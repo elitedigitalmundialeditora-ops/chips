@@ -3,854 +3,1268 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>ChipMGR</title>
+<title>ChipMGR | Gestão de Chips WhatsApp</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
 <style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --bg:#0b0b10;--bg2:#13131c;--bg3:#1c1c28;--bg4:#22222f;
-  --border:#2e2e40;--accent:#00e5a0;--red:#ff4d6d;--yellow:#ffd60a;
-  --text:#eeeef5;--text2:#7777a0;--text3:#4a4a6a;
-  --font:'Syne',sans-serif;--mono:'DM Mono',monospace;
-  --radius:10px;--shadow:0 4px 24px rgba(0,0,0,.4);
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
-body{background:var(--bg);color:var(--text);font-family:var(--mono);min-height:100vh;display:flex;overflow:hidden}
-
-/* SIDEBAR */
-#sidebar{
-  width:220px;background:var(--bg2);border-right:1px solid var(--border);
-  display:flex;flex-direction:column;flex-shrink:0;height:100vh;position:sticky;top:0;
+:root {
+  --bg: #0b0b10;
+  --bg2: #13131c;
+  --bg3: #1c1c28;
+  --bg4: #22222f;
+  --border: #2e2e40;
+  --accent: #00e5a0;
+  --red: #ff4d6d;
+  --yellow: #ffd60a;
+  --blue: #4d9eff;
+  --text: #eeeef5;
+  --text2: #7777a0;
+  --font: 'Syne', sans-serif;
+  --mono: 'DM Mono', monospace;
+  --radius: 10px;
 }
-.logo{padding:26px 20px 18px;border-bottom:1px solid var(--border)}
-.logo-text{font-family:var(--font);font-weight:800;font-size:20px;letter-spacing:-.02em}
-.logo-text span{color:var(--accent)}
-.logo-sub{color:var(--text2);font-size:11px;margin-top:3px}
-nav{padding:10px 8px;flex:1}
-.nav-btn{
-  display:flex;align-items:center;gap:10px;width:100%;padding:10px 12px;
-  border-radius:8px;border:none;background:transparent;color:var(--text2);
-  font-family:var(--font);font-weight:600;font-size:14px;cursor:pointer;
-  margin-bottom:2px;transition:all .15s;text-align:left;
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--mono);
+  display: flex;
+  overflow: hidden;
+  height: 100vh;
 }
-.nav-btn:hover{background:var(--bg3);color:var(--text)}
-.nav-btn.active{background:var(--bg3);color:var(--accent)}
-.nav-btn svg{flex-shrink:0}
-.sidebar-foot{padding:14px 20px;border-top:1px solid var(--border);color:var(--text2);font-size:11px}
-.dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--accent);margin-right:6px;box-shadow:0 0 6px var(--accent)}
-
-/* MAIN */
-#main{flex:1;overflow-y:auto;height:100vh}
-.page{display:none;padding:32px;animation:fadeIn .25s ease}
-.page.active{display:block}
-@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
-
-.page-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px}
-.page-title{font-family:var(--font);font-weight:800;font-size:28px}
-.page-sub{color:var(--text2);font-size:13px;margin-top:3px}
-
-/* CARDS GRID */
-.cards-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px}
-.stat-card{
-  background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);
-  padding:20px;display:flex;flex-direction:column;gap:10px;
+#sidebar {
+  width: 240px;
+  background: var(--bg2);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  height: 100vh;
 }
-.stat-label{font-family:var(--font);font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.08em}
-.stat-value{font-family:var(--font);font-weight:800;font-size:38px;line-height:1}
-
-/* TABLE */
-.table-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
-table{width:100%;border-collapse:collapse}
-th{padding:13px 16px;text-align:left;font-family:var(--font);font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.07em;border-bottom:1px solid var(--border)}
-td{padding:12px 16px;font-size:13px;border-bottom:1px solid var(--border)}
-tr:last-child td{border-bottom:none}
-tr:hover td{background:var(--bg3)}
-.empty-row td{text-align:center;color:var(--text2);padding:40px}
-
-/* BADGE */
-.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:11px;font-family:var(--font);font-weight:700;text-transform:uppercase;letter-spacing:.05em}
-.badge-ativo{background:#00e5a018;color:var(--accent);border:1px solid #00e5a030}
-.badge-banido{background:#ff4d6d18;color:var(--red);border:1px solid #ff4d6d30}
-.badge-inativo{background:#ffd60a18;color:var(--yellow);border:1px solid #ffd60a30}
-
-/* BUTTONS */
-button{cursor:pointer;border:none;border-radius:8px;transition:all .15s;font-family:var(--font)}
-button:active{transform:scale(.97)}
-.btn-primary{background:var(--accent);color:#000;padding:10px 20px;font-weight:700;font-size:14px;display:inline-flex;align-items:center;gap:6px}
-.btn-primary:hover{background:#00ffb3}
-.btn-sm{padding:6px 14px;font-size:12px;font-weight:700}
-.btn-edit{background:var(--bg3);color:var(--text);border:1px solid var(--border)}
-.btn-edit:hover{border-color:var(--accent);color:var(--accent)}
-.btn-del{background:#ff4d6d18;color:var(--red);border:1px solid #ff4d6d30}
-.btn-del:hover{background:#ff4d6d30}
-.btn-ghost{background:transparent;border:1px solid var(--border);color:var(--text2);padding:8px 16px;font-size:13px;display:inline-flex;align-items:center;gap:6px}
-.btn-ghost:hover{border-color:var(--accent);color:var(--accent)}
-
-/* FILTERS */
-.filters{display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap;align-items:center}
-.search-wrap{position:relative;flex:1;max-width:300px}
-.search-wrap input{padding-left:34px}
-.search-icon{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--text2)}
-.filter-btn{padding:8px 16px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text2);font-family:var(--font);font-weight:700;font-size:13px;cursor:pointer;transition:all .15s;text-transform:capitalize}
-.filter-btn.active{background:var(--accent);color:#000;border-color:var(--accent)}
-.filter-btn:hover:not(.active){border-color:var(--accent);color:var(--accent)}
-
-/* INPUTS */
-input,select,textarea{
-  font-family:var(--mono);background:var(--bg3);border:1px solid var(--border);
-  color:var(--text);border-radius:8px;padding:10px 14px;outline:none;
-  transition:border-color .2s;width:100%;font-size:13px;
+.logo {
+  padding: 26px 20px 18px;
+  border-bottom: 1px solid var(--border);
 }
-input:focus,select:focus,textarea:focus{border-color:var(--accent)}
-select option{background:var(--bg3)}
-
-/* MODAL */
-.modal-overlay{
-  display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);
-  z-index:1000;align-items:center;justify-content:center;padding:20px;
+.logo-text {
+  font-family: var(--font);
+  font-weight: 800;
+  font-size: 20px;
 }
-.modal-overlay.open{display:flex}
-.modal{background:var(--bg2);border:1px solid var(--border);border-radius:14px;width:100%;max-width:440px;padding:28px;animation:fadeIn .2s ease}
-.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:22px}
-.modal-title{font-family:var(--font);font-weight:800;font-size:18px}
-.modal-close{background:none;color:var(--text2);padding:4px;font-size:20px;line-height:1}
-.modal-close:hover{color:var(--text)}
-.form-group{margin-bottom:14px}
-label.form-label{display:block;font-family:var(--font);font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px}
-.form-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:20px}
-
-/* CHARTS ROW */
-.charts-row{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px}
-.chart-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:22px}
-.chart-title{font-family:var(--font);font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.08em;margin-bottom:18px}
-.pie-wrap{display:flex;align-items:center;gap:24px}
-.pie-legend{display:flex;flex-direction:column;gap:10px}
-.legend-item{display:flex;align-items:center;gap:8px;font-size:13px}
-.legend-dot{width:10px;height:10px;border-radius:3px;flex-shrink:0}
-.legend-val{font-family:var(--font);font-weight:700;margin-left:auto;padding-left:16px}
-
-/* RANKING */
-.ranking-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:22px}
-.ranking-row{display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid var(--border)}
-.ranking-row:last-child{border-bottom:none}
-.rank-num{font-family:var(--font);font-weight:800;font-size:22px;min-width:28px}
-.rank-name{flex:1;font-size:13px}
-.rank-val{font-family:var(--font);font-weight:700;font-size:17px}
-
-/* OP CARDS */
-.op-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:16px}
-.op-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:20px;display:flex;flex-direction:column;gap:14px}
-.op-head{display:flex;justify-content:space-between;align-items:flex-start}
-.op-info{display:flex;align-items:center;gap:10px}
-.op-avatar{width:40px;height:40px;border-radius:10px;background:var(--bg3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-family:var(--font);font-weight:800;font-size:16px;color:var(--accent)}
-.op-name{font-family:var(--font);font-weight:700;font-size:15px}
-.op-email{color:var(--text2);font-size:12px}
-.op-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.op-stat{background:var(--bg3);border-radius:8px;padding:8px 10px;border:1px solid var(--border)}
-.op-stat-label{color:var(--text2);font-size:10px;font-family:var(--font);font-weight:700;text-transform:uppercase;letter-spacing:.06em}
-.op-stat-val{font-family:var(--font);font-weight:800;font-size:22px}
-.op-actions{display:flex;gap:8px;border-top:1px solid var(--border);padding-top:14px}
-.op-actions button{flex:1}
-
-/* LOADING */
-.loading{display:flex;align-items:center;justify-content:center;height:200px;color:var(--text2);gap:10px;font-size:14px}
-.spin{width:20px;height:20px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;display:inline-block;flex-shrink:0}
-@keyframes spin{to{transform:rotate(360deg)}}
-
-/* TOAST */
-#toast{
-  position:fixed;bottom:24px;right:24px;background:var(--bg3);border:1px solid var(--border);
-  border-radius:10px;padding:12px 20px;font-size:13px;z-index:2000;
-  transform:translateY(80px);opacity:0;transition:all .3s ease;pointer-events:none;
+.logo-text span { color: var(--accent); }
+.logo-sub {
+  color: var(--text2);
+  font-size: 11px;
+  margin-top: 3px;
 }
-#toast.show{transform:translateY(0);opacity:1}
-#toast.ok{border-color:var(--accent);color:var(--accent)}
-#toast.err{border-color:var(--red);color:var(--red)}
-
-/* SCROLLBAR */
-::-webkit-scrollbar{width:5px}
-::-webkit-scrollbar-track{background:var(--bg2)}
-::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
-
-/* SETUP SCREEN */
-#setup-screen{
-  position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;
-  align-items:center;justify-content:center;gap:16px;z-index:9999;
+nav {
+  padding: 10px 8px;
+  flex: 1;
 }
-.setup-title{font-family:var(--font);font-weight:800;font-size:22px}
-.setup-sub{color:var(--text2);font-size:14px}
-.setup-error{background:#ff4d6d18;border:1px solid #ff4d6d40;border-radius:10px;padding:16px 20px;max-width:480px;color:var(--red);font-size:13px;text-align:center;line-height:1.6}
+.nav-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: var(--text2);
+  font-family: var(--font);
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  margin-bottom: 2px;
+  text-align: left;
+}
+.nav-btn:hover {
+  background: var(--bg3);
+  color: var(--text);
+}
+.nav-btn.active {
+  background: var(--bg3);
+  color: var(--accent);
+}
+.sidebar-foot {
+  padding: 14px 20px;
+  border-top: 1px solid var(--border);
+  color: var(--text2);
+  font-size: 11px;
+}
+.dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+  margin-right: 6px;
+}
+#main {
+  flex: 1;
+  overflow-y: auto;
+  height: 100vh;
+}
+.page {
+  display: none;
+  padding: 32px;
+  animation: fadeIn 0.25s ease;
+}
+.page.active {
+  display: block;
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+.page-title {
+  font-family: var(--font);
+  font-weight: 800;
+  font-size: 28px;
+}
+.page-sub {
+  color: var(--text2);
+  font-size: 13px;
+  margin-top: 3px;
+}
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 28px;
+}
+.stat-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+}
+.stat-label {
+  font-family: var(--font);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text2);
+  text-transform: uppercase;
+}
+.stat-value {
+  font-family: var(--font);
+  font-weight: 800;
+  font-size: 38px;
+  line-height: 1;
+  margin-top: 8px;
+}
+.table-wrap {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: auto;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+th, td {
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+th {
+  font-family: var(--font);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text2);
+  text-transform: uppercase;
+}
+tr:hover td {
+  background: var(--bg3);
+}
+.badge {
+  display: inline-flex;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+.badge-ativo {
+  background: #00e5a018;
+  color: var(--accent);
+  border: 1px solid #00e5a030;
+}
+.badge-banido {
+  background: #ff4d6d18;
+  color: var(--red);
+  border: 1px solid #ff4d6d30;
+}
+.badge-novo {
+  background: #4d9eff18;
+  color: var(--blue);
+  border: 1px solid #4d9eff30;
+}
+button {
+  cursor: pointer;
+  border: none;
+  border-radius: 8px;
+  font-family: var(--font);
+  transition: all 0.15s;
+}
+.btn-primary {
+  background: var(--accent);
+  color: #000;
+  padding: 10px 20px;
+  font-weight: 700;
+  font-size: 14px;
+}
+.btn-sm {
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 700;
+}
+.btn-edit {
+  background: var(--bg3);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+.btn-del {
+  background: #ff4d6d18;
+  color: var(--red);
+  border: 1px solid #ff4d6d30;
+}
+.btn-ghost {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text2);
+  padding: 8px 16px;
+}
+.filters {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+}
+.search-wrap {
+  position: relative;
+  flex: 1;
+  max-width: 300px;
+}
+.search-wrap input {
+  padding-left: 34px;
+  width: 100%;
+}
+.search-icon {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+input, select {
+  font-family: var(--mono);
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 8px;
+  padding: 10px 14px;
+  outline: none;
+  width: 100%;
+}
+.filter-btn {
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text2);
+  font-weight: 700;
+}
+.filter-btn.active {
+  background: var(--accent);
+  color: #000;
+  border-color: var(--accent);
+}
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.75);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+}
+.modal-overlay.open {
+  display: flex;
+}
+.modal {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  width: 100%;
+  max-width: 520px;
+  padding: 28px;
+}
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 22px;
+}
+.modal-title {
+  font-family: var(--font);
+  font-weight: 800;
+  font-size: 18px;
+}
+.form-group {
+  margin-bottom: 14px;
+}
+.form-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text2);
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.form-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+.class-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 16px;
+}
+.class-header {
+  background: var(--bg3);
+  padding: 16px 20px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.class-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.class-icon {
+  font-size: 24px;
+}
+.class-name {
+  font-family: var(--font);
+  font-weight: 800;
+  font-size: 18px;
+}
+.class-stats {
+  display: flex;
+  gap: 16px;
+  margin-left: 20px;
+}
+.class-stat {
+  font-size: 12px;
+  color: var(--text2);
+}
+.class-content {
+  display: none;
+  padding: 20px;
+  border-top: 1px solid var(--border);
+}
+.class-content.open {
+  display: block;
+}
+.op-mini-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 16px;
+}
+.op-card-mini {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+}
+.op-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.op-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.op-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: var(--bg4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+}
+.op-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin: 12px 0;
+}
+.op-stat {
+  background: var(--bg4);
+  border-radius: 6px;
+  padding: 8px;
+  text-align: center;
+}
+.op-stat-label {
+  font-size: 10px;
+  color: var(--text2);
+}
+.op-stat-val {
+  font-weight: 800;
+  font-size: 18px;
+}
+.export-import-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+.exim-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 28px;
+}
+.file-dropzone {
+  border: 2px dashed var(--border);
+  border-radius: 12px;
+  padding: 28px;
+  text-align: center;
+  margin: 20px 0;
+  background: var(--bg4);
+  cursor: pointer;
+}
+.file-dropzone:hover {
+  border-color: var(--accent);
+}
+.import-preview {
+  background: var(--bg3);
+  border-radius: 10px;
+  padding: 12px;
+  margin-top: 16px;
+  max-height: 250px;
+  overflow: auto;
+  font-size: 12px;
+}
+#toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 20px;
+  z-index: 2000;
+  transform: translateY(80px);
+  opacity: 0;
+  transition: all 0.3s ease;
+}
+#toast.show {
+  transform: translateY(0);
+  opacity: 1;
+}
+#toast.ok {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+#toast.err {
+  border-color: var(--red);
+  color: var(--red);
+}
+.charts-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 24px;
+}
+.chart-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 22px;
+}
+.pie-wrap {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+.pie-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+}
+.ranking-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 22px;
+}
+.ranking-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--border);
+}
+.rank-num {
+  font-weight: 800;
+  font-size: 22px;
+  min-width: 28px;
+}
+.rank-name {
+  flex: 1;
+}
+.empty-class {
+  text-align: center;
+  padding: 40px;
+  color: var(--text2);
+}
+.classes-header {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
 </style>
 </head>
 <body>
 
-<!-- SETUP SCREEN -->
-<div id="setup-screen">
-  <div class="spin" style="width:36px;height:36px"></div>
-  <div class="setup-title">Configurando banco de dados...</div>
-  <div class="setup-sub" id="setup-msg">Conectando ao Supabase</div>
-</div>
-
-<!-- SIDEBAR -->
 <div id="sidebar">
   <div class="logo">
     <div class="logo-text">CHIP<span>MGR</span></div>
-    <div class="logo-sub">Gestao de chips WhatsApp</div>
+    <div class="logo-sub">Gestão de chips WhatsApp</div>
   </div>
   <nav>
-    <button class="nav-btn active" onclick="navigate('dashboard')" id="nav-dashboard">
-      <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-      Dashboard
-    </button>
-    <button class="nav-btn" onclick="navigate('chips')" id="nav-chips">
-      <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="7" y="7" width="10" height="10" rx="1"/><path d="M7 10H3M7 14H3M17 10h4M17 14h4M10 7V3M14 7V3M10 17v4M14 17v4"/></svg>
-      Chips
-    </button>
-    <button class="nav-btn" onclick="navigate('operadores')" id="nav-operadores">
-      <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/><path d="M16 3.13a4 4 0 0 1 0 7.75M21 21v-2a4 4 0 0 0-3-3.87"/></svg>
-      Operadores
-    </button>
-    <button class="nav-btn" onclick="navigate('historico')" id="nav-historico">
-      <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></svg>
-      Historico
-    </button>
+    <button class="nav-btn active" data-page="dashboard">📊 Dashboard</button>
+    <button class="nav-btn" data-page="chips">📱 Chips</button>
+    <button class="nav-btn" data-page="operadores">👥 Operadores</button>
+    <button class="nav-btn" data-page="exportar">📦 Import/Export</button>
   </nav>
-  <div class="sidebar-foot"><span class="dot"></span>Conectado ao Supabase</div>
+  <div class="sidebar-foot"><span class="dot"></span>Modo Local</div>
 </div>
 
-<!-- MAIN -->
 <div id="main">
-
-  <!-- DASHBOARD -->
   <div class="page active" id="page-dashboard">
     <div class="page-header">
       <div>
         <div class="page-title">Dashboard</div>
-        <div class="page-sub">Visao geral do sistema de chips</div>
+        <div class="page-sub">Visão geral do sistema</div>
       </div>
-      <button class="btn-ghost" onclick="loadDashboard()">
-        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
-        Atualizar
-      </button>
+      <button class="btn-ghost" onclick="carregarDados()">Atualizar</button>
     </div>
-    <div class="cards-grid" id="dash-cards">
-      <div class="stat-card"><div class="stat-label">Total de Chips</div><div class="stat-value" id="d-total">—</div></div>
-      <div class="stat-card"><div class="stat-label">Ativos</div><div class="stat-value" id="d-ativos" style="color:var(--accent)">—</div></div>
-      <div class="stat-card"><div class="stat-label">Banidos</div><div class="stat-value" id="d-banidos" style="color:var(--red)">—</div></div>
-      <div class="stat-card"><div class="stat-label">Inativos</div><div class="stat-value" id="d-inativos" style="color:var(--yellow)">—</div></div>
+    <div class="cards-grid">
+      <div class="stat-card"><div class="stat-label">Total de Chips</div><div class="stat-value" id="d-total">0</div></div>
+      <div class="stat-card"><div class="stat-label">Ativos</div><div class="stat-value" id="d-ativos" style="color:var(--accent)">0</div></div>
+      <div class="stat-card"><div class="stat-label">Banidos</div><div class="stat-value" id="d-banidos" style="color:var(--red)">0</div></div>
+      <div class="stat-card"><div class="stat-label">Novos</div><div class="stat-value" id="d-novos" style="color:var(--blue)">0</div></div>
     </div>
     <div class="charts-row">
       <div class="chart-card">
-        <div class="chart-title">Distribuicao de Status</div>
-        <div class="pie-wrap">
-          <canvas id="pie-chart" width="160" height="160" style="flex-shrink:0"></canvas>
-          <div class="pie-legend" id="pie-legend"></div>
-        </div>
+        <div class="chart-title">Distribuição de Status</div>
+        <div class="pie-wrap"><canvas id="pie-chart" width="160" height="160"></canvas><div class="pie-legend" id="pie-legend"></div></div>
       </div>
       <div class="chart-card">
-        <div class="chart-title">Chips por Operador</div>
+        <div class="chart-title">Chips por Classe</div>
         <canvas id="bar-chart" height="160"></canvas>
       </div>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
-      <div class="ranking-card">
-        <div class="chart-title">Ranking — Mais Ativos</div>
-        <div id="rank-ativos"></div>
-      </div>
-      <div class="ranking-card">
-        <div class="chart-title">Ranking — Mais Banidos</div>
-        <div id="rank-banidos"></div>
-      </div>
+      <div class="ranking-card"><div class="chart-title">Ranking — Mais Ativos</div><div id="rank-ativos"></div></div>
+      <div class="ranking-card"><div class="chart-title">Ranking — Mais Banidos</div><div id="rank-banidos"></div></div>
     </div>
   </div>
 
-  <!-- CHIPS -->
   <div class="page" id="page-chips">
     <div class="page-header">
-      <div>
-        <div class="page-title">Chips</div>
-        <div class="page-sub" id="chips-count">carregando...</div>
-      </div>
-      <button class="btn-primary" onclick="abrirModalChip()">
-        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
-        Adicionar Chip
-      </button>
+      <div><div class="page-title">Chips</div><div class="page-sub" id="chips-count">carregando...</div></div>
+      <button class="btn-primary" onclick="abrirModalChip()">+ Adicionar Chip</button>
     </div>
     <div class="filters">
-      <div class="search-wrap">
-        <span class="search-icon"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></span>
-        <input id="chip-search" placeholder="Buscar numero ou operador..." oninput="renderChips()">
-      </div>
-      <button class="filter-btn active" onclick="setChipFilter('todos',this)">Todos</button>
-      <button class="filter-btn" onclick="setChipFilter('ativo',this)">Ativo</button>
-      <button class="filter-btn" onclick="setChipFilter('banido',this)">Banido</button>
-      <button class="filter-btn" onclick="setChipFilter('inativo',this)">Inativo</button>
+      <div class="search-wrap"><span class="search-icon">🔍</span><input id="chip-search" placeholder="Buscar..." oninput="renderizarChips()"></div>
+      <button class="filter-btn active" onclick="setFiltroChip('todos',this)">Todos</button>
+      <button class="filter-btn" onclick="setFiltroChip('ativo',this)">Ativo</button>
+      <button class="filter-btn" onclick="setFiltroChip('banido',this)">Banido</button>
+      <button class="filter-btn" onclick="setFiltroChip('novo',this)">Novo</button>
     </div>
     <div class="table-wrap">
       <table>
-        <thead>
-          <tr>
-            <th>Numero</th><th>Operador</th><th>Status</th><th>Motivo Ban</th><th>Cadastrado em</th><th>Acoes</th>
-          </tr>
-        </thead>
-        <tbody id="chips-tbody">
-          <tr class="empty-row"><td colspan="6"><div class="spin"></div></td></tr>
-        </tbody>
+        <thead><tr><th>Número</th><th>Operador</th><th>Classe</th><th>Status</th><th>Motivo</th><th>Ações</th></tr></thead>
+        <tbody id="chips-tbody"><tr><td colspan="6">Carregando...</td></tr></tbody>
       </table>
     </div>
   </div>
 
-  <!-- OPERADORES -->
   <div class="page" id="page-operadores">
     <div class="page-header">
-      <div>
-        <div class="page-title">Operadores</div>
-        <div class="page-sub" id="ops-count">carregando...</div>
-      </div>
-      <button class="btn-primary" onclick="abrirModalOp()">
-        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
-        Novo Operador
-      </button>
+      <div><div class="page-title">Operadores</div><div class="page-sub" id="operadores-count">Organize por classe</div></div>
+      <div><button class="btn-primary" onclick="abrirModalClasse()">+ Nova Classe</button>
+      <button class="btn-primary" style="margin-left:10px" onclick="abrirModalOp()">+ Novo Operador</button></div>
     </div>
-    <div class="op-grid" id="ops-grid">
-      <div class="loading"><div class="spin"></div> Carregando...</div>
+    <div class="classes-header">
+      <button class="btn-ghost" onclick="expandirTodas()">📂 Expandir todas</button>
+      <button class="btn-ghost" onclick="recolherTodas()">📁 Recolher todas</button>
     </div>
+    <div id="classes-container"></div>
   </div>
 
-  <!-- HISTORICO -->
-  <div class="page" id="page-historico">
-    <div class="page-header">
-      <div>
-        <div class="page-title">Historico</div>
-        <div class="page-sub">Log completo de alteracoes</div>
+  <div class="page" id="page-exportar">
+    <div class="page-header"><div><div class="page-title">Importação / Exportação</div><div class="page-sub">Arquivo CSV com separador ;</div></div></div>
+    <div class="export-import-grid">
+      <div class="exim-card">
+        <div class="exim-icon">📤</div>
+        <div class="exim-title">Exportar Dados</div>
+        <button class="btn-primary" style="width:100%;margin-top:20px" onclick="exportarDados()">Exportar CSV</button>
       </div>
-      <button class="btn-ghost" onclick="loadHistorico()">
-        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
-        Atualizar
-      </button>
-    </div>
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr><th>Data/Hora</th><th>Chip</th><th>Operador</th><th>De</th><th>Para</th><th>Motivo</th></tr>
-        </thead>
-        <tbody id="hist-tbody">
-          <tr class="empty-row"><td colspan="6"><div class="spin"></div></td></tr>
-        </tbody>
-      </table>
+      <div class="exim-card">
+        <div class="exim-icon">📥</div>
+        <div class="exim-title">Importar Dados</div>
+        <button class="btn-ghost" style="width:100%;margin-bottom:12px" onclick="baixarModelo()">Baixar Modelo</button>
+        <div class="file-dropzone" id="dropzone">📂 Clique ou arraste arquivo CSV<input type="file" id="import-file" accept=".csv" style="display:none"></div>
+        <button class="btn-primary" style="width:100%" onclick="processarImportacao()">Processar Importação</button>
+        <div id="import-preview" class="import-preview" style="display:none"></div>
+      </div>
     </div>
   </div>
+</div>
 
-</div><!-- /main -->
-
-<!-- MODAL CHIP -->
 <div class="modal-overlay" id="modal-chip">
   <div class="modal">
-    <div class="modal-header">
-      <div class="modal-title" id="modal-chip-title">Novo Chip</div>
-      <button class="modal-close" onclick="fecharModal('modal-chip')">✕</button>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Numero do chip *</label>
-      <input id="chip-numero" placeholder="Ex: 5511999999999">
-    </div>
-    <div class="form-group">
-      <label class="form-label">Operador</label>
-      <select id="chip-operador"><option value="">Nenhum operador</option></select>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Status</label>
-      <select id="chip-status" onchange="toggleMotivo()">
-        <option value="ativo">Ativo</option>
-        <option value="banido">Banido</option>
-        <option value="inativo">Inativo</option>
-      </select>
-    </div>
-    <div class="form-group" id="motivo-group" style="display:none">
-      <label class="form-label">Motivo do ban</label>
-      <input id="chip-motivo" placeholder="Ex: Spam detectado">
-    </div>
-    <div class="form-actions">
-      <button class="btn-ghost" onclick="fecharModal('modal-chip')">Cancelar</button>
-      <button class="btn-primary" onclick="salvarChip()" id="btn-salvar-chip">Salvar</button>
-    </div>
+    <div class="modal-header"><div class="modal-title" id="modal-chip-title">Novo Chip</div><button onclick="fecharModal('modal-chip')">✕</button></div>
+    <div class="form-group"><label class="form-label">Número</label><input id="chip-numero" placeholder="(11) 99999-9999"></div>
+    <div class="form-group"><label class="form-label">Operador</label><select id="chip-operador"></select></div>
+    <div class="form-group"><label class="form-label">Status</label><select id="chip-status" onchange="toggleMotivoBan()"><option value="novo">Novo</option><option value="ativo">Ativo</option><option value="banido">Banido</option></select></div>
+    <div class="form-group" id="motivo-group" style="display:none"><label class="form-label">Motivo do Ban</label><input id="chip-motivo"></div>
+    <div class="form-actions"><button class="btn-ghost" onclick="fecharModal('modal-chip')">Cancelar</button><button class="btn-primary" onclick="salvarChip()">Salvar</button></div>
   </div>
 </div>
 
-<!-- MODAL OPERADOR -->
 <div class="modal-overlay" id="modal-op">
   <div class="modal">
-    <div class="modal-header">
-      <div class="modal-title" id="modal-op-title">Novo Operador</div>
-      <button class="modal-close" onclick="fecharModal('modal-op')">✕</button>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Nome *</label>
-      <input id="op-nome" placeholder="Nome do operador">
-    </div>
-    <div class="form-group">
-      <label class="form-label">Email</label>
-      <input id="op-email" placeholder="email@exemplo.com">
-    </div>
-    <div class="form-group" style="display:flex;align-items:center;gap:10px">
-      <input type="checkbox" id="op-ativo" checked style="width:16px;height:16px;accent-color:var(--accent)">
-      <label for="op-ativo" style="font-size:13px;cursor:pointer">Operador ativo</label>
-    </div>
-    <div class="form-actions">
-      <button class="btn-ghost" onclick="fecharModal('modal-op')">Cancelar</button>
-      <button class="btn-primary" onclick="salvarOp()" id="btn-salvar-op">Salvar</button>
-    </div>
+    <div class="modal-header"><div class="modal-title" id="modal-op-title">Novo Operador</div><button onclick="fecharModal('modal-op')">✕</button></div>
+    <div class="form-group"><label class="form-label">Nome</label><input id="op-nome"></div>
+    <div class="form-group"><label class="form-label">Email</label><input id="op-email"></div>
+    <div class="form-group"><label class="form-label">Classe</label><select id="op-classe"></select></div>
+    <div class="form-group"><input type="checkbox" id="op-ativo" checked> <label>Ativo</label></div>
+    <div class="form-actions"><button class="btn-ghost" onclick="fecharModal('modal-op')">Cancelar</button><button class="btn-primary" onclick="salvarOperador()">Salvar</button></div>
   </div>
 </div>
 
-<!-- TOAST -->
+<div class="modal-overlay" id="modal-classe">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title" id="modal-classe-title">Nova Classe</div><button onclick="fecharModal('modal-classe')">✕</button></div>
+    <div class="form-group"><label class="form-label">Nome da Classe</label><input id="classe-nome"></div>
+    <div class="form-group"><label class="form-label">Ícone</label><select id="classe-icon"><option value="📁">📁 Pasta</option><option value="🚀">🚀 CRM</option><option value="🎯">🎯 Digital</option><option value="🏠">🏠 Home</option><option value="🌱">🌱 Novatos</option><option value="👶">👶 Menores</option><option value="⭐">⭐ Elite</option></select></div>
+    <div class="form-actions"><button class="btn-ghost" onclick="fecharModal('modal-classe')">Cancelar</button><button class="btn-primary" onclick="salvarClasse()">Salvar</button></div>
+  </div>
+</div>
+
 <div id="toast"></div>
 
 <script>
-// ─── SUPABASE ────────────────────────────────────────────────
-const { createClient } = supabase
-const sb = createClient(
-  'https://fyeqxmokaiovnjfmoior.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ5ZXF4bW9rYWlvdm5qZm1vaW9yIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3ODAwMjA3MCwiZXhwIjoyMDkzNTc4MDcwfQ.vPDMfq_kWWV0P_V9nuYd9lfFk_nprRgfDUQ9DX_1gpE'
-)
+// ==================== DADOS INICIAIS ====================
+let chips = [];
+let operadores = [];
+let classes = [];
+let filtroChip = 'todos';
+let editandoChipId = null;
+let editandoOpId = null;
+let editandoClasseId = null;
+let pieChart = null;
+let barChart = null;
+let classesExpandidas = {};
 
-// ─── ESTADO ──────────────────────────────────────────────────
-let allChips = [], allOps = [], allHist = []
-let chipFilter = 'todos', editingChipId = null, editingOpId = null
-let pieChart = null, barChart = null
+// Carregar dados do localStorage
+function carregarDados() {
+  const savedClasses = localStorage.getItem('chipmgr_classes');
+  const savedOps = localStorage.getItem('chipmgr_operadores');
+  const savedChips = localStorage.getItem('chipmgr_chips');
+  
+  classes = savedClasses ? JSON.parse(savedClasses) : [
+    { id: '1', nome: 'CRM', icone: '🚀' },
+    { id: '2', nome: 'Digital', icone: '🎯' },
+    { id: '3', nome: 'Home', icone: '🏠' },
+    { id: '4', nome: 'Novatos', icone: '🌱' },
+    { id: '5', nome: 'Menores', icone: '👶' },
+    { id: '6', nome: 'Elite', icone: '⭐' }
+  ];
+  
+  operadores = savedOps ? JSON.parse(savedOps) : [];
+  chips = savedChips ? JSON.parse(savedChips) : [];
+  
+  // Inicializar expansão das classes
+  classes.forEach(c => { if(classesExpandidas[c.id] === undefined) classesExpandidas[c.id] = true; });
+  
+  atualizarDashboard();
+  renderizarChips();
+  renderizarClasses();
+  popularSelects();
+  salvarLocalStorage();
+}
 
-// ─── SETUP DB ────────────────────────────────────────────────
-async function setupDb() {
-  setMsg('Verificando tabelas...')
-  try {
-    const { error } = await sb.from('chips').select('id').limit(1)
-    if (error && error.code === '42P01') {
-      setMsg('Criando tabelas...')
-      await criarTabelas()
-    }
-    setMsg('Pronto!')
-    setTimeout(() => {
-      document.getElementById('setup-screen').style.display = 'none'
-      loadAll()
-    }, 400)
-  } catch(e) {
-    showSetupError('Erro ao conectar: ' + e.message)
+function salvarLocalStorage() {
+  localStorage.setItem('chipmgr_classes', JSON.stringify(classes));
+  localStorage.setItem('chipmgr_operadores', JSON.stringify(operadores));
+  localStorage.setItem('chipmgr_chips', JSON.stringify(chips));
+}
+
+function formatarTelefone(numero) {
+  let digits = numero.toString().replace(/\D/g, '');
+  if (digits.length === 11) return `(${digits.substring(0,2)}) ${digits.substring(2,7)}-${digits.substring(7,11)}`;
+  if (digits.length === 10) return `(${digits.substring(0,2)}) ${digits.substring(2,6)}-${digits.substring(6,10)}`;
+  return numero;
+}
+
+// ==================== DASHBOARD ====================
+function atualizarDashboard() {
+  const total = chips.length;
+  const ativos = chips.filter(c => c.status === 'ativo').length;
+  const banidos = chips.filter(c => c.status === 'banido').length;
+  const novos = chips.filter(c => c.status === 'novo').length;
+  
+  document.getElementById('d-total').textContent = total;
+  document.getElementById('d-ativos').textContent = ativos;
+  document.getElementById('d-banidos').textContent = banidos;
+  document.getElementById('d-novos').textContent = novos;
+  
+  // Gráfico de pizza
+  if (pieChart) pieChart.destroy();
+  const ctx = document.getElementById('pie-chart');
+  if (ctx) {
+    pieChart = new Chart(ctx, {
+      type: 'doughnut',
+      data: { labels: ['Ativos', 'Banidos', 'Novos'], datasets: [{ data: [ativos, banidos, novos], backgroundColor: ['#00e5a0', '#ff4d6d', '#4d9eff'] }] },
+      options: { cutout: '60%', plugins: { legend: { display: false } } }
+    });
   }
-}
-
-async function criarTabelas() {
-  const sqls = [
-    `CREATE TABLE IF NOT EXISTS operadores (id uuid DEFAULT gen_random_uuid() PRIMARY KEY, nome text NOT NULL, email text, ativo boolean DEFAULT true, criado_em timestamptz DEFAULT now())`,
-    `CREATE TABLE IF NOT EXISTS chips (id uuid DEFAULT gen_random_uuid() PRIMARY KEY, numero text NOT NULL UNIQUE, operador_id uuid REFERENCES operadores(id) ON DELETE SET NULL, status text NOT NULL DEFAULT 'ativo', motivo_ban text, criado_em timestamptz DEFAULT now(), atualizado_em timestamptz DEFAULT now())`,
-    `CREATE TABLE IF NOT EXISTS historico (id uuid DEFAULT gen_random_uuid() PRIMARY KEY, chip_id uuid REFERENCES chips(id) ON DELETE CASCADE, operador_id uuid REFERENCES operadores(id) ON DELETE SET NULL, status_anterior text, status_novo text NOT NULL, motivo text, criado_em timestamptz DEFAULT now())`,
-    `ALTER TABLE operadores ENABLE ROW LEVEL SECURITY`,
-    `ALTER TABLE chips ENABLE ROW LEVEL SECURITY`,
-    `ALTER TABLE historico ENABLE ROW LEVEL SECURITY`,
-    `DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename='operadores' AND policyname='allow_all_operadores') THEN CREATE POLICY "allow_all_operadores" ON operadores FOR ALL USING (true) WITH CHECK (true); END IF; END $$`,
-    `DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename='chips' AND policyname='allow_all_chips') THEN CREATE POLICY "allow_all_chips" ON chips FOR ALL USING (true) WITH CHECK (true); END IF; END $$`,
-    `DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename='historico' AND policyname='allow_all_historico') THEN CREATE POLICY "allow_all_historico" ON historico FOR ALL USING (true) WITH CHECK (true); END IF; END $$`,
-  ]
-  for (const sql of sqls) {
-    const res = await fetch('https://fyeqxmokaiovnjfmoior.supabase.co/rest/v1/rpc/query', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ5ZXF4bW9rYWlvdm5qZm1vaW9yIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3ODAwMjA3MCwiZXhwIjoyMDkzNTc4MDcwfQ.vPDMfq_kWWV0P_V9nuYd9lfFk_nprRgfDUQ9DX_1gpE',
-        'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ5ZXF4bW9rYWlvdm5qZm1vaW9yIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3ODAwMjA3MCwiZXhwIjoyMDkzNTc4MDcwfQ.vPDMfq_kWWV0P_V9nuYd9lfFk_nprRgfDUQ9DX_1gpE',
-        'Prefer': 'return=minimal'
-      },
-      body: JSON.stringify({ query: sql })
-    })
-  }
-}
-
-function setMsg(t) { document.getElementById('setup-msg').textContent = t }
-function showSetupError(msg) {
-  document.getElementById('setup-screen').innerHTML = `
-    <svg width="40" height="40" fill="none" stroke="#ff4d6d" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
-    <div class="setup-title">Erro de Conexao</div>
-    <div class="setup-error">${msg}<br><br>Verifique se as chaves do Supabase estao corretas no arquivo HTML.</div>
-  `
-}
-
-// ─── NAVEGACAO ───────────────────────────────────────────────
-function navigate(page) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'))
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'))
-  document.getElementById('page-' + page).classList.add('active')
-  document.getElementById('nav-' + page).classList.add('active')
-  if (page === 'dashboard') loadDashboard()
-  if (page === 'chips') renderChips()
-  if (page === 'operadores') renderOps()
-  if (page === 'historico') loadHistorico()
-}
-
-// ─── LOAD ALL ────────────────────────────────────────────────
-async function loadAll() {
-  const [{ data: c }, { data: o }] = await Promise.all([
-    sb.from('chips').select('*, operadores(nome)').order('criado_em', { ascending: false }),
-    sb.from('operadores').select('*').order('nome')
-  ])
-  allChips = c || []
-  allOps = o || []
-  loadDashboard()
-  renderChips()
-  renderOps()
-  populateOpSelect()
-}
-
-// ─── DASHBOARD ───────────────────────────────────────────────
-function loadDashboard() {
-  const total = allChips.length
-  const ativos = allChips.filter(c => c.status === 'ativo').length
-  const banidos = allChips.filter(c => c.status === 'banido').length
-  const inativos = allChips.filter(c => c.status === 'inativo').length
-
-  document.getElementById('d-total').textContent = total
-  document.getElementById('d-ativos').textContent = ativos
-  document.getElementById('d-banidos').textContent = banidos
-  document.getElementById('d-inativos').textContent = inativos
-
-  // Pie chart
-  const pieCtx = document.getElementById('pie-chart').getContext('2d')
-  if (pieChart) pieChart.destroy()
-  pieChart = new Chart(pieCtx, {
-    type: 'doughnut',
-    data: {
-      labels: ['Ativos', 'Banidos', 'Inativos'],
-      datasets: [{ data: [ativos, banidos, inativos], backgroundColor: ['#00e5a0','#ff4d6d','#ffd60a'], borderWidth: 0, hoverOffset: 4 }]
-    },
-    options: { cutout: '60%', plugins: { legend: { display: false } }, animation: { duration: 400 } }
-  })
-
-  const legend = document.getElementById('pie-legend')
-  legend.innerHTML = [
+  
+  document.getElementById('pie-legend').innerHTML = [
     ['Ativos', ativos, '#00e5a0'],
     ['Banidos', banidos, '#ff4d6d'],
-    ['Inativos', inativos, '#ffd60a'],
-  ].map(([l,v,c]) => `
-    <div class="legend-item">
-      <div class="legend-dot" style="background:${c}"></div>
-      <span style="color:var(--text2)">${l}</span>
-      <span class="legend-val" style="color:${c}">${v}</span>
-    </div>`).join('')
-
-  // By operator
-  const byOp = {}
-  allChips.forEach(chip => {
-    const nome = chip.operadores?.nome || 'Sem operador'
-    if (!byOp[nome]) byOp[nome] = { nome, total: 0, ativos: 0, banidos: 0 }
-    byOp[nome].total++
-    if (chip.status === 'ativo') byOp[nome].ativos++
-    if (chip.status === 'banido') byOp[nome].banidos++
-  })
-  const ops = Object.values(byOp).sort((a,b) => b.total - a.total).slice(0,7)
-
-  // Bar chart
-  const barCtx = document.getElementById('bar-chart').getContext('2d')
-  if (barChart) barChart.destroy()
-  barChart = new Chart(barCtx, {
-    type: 'bar',
-    data: {
-      labels: ops.map(o => o.nome.length > 12 ? o.nome.slice(0,12)+'…' : o.nome),
-      datasets: [{ data: ops.map(o => o.total), backgroundColor: '#00e5a040', borderColor: '#00e5a0', borderWidth: 2, borderRadius: 4 }]
-    },
-    options: {
-      plugins: { legend: { display: false } },
-      scales: {
-        x: { ticks: { color: '#7777a0', font: { family: 'DM Mono', size: 11 } }, grid: { color: '#2e2e40' } },
-        y: { ticks: { color: '#7777a0', font: { family: 'DM Mono', size: 11 } }, grid: { color: '#2e2e40' } }
-      },
-      animation: { duration: 400 }
+    ['Novos', novos, '#4d9eff']
+  ].map(([l, v, c]) => `<div class="legend-item"><div class="legend-dot" style="background:${c}"></div><span>${l}</span><span style="margin-left:auto">${v}</span></div>`).join('');
+  
+  // Gráfico de barras por classe
+  const porClasse = {};
+  operadores.forEach(op => {
+    if (op.classe_id) {
+      const classe = classes.find(c => c.id === op.classe_id);
+      const nome = classe?.nome || 'Sem classe';
+      if (!porClasse[nome]) porClasse[nome] = 0;
+      porClasse[nome] += chips.filter(c => c.operador_id === op.id).length;
     }
-  })
-
-  // Rankings
-  const rankA = [...ops].sort((a,b) => b.ativos - a.ativos).slice(0,6)
-  const rankB = [...ops].sort((a,b) => b.banidos - a.banidos).slice(0,6)
-
-  document.getElementById('rank-ativos').innerHTML = rankA.length
-    ? rankA.map((o,i) => rankRow(i, o.nome, o.ativos, '#00e5a0')).join('')
-    : '<p style="color:var(--text2);font-size:13px">Nenhum dado ainda.</p>'
-
-  document.getElementById('rank-banidos').innerHTML = rankB.length
-    ? rankB.map((o,i) => rankRow(i, o.nome, o.banidos, '#ff4d6d')).join('')
-    : '<p style="color:var(--text2);font-size:13px">Nenhum dado ainda.</p>'
-}
-
-function rankRow(i, nome, val, cor) {
-  return `<div class="ranking-row">
-    <span class="rank-num" style="color:${i===0?cor:'var(--border)'}">${i+1}</span>
-    <span class="rank-name">${nome}</span>
-    <span class="rank-val" style="color:${cor}">${val}</span>
-  </div>`
-}
-
-// ─── CHIPS ───────────────────────────────────────────────────
-function setChipFilter(f, btn) {
-  chipFilter = f
-  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'))
-  btn.classList.add('active')
-  renderChips()
-}
-
-function renderChips() {
-  const search = (document.getElementById('chip-search')?.value || '').toLowerCase()
-  const filtered = allChips.filter(c => {
-    const matchS = chipFilter === 'todos' || c.status === chipFilter
-    const matchQ = !search || c.numero.includes(search) || (c.operadores?.nome || '').toLowerCase().includes(search)
-    return matchS && matchQ
-  })
-
-  document.getElementById('chips-count').textContent = `${allChips.length} chips cadastrados`
-
-  const tbody = document.getElementById('chips-tbody')
-  if (!filtered.length) {
-    tbody.innerHTML = '<tr class="empty-row"><td colspan="6">Nenhum chip encontrado.</td></tr>'
-    return
+  });
+  const dadosClasse = Object.entries(porClasse).sort((a,b) => b[1] - a[1]).slice(0,7);
+  
+  if (barChart) barChart.destroy();
+  const barCtx = document.getElementById('bar-chart');
+  if (barCtx && dadosClasse.length) {
+    barChart = new Chart(barCtx, {
+      type: 'bar',
+      data: { labels: dadosClasse.map(d => d[0].length > 12 ? d[0].slice(0,12)+'…' : d[0]), datasets: [{ data: dadosClasse.map(d => d[1]), backgroundColor: '#00e5a040', borderColor: '#00e5a0', borderWidth: 2 }] },
+      options: { plugins: { legend: { display: false } }, scales: { x: { ticks: { color: '#7777a0' } }, y: { ticks: { color: '#7777a0' } } } }
+    });
   }
+  
+  // Rankings
+  const rankingAtivos = [...operadores].sort((a,b) => chips.filter(c => c.operador_id === b.id && c.status === 'ativo').length - chips.filter(c => c.operador_id === a.id && c.status === 'ativo').length).slice(0,6);
+  const rankingBanidos = [...operadores].sort((a,b) => chips.filter(c => c.operador_id === b.id && c.status === 'banido').length - chips.filter(c => c.operador_id === a.id && c.status === 'banido').length).slice(0,6);
+  
+  document.getElementById('rank-ativos').innerHTML = rankingAtivos.map((o,i) => `<div class="ranking-row"><span class="rank-num" style="color:${i===0?'#00e5a0':'var(--border)'}">${i+1}</span><span class="rank-name">${o.nome}</span><span style="color:#00e5a0">${chips.filter(c=>c.operador_id===o.id && c.status==='ativo').length}</span></div>`).join('') || '<div class="empty-class">Sem dados</div>';
+  document.getElementById('rank-banidos').innerHTML = rankingBanidos.map((o,i) => `<div class="ranking-row"><span class="rank-num" style="color:${i===0?'#ff4d6d':'var(--border)'}">${i+1}</span><span class="rank-name">${o.nome}</span><span style="color:#ff4d6d">${chips.filter(c=>c.operador_id===o.id && c.status==='banido').length}</span></div>`).join('') || '<div class="empty-class">Sem dados</div>';
+}
 
-  tbody.innerHTML = filtered.map(c => `
-    <tr>
-      <td style="font-family:var(--mono)">${c.numero}</td>
-      <td>${c.operadores?.nome || '<span style="color:var(--text2)">—</span>'}</td>
-      <td><span class="badge badge-${c.status}">● ${c.status}</span></td>
-      <td style="color:var(--text2)">${c.motivo_ban || '—'}</td>
-      <td style="color:var(--text2)">${new Date(c.criado_em).toLocaleDateString('pt-BR')}</td>
-      <td style="display:flex;gap:6px">
-        <button class="btn-sm btn-edit" onclick="editarChip('${c.id}')">Editar</button>
-        <button class="btn-sm btn-del" onclick="excluirChip('${c.id}')">Excluir</button>
-      </td>
-    </tr>`).join('')
+// ==================== CHIPS ====================
+function renderizarChips() {
+  const busca = document.getElementById('chip-search')?.value.toLowerCase() || '';
+  const filtrados = chips.filter(c => (filtroChip === 'todos' || c.status === filtroChip) && (!busca || c.numero.includes(busca) || (operadores.find(o=>o.id===c.operador_id)?.nome || '').toLowerCase().includes(busca)));
+  
+  document.getElementById('chips-count').textContent = `${chips.length} chips (${chips.filter(c=>c.status==='novo').length} novos)`;
+  const tbody = document.getElementById('chips-tbody');
+  if (!filtrados.length) { tbody.innerHTML = '<tr><td colspan="6">Nenhum chip encontrado</td></tr>'; return; }
+  
+  tbody.innerHTML = filtrados.map(c => {
+    const op = operadores.find(o => o.id === c.operador_id);
+    const classe = op ? classes.find(cl => cl.id === op.classe_id) : null;
+    return `<tr>
+      <td>${c.numero}</td>
+      <td>${op?.nome || '—'}</td>
+      <td>${classe ? `${classe.icone} ${classe.nome}` : '📁 Sem classe'}</td>
+      <td><span class="badge badge-${c.status}">${c.status}</span></td>
+      <td>${c.motivo_ban || '—'}</td>
+      <td><button class="btn-sm btn-edit" onclick="editarChip('${c.id}')">Editar</button> <button class="btn-sm btn-del" onclick="excluirChip('${c.id}')">Excluir</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function setFiltroChip(filtro, btn) {
+  filtroChip = filtro;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderizarChips();
 }
 
 function abrirModalChip() {
-  editingChipId = null
-  document.getElementById('modal-chip-title').textContent = 'Novo Chip'
-  document.getElementById('chip-numero').value = ''
-  document.getElementById('chip-operador').value = ''
-  document.getElementById('chip-status').value = 'ativo'
-  document.getElementById('chip-motivo').value = ''
-  document.getElementById('motivo-group').style.display = 'none'
-  document.getElementById('modal-chip').classList.add('open')
+  editandoChipId = null;
+  document.getElementById('modal-chip-title').innerText = 'Novo Chip';
+  document.getElementById('chip-numero').value = '';
+  document.getElementById('chip-operador').value = '';
+  document.getElementById('chip-status').value = 'novo';
+  document.getElementById('chip-motivo').value = '';
+  document.getElementById('motivo-group').style.display = 'none';
+  document.getElementById('modal-chip').classList.add('open');
 }
 
 function editarChip(id) {
-  const c = allChips.find(x => x.id === id)
-  if (!c) return
-  editingChipId = id
-  document.getElementById('modal-chip-title').textContent = 'Editar Chip'
-  document.getElementById('chip-numero').value = c.numero
-  document.getElementById('chip-operador').value = c.operador_id || ''
-  document.getElementById('chip-status').value = c.status
-  document.getElementById('chip-motivo').value = c.motivo_ban || ''
-  document.getElementById('motivo-group').style.display = c.status === 'banido' ? 'block' : 'none'
-  document.getElementById('modal-chip').classList.add('open')
+  const chip = chips.find(c => c.id === id);
+  if (!chip) return;
+  editandoChipId = id;
+  document.getElementById('modal-chip-title').innerText = 'Editar Chip';
+  document.getElementById('chip-numero').value = chip.numero;
+  document.getElementById('chip-operador').value = chip.operador_id || '';
+  document.getElementById('chip-status').value = chip.status;
+  document.getElementById('chip-motivo').value = chip.motivo_ban || '';
+  document.getElementById('motivo-group').style.display = chip.status === 'banido' ? 'block' : 'none';
+  document.getElementById('modal-chip').classList.add('open');
 }
 
-function toggleMotivo() {
-  const s = document.getElementById('chip-status').value
-  document.getElementById('motivo-group').style.display = s === 'banido' ? 'block' : 'none'
+function toggleMotivoBan() {
+  document.getElementById('motivo-group').style.display = document.getElementById('chip-status').value === 'banido' ? 'block' : 'none';
 }
 
-async function salvarChip() {
-  const numero = document.getElementById('chip-numero').value.trim()
-  if (!numero) { toast('Informe o numero do chip', 'err'); return }
-  const operador_id = document.getElementById('chip-operador').value || null
-  const status = document.getElementById('chip-status').value
-  const motivo_ban = document.getElementById('chip-motivo').value.trim() || null
-
-  const btn = document.getElementById('btn-salvar-chip')
-  btn.textContent = 'Salvando...'
-  btn.disabled = true
-
-  try {
-    if (editingChipId) {
-      const antigo = allChips.find(c => c.id === editingChipId)
-      await sb.from('chips').update({ numero, operador_id, status, motivo_ban }).eq('id', editingChipId)
-      if (antigo.status !== status) {
-        await sb.from('historico').insert({ chip_id: editingChipId, operador_id, status_anterior: antigo.status, status_novo: status, motivo: motivo_ban })
-      }
-      toast('Chip atualizado!', 'ok')
-    } else {
-      const { data: novo } = await sb.from('chips').insert({ numero, operador_id, status, motivo_ban }).select().single()
-      if (novo) await sb.from('historico').insert({ chip_id: novo.id, operador_id, status_anterior: null, status_novo: status, motivo: 'Cadastro inicial' })
-      toast('Chip adicionado!', 'ok')
-    }
-    fecharModal('modal-chip')
-    await loadAll()
-  } catch(e) { toast('Erro: ' + e.message, 'err') }
-
-  btn.textContent = 'Salvar'
-  btn.disabled = false
-}
-
-async function excluirChip(id) {
-  if (!confirm('Excluir este chip?')) return
-  await sb.from('chips').delete().eq('id', id)
-  await loadAll()
-  toast('Chip excluido.', 'ok')
-}
-
-// ─── OPERADORES ──────────────────────────────────────────────
-function renderOps() {
-  document.getElementById('ops-count').textContent = `${allOps.length} operadores cadastrados`
-
-  const statsOp = {}
-  allChips.forEach(c => {
-    if (!c.operador_id) return
-    if (!statsOp[c.operador_id]) statsOp[c.operador_id] = { total:0, ativos:0, banidos:0 }
-    statsOp[c.operador_id].total++
-    if (c.status === 'ativo') statsOp[c.operador_id].ativos++
-    if (c.status === 'banido') statsOp[c.operador_id].banidos++
-  })
-
-  const grid = document.getElementById('ops-grid')
-  if (!allOps.length) {
-    grid.innerHTML = '<div style="color:var(--text2);font-size:13px;padding:40px;text-align:center;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius)">Nenhum operador cadastrado ainda.</div>'
-    return
+function salvarChip() {
+  const numero = formatarTelefone(document.getElementById('chip-numero').value.trim());
+  if (!numero) { toast('Informe o número', 'err'); return; }
+  const operador_id = document.getElementById('chip-operador').value || null;
+  const status = document.getElementById('chip-status').value;
+  const motivo_ban = document.getElementById('chip-motivo').value.trim() || null;
+  
+  if (editandoChipId) {
+    const index = chips.findIndex(c => c.id === editandoChipId);
+    if (index !== -1) chips[index] = { ...chips[index], numero, operador_id, status, motivo_ban };
+    toast('Chip atualizado', 'ok');
+  } else {
+    chips.unshift({ id: Date.now().toString(), numero, operador_id, status, motivo_ban, criado_em: new Date().toISOString() });
+    toast('Chip adicionado', 'ok');
   }
+  fecharModal('modal-chip');
+  salvarLocalStorage();
+  carregarDados();
+}
 
-  grid.innerHTML = allOps.map(op => {
-    const s = statsOp[op.id] || { total:0, ativos:0, banidos:0 }
-    const initials = op.nome.split(' ').map(n => n[0]).join('').slice(0,2).toUpperCase()
+function excluirChip(id) {
+  if (!confirm('Excluir este chip?')) return;
+  chips = chips.filter(c => c.id !== id);
+  salvarLocalStorage();
+  carregarDados();
+  toast('Chip excluído', 'ok');
+}
+
+// ==================== OPERADORES E CLASSES ====================
+function renderizarClasses() {
+  const container = document.getElementById('classes-container');
+  if (!container) return;
+  if (!classes.length) { container.innerHTML = '<div class="empty-class">Nenhuma classe. Clique em "+ Nova Classe"</div>'; return; }
+  
+  document.getElementById('operadores-count').textContent = `${operadores.length} operadores em ${classes.length} classes`;
+  
+  container.innerHTML = classes.map(classe => {
+    const opsDaClasse = operadores.filter(op => op.classe_id === classe.id);
+    let stats = { total: 0, ativos: 0, banidos: 0, novos: 0 };
+    opsDaClasse.forEach(op => {
+      const chipsOp = chips.filter(c => c.operador_id === op.id);
+      stats.total += chipsOp.length;
+      stats.ativos += chipsOp.filter(c => c.status === 'ativo').length;
+      stats.banidos += chipsOp.filter(c => c.status === 'banido').length;
+      stats.novos += chipsOp.filter(c => c.status === 'novo').length;
+    });
+    const isOpen = classesExpandidas[classe.id] !== false;
+    
     return `
-    <div class="op-card">
-      <div class="op-head">
-        <div class="op-info">
-          <div class="op-avatar">${initials}</div>
-          <div>
-            <div class="op-name">${op.nome}</div>
-            <div class="op-email">${op.email || 'sem email'}</div>
+      <div class="class-card">
+        <div class="class-header" onclick="toggleClasse('${classe.id}')">
+          <div class="class-header-left">
+            <span class="class-icon">${classe.icone || '📁'}</span>
+            <span class="class-name">${classe.nome}</span>
+            <div class="class-stats">
+              <span class="class-stat"><strong>${stats.total}</strong> chips</span>
+              <span class="class-stat" style="color:var(--accent)">▲ ${stats.ativos}</span>
+              <span class="class-stat" style="color:var(--red)">▼ ${stats.banidos}</span>
+              <span class="class-stat" style="color:var(--blue)">● ${stats.novos}</span>
+              <span class="class-stat">👥 ${opsDaClasse.length}</span>
+            </div>
+          </div>
+          <div class="class-actions" onclick="event.stopPropagation()">
+            <button class="btn-sm btn-edit" onclick="editarClasse('${classe.id}')">✏️</button>
+            <button class="btn-sm btn-del" onclick="excluirClasse('${classe.id}')">🗑️</button>
           </div>
         </div>
-        <span class="badge ${op.ativo ? 'badge-ativo' : 'badge-inativo'}">${op.ativo ? 'ativo' : 'inativo'}</span>
+        <div class="class-content ${isOpen ? 'open' : ''}" id="class-content-${classe.id}">
+          ${opsDaClasse.length ? `<div class="op-mini-grid">${opsDaClasse.map(op => {
+            const chipsOp = chips.filter(c => c.operador_id === op.id);
+            const iniciais = op.nome.split(' ').map(n => n[0]).join('').slice(0,2).toUpperCase();
+            return `
+              <div class="op-card-mini">
+                <div class="op-head">
+                  <div class="op-info">
+                    <div class="op-avatar">${iniciais}</div>
+                    <div><strong>${op.nome}</strong><br><small>${op.email || 'sem email'}</small></div>
+                  </div>
+                  <span class="badge ${op.ativo ? 'badge-ativo' : 'badge-inativo'}">${op.ativo ? 'ativo' : 'inativo'}</span>
+                </div>
+                <div class="op-stats">
+                  <div class="op-stat"><div class="op-stat-label">Total</div><div class="op-stat-val">${chipsOp.length}</div></div>
+                  <div class="op-stat"><div class="op-stat-label">Ativos</div><div class="op-stat-val" style="color:var(--accent)">${chipsOp.filter(c=>c.status==='ativo').length}</div></div>
+                  <div class="op-stat"><div class="op-stat-label">Banidos</div><div class="op-stat-val" style="color:var(--red)">${chipsOp.filter(c=>c.status==='banido').length}</div></div>
+                  <div class="op-stat"><div class="op-stat-label">Novos</div><div class="op-stat-val" style="color:var(--blue)">${chipsOp.filter(c=>c.status==='novo').length}</div></div>
+                </div>
+                <div style="display:flex;gap:6px">
+                  <button class="btn-sm btn-edit" onclick="editarOperador('${op.id}')">Editar</button>
+                  <button class="btn-sm btn-del" onclick="excluirOperador('${op.id}')">Excluir</button>
+                  <button class="btn-sm btn-ghost" onclick="moverOperador('${op.id}')">Mover</button>
+                </div>
+              </div>
+            `;
+          }).join('')}</div>` : `<div class="empty-class">📭 Nenhum operador<br><button class="btn-sm btn-ghost" onclick="abrirModalOpComClasse('${classe.id}')">+ Adicionar</button></div>`}
+        </div>
       </div>
-      <div class="op-stats">
-        <div class="op-stat"><div class="op-stat-label">Total</div><div class="op-stat-val">${s.total}</div></div>
-        <div class="op-stat"><div class="op-stat-label">Ativos</div><div class="op-stat-val" style="color:var(--accent)">${s.ativos}</div></div>
-        <div class="op-stat"><div class="op-stat-label">Banidos</div><div class="op-stat-val" style="color:var(--red)">${s.banidos}</div></div>
-      </div>
-      <div class="op-actions">
-        <button class="btn-sm btn-edit" onclick="editarOp('${op.id}')">Editar</button>
-        <button class="btn-sm btn-del" onclick="excluirOp('${op.id}')">Excluir</button>
-      </div>
-    </div>`
-  }).join('')
+    `;
+  }).join('');
+}
+
+function toggleClasse(id) {
+  classesExpandidas[id] = !classesExpandidas[id];
+  const content = document.getElementById(`class-content-${id}`);
+  if (content) content.classList.toggle('open');
+}
+
+function expandirTodas() { classes.forEach(c => classesExpandidas[c.id] = true); renderizarClasses(); }
+function recolherTodas() { classes.forEach(c => classesExpandidas[c.id] = false); renderizarClasses(); }
+
+function abrirModalClasse() {
+  editandoClasseId = null;
+  document.getElementById('modal-classe-title').innerText = 'Nova Classe';
+  document.getElementById('classe-nome').value = '';
+  document.getElementById('classe-icon').value = '📁';
+  document.getElementById('modal-classe').classList.add('open');
+}
+
+function editarClasse(id) {
+  const classe = classes.find(c => c.id === id);
+  if (!classe) return;
+  editandoClasseId = id;
+  document.getElementById('modal-classe-title').innerText = 'Editar Classe';
+  document.getElementById('classe-nome').value = classe.nome;
+  document.getElementById('classe-icon').value = classe.icone || '📁';
+  document.getElementById('modal-classe').classList.add('open');
+}
+
+function salvarClasse() {
+  const nome = document.getElementById('classe-nome').value.trim();
+  if (!nome) { toast('Informe o nome', 'err'); return; }
+  const icone = document.getElementById('classe-icon').value;
+  
+  if (editandoClasseId) {
+    const index = classes.findIndex(c => c.id === editandoClasseId);
+    if (index !== -1) classes[index] = { ...classes[index], nome, icone };
+    toast('Classe atualizada', 'ok');
+  } else {
+    classes.push({ id: Date.now().toString(), nome, icone });
+    toast('Classe criada', 'ok');
+  }
+  fecharModal('modal-classe');
+  salvarLocalStorage();
+  carregarDados();
+}
+
+function excluirClasse(id) {
+  const opsNaClasse = operadores.filter(op => op.classe_id === id);
+  if (opsNaClasse.length && !confirm(`Esta classe tem ${opsNaClasse.length} operadores. Excluir mesmo?`)) return;
+  operadores = operadores.map(op => op.classe_id === id ? { ...op, classe_id: null } : op);
+  classes = classes.filter(c => c.id !== id);
+  salvarLocalStorage();
+  carregarDados();
+  toast('Classe excluída', 'ok');
 }
 
 function abrirModalOp() {
-  editingOpId = null
-  document.getElementById('modal-op-title').textContent = 'Novo Operador'
-  document.getElementById('op-nome').value = ''
-  document.getElementById('op-email').value = ''
-  document.getElementById('op-ativo').checked = true
-  document.getElementById('modal-op').classList.add('open')
+  editandoOpId = null;
+  document.getElementById('modal-op-title').innerText = 'Novo Operador';
+  document.getElementById('op-nome').value = '';
+  document.getElementById('op-email').value = '';
+  document.getElementById('op-classe').value = '';
+  document.getElementById('op-ativo').checked = true;
+  document.getElementById('modal-op').classList.add('open');
 }
 
-function editarOp(id) {
-  const op = allOps.find(o => o.id === id)
-  if (!op) return
-  editingOpId = id
-  document.getElementById('modal-op-title').textContent = 'Editar Operador'
-  document.getElementById('op-nome').value = op.nome
-  document.getElementById('op-email').value = op.email || ''
-  document.getElementById('op-ativo').checked = op.ativo
-  document.getElementById('modal-op').classList.add('open')
+function abrirModalOpComClasse(classeId) {
+  editandoOpId = null;
+  document.getElementById('modal-op-title').innerText = 'Novo Operador';
+  document.getElementById('op-nome').value = '';
+  document.getElementById('op-email').value = '';
+  document.getElementById('op-classe').value = classeId;
+  document.getElementById('op-ativo').checked = true;
+  document.getElementById('modal-op').classList.add('open');
 }
 
-async function salvarOp() {
-  const nome = document.getElementById('op-nome').value.trim()
-  if (!nome) { toast('Informe o nome', 'err'); return }
-  const email = document.getElementById('op-email').value.trim() || null
-  const ativo = document.getElementById('op-ativo').checked
-
-  const btn = document.getElementById('btn-salvar-op')
-  btn.textContent = 'Salvando...'
-  btn.disabled = true
-
-  try {
-    if (editingOpId) {
-      await sb.from('operadores').update({ nome, email, ativo }).eq('id', editingOpId)
-      toast('Operador atualizado!', 'ok')
-    } else {
-      await sb.from('operadores').insert({ nome, email, ativo })
-      toast('Operador adicionado!', 'ok')
-    }
-    fecharModal('modal-op')
-    await loadAll()
-  } catch(e) { toast('Erro: ' + e.message, 'err') }
-
-  btn.textContent = 'Salvar'
-  btn.disabled = false
+function editarOperador(id) {
+  const op = operadores.find(o => o.id === id);
+  if (!op) return;
+  editandoOpId = id;
+  document.getElementById('modal-op-title').innerText = 'Editar Operador';
+  document.getElementById('op-nome').value = op.nome;
+  document.getElementById('op-email').value = op.email || '';
+  document.getElementById('op-classe').value = op.classe_id || '';
+  document.getElementById('op-ativo').checked = op.ativo;
+  document.getElementById('modal-op').classList.add('open');
 }
 
-async function excluirOp(id) {
-  if (!confirm('Excluir operador? Os chips associados ficarao sem operador.')) return
-  await sb.from('operadores').delete().eq('id', id)
-  await loadAll()
-  toast('Operador excluido.', 'ok')
-}
-
-function populateOpSelect() {
-  const sel = document.getElementById('chip-operador')
-  const cur = sel.value
-  sel.innerHTML = '<option value="">Nenhum operador</option>' +
-    allOps.filter(o => o.ativo).map(o => `<option value="${o.id}">${o.nome}</option>`).join('')
-  sel.value = cur
-}
-
-// ─── HISTORICO ───────────────────────────────────────────────
-async function loadHistorico() {
-  document.getElementById('hist-tbody').innerHTML = '<tr class="empty-row"><td colspan="6"><div class="spin"></div></td></tr>'
-  const { data } = await sb.from('historico')
-    .select('*, chips(numero), operadores(nome)')
-    .order('criado_em', { ascending: false })
-    .limit(300)
-  allHist = data || []
-
-  const tbody = document.getElementById('hist-tbody')
-  if (!allHist.length) {
-    tbody.innerHTML = '<tr class="empty-row"><td colspan="6">Nenhum registro ainda.</td></tr>'
-    return
+function salvarOperador() {
+  const nome = document.getElementById('op-nome').value.trim();
+  if (!nome) { toast('Informe o nome', 'err'); return; }
+  const email = document.getElementById('op-email').value.trim() || null;
+  const classe_id = document.getElementById('op-classe').value || null;
+  const ativo = document.getElementById('op-ativo').checked;
+  
+  if (editandoOpId) {
+    const index = operadores.findIndex(o => o.id === editandoOpId);
+    if (index !== -1) operadores[index] = { ...operadores[index], nome, email, classe_id, ativo };
+    toast('Operador atualizado', 'ok');
+  } else {
+    operadores.push({ id: Date.now().toString(), nome, email, classe_id, ativo });
+    toast('Operador criado', 'ok');
   }
-  tbody.innerHTML = allHist.map(h => `
-    <tr>
-      <td style="color:var(--text2);font-family:var(--mono);font-size:12px">${new Date(h.criado_em).toLocaleString('pt-BR')}</td>
-      <td style="font-family:var(--mono)">${h.chips?.numero || '—'}</td>
-      <td>${h.operadores?.nome || '<span style="color:var(--text2)">—</span>'}</td>
-      <td>${h.status_anterior ? `<span class="badge badge-${h.status_anterior}">${h.status_anterior}</span>` : '<span style="color:var(--text2);font-size:12px">novo</span>'}</td>
-      <td><span class="badge badge-${h.status_novo}">${h.status_novo}</span></td>
-      <td style="color:var(--text2)">${h.motivo || '—'}</td>
-    </tr>`).join('')
+  fecharModal('modal-op');
+  salvarLocalStorage();
+  carregarDados();
 }
 
-// ─── UTILS ───────────────────────────────────────────────────
-function fecharModal(id) { document.getElementById(id).classList.remove('open') }
-
-let toastTimer
-function toast(msg, type) {
-  const el = document.getElementById('toast')
-  el.textContent = msg
-  el.className = 'show ' + (type || '')
-  clearTimeout(toastTimer)
-  toastTimer = setTimeout(() => el.className = '', 3000)
+function excluirOperador(id) {
+  if (!confirm('Excluir operador? Os chips ficarão sem operador.')) return;
+  operadores = operadores.filter(o => o.id !== id);
+  chips = chips.map(c => c.operador_id === id ? { ...c, operador_id: null } : c);
+  salvarLocalStorage();
+  carregarDados();
+  toast('Operador excluído', 'ok');
 }
 
-// Fecha modal clicando fora
-document.querySelectorAll('.modal-overlay').forEach(o => {
-  o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open') })
-})
+function moverOperador(id) {
+  const op = operadores.find(o => o.id === id);
+  if (!op) return;
+  const lista = classes.map((c, idx) => `${idx+1} - ${c.icone} ${c.nome}`).join('\n');
+  const resposta = prompt(`Mover "${op.nome}" para qual classe?\n\n${lista}\n\nDigite o número ou deixe em branco:`);
+  if (resposta === null) return;
+  if (resposta === "") {
+    const index = operadores.findIndex(o => o.id === id);
+    if (index !== -1) operadores[index] = { ...operadores[index], classe_id: null };
+    toast('Classe removida', 'ok');
+  } else {
+    const idx = parseInt(resposta) - 1;
+    if (!isNaN(idx) && classes[idx]) {
+      const index = operadores.findIndex(o => o.id === id);
+      if (index !== -1) operadores[index] = { ...operadores[index], classe_id: classes[idx].id };
+      toast(`Movido para ${classes[idx].nome}`, 'ok');
+    } else { toast('Número inválido', 'err'); return; }
+  }
+  salvarLocalStorage();
+  carregarDados();
+}
 
-// Enter nos inputs
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') document.querySelectorAll('.modal-overlay').forEach(o => o.classList.remove('open'))
-})
+// ==================== SELECTS ====================
+function popularSelects() {
+  const opSelect = document.getElementById('chip-operador');
+  if (opSelect) {
+    const atual = opSelect.value;
+    opSelect.innerHTML = '<option value="">Nenhum operador</option>' + operadores.filter(o => o.ativo).map(o => `<option value="${o.id}">${o.nome}</option>`).join('');
+    opSelect.value = atual;
+  }
+  const classeSelect = document.getElementById('op-classe');
+  if (classeSelect) {
+    const atual = classeSelect.value;
+    classeSelect.innerHTML = '<option value="">Sem classe</option>' + classes.map(c => `<option value="${c.id}">${c.icone} ${c.nome}</option>`).join('');
+    classeSelect.value = atual;
+  }
+}
 
-// ─── INIT ────────────────────────────────────────────────────
-setupDb()
+// ==================== EXPORT/IMPORT ====================
+function exportarDados() {
+  const linhas = [['OPERADOR', 'CHIP', 'SITUAÇÃO', 'CLASSE']];
+  chips.forEach(chip => {
+    const op = operadores.find(o => o.id === chip.operador_id);
+    const classe = op ? classes.find(c => c.id === op.classe_id) : null;
+    linhas.push([op?.nome || '', chip.numero, chip.status === 'ativo' ? 'Ativo' : (chip.status === 'banido' ? 'Banido' : 'Novo'), classe?.nome || '']);
+  });
+  const csv = linhas.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(';')).join('\n');
+  const blob = new Blob(["\uFEFF" + csv], { type: 'text/csv;charset=utf-8' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = `chips_${new Date().toISOString().slice(0,19)}.csv`;
+  link.click();
+  toast('Exportado!', 'ok');
+}
+
+function baixarModelo() {
+  const headers = ['OPERADOR', 'CHIP', 'SITUAÇÃO', 'CLASSE'];
+  const exemplos = [['Exemplo_operador', '(11) 99999-9999', 'Novo', 'CRM']];
+  const csv = [headers.join(';'), ...exemplos.map(row => row.map(c => `"${c}"`).join(';'))].join('\n');
+  const blob = new Blob(["\uFEFF" + csv], { type: 'text/csv' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = 'modelo_chips.csv';
+  link.click();
+  toast('Modelo baixado!', 'ok');
+}
+
+const dropzone = document.getElementById('dropzone');
+const fileInput = document.getElementById('import-file');
+if (dropzone && fileInput) {
+  dropzone.addEventListener('click', () => fileInput.click());
+  dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.classList.add('drag-over'); });
+  dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag-over'));
+  dropzone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropzone.classList.remove('drag-over');
+    if (e.dataTransfer.files.length) {
+      fileInput.files = e.dataTransfer.files;
+      previewArquivo(e.dataTransfer.files[0]);
+    }
+  });
+  fileInput.addEventListener('change', (e) => { if (e.target.files.length) previewArquivo(e.target.files[0]); });
+}
+
+let arquivoLinhas = null;
+let arquivoSeparador = null;
+
+function previewArquivo(file) {
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    const preview = document.getElementById('import-preview');
+    const conteudo = ev.target.result;
+    arquivoSeparador = conteudo.includes(';') ? ';' : ',';
+    const linhas = conteudo.split(/\r?\n/).filter(l => l.trim());
+    if (linhas.length < 2) { preview.innerHTML = '<span style="color:var(--red)">Arquivo vazio</span>'; preview.style.display = 'block'; return; }
+    const headers = linhas[0].split(arquivoSeparador).map(h => h.replace(/^"|"$/g, '').trim().toUpperCase());
+    const valid = headers.includes('OPERADOR') && headers.includes('CHIP') && headers.includes('SITUAÇÃO');
+    if (!valid) { preview.innerHTML = '<span style="color:var(--red)">Colunas: OPERADOR; CHIP; SITUAÇÃO; CLASSE</span>'; preview.style.display = 'block'; return; }
+    const previewRows = linhas.slice(1, 6).map(l => l.split(arquivoSeparador).map(c => c.replace(/^"|"$/g, '').trim()));
+    let html = '<table style="width:100%;border-collapse:collapse"><tr><th>OPERADOR</th><th>CHIP</th><th>SITUAÇÃO</th><th>CLASSE</th></tr>';
+    previewRows.forEach(r => { if (r.length >= 3) html += `<tr><td>${r[0]||''}</td><td>${r[1]||''}</td><td>${r[2]||''}</td><td>${r[3]||''}</td></tr>`; });
+    html += '</table><span style="color:var(--accent)">✔️ Pronto para importar</span>';
+    preview.innerHTML = html;
+    preview.style.display = 'block';
+    arquivoLinhas = linhas;
+  };
+  reader.readAsText(file, 'UTF-8');
+}
+
+async function processarImportacao() {
+  if (!arquivoLinhas) { toast('Nenhum arquivo carregado', 'err'); return; }
+  const headers = arquivoLinhas[0].split(arquivoSeparador).map(h => h.replace(/^"|"$/g, '').trim().toUpperCase());
+  const idxOp = headers.indexOf('OPERADOR');
+  const idxChip = headers.indexOf('CHIP');
+  const idxStatus = headers.indexOf('SITUAÇÃO');
+  const idxClasse = headers.indexOf('CLASSE');
+  let sucessos = 0, erros = 0;
+  
+  for (let i = 1; i < arquivoLinhas.length; i++) {
+    if (!arquivoLinhas[i].trim()) continue;
+    const cols = arquivoLinhas[i].split(arquivoSeparador).map(c => c.replace(/^"|"$/g, '').trim());
+    const nomeOp = cols[idxOp] || '';
+    const numeroRaw = cols[idxChip] || '';
+    const numero = formatarTelefone(numeroRaw);
+    const situacao = (cols[idxStatus] || '').toLowerCase();
+    const nomeClasse = idxClasse !== -1 ? (cols[idxClasse] || '').trim() : '';
+    const statusMap = { 'ativo':'ativo', 'banido':'banido', 'novo':'novo', 'atividade':'ativo', 'active':'ativo' };
+    const status = statusMap[situacao] || 'novo';
+    if (!numero) { erros++; continue; }
+    
+    let classe_id = null;
+    if (nomeClasse) {
+      let existente = classes.find(c => c.nome.toLowerCase() === nomeClasse.toLowerCase());
+      if (existente) classe_id = existente.id;
+      else { classe_id = Date.now().toString(); classes.push({ id: classe_id, nome: nomeClasse, icone: '📁' }); }
+    }
+    let operador_id = null;
+    if (nomeOp) {
+      let existente = operadores.find(o => o.nome.toLowerCase() === nomeOp.toLowerCase());
+      if (existente) operador_id = existente.id;
+      else { operador_id = Date.now().toString(); operadores.push({ id: operador_id, nome: nomeOp, email: null, classe_id, ativo: true }); }
+    }
+    const existente = chips.find(c => c.numero === numero);
+    if (existente) { existente.operador_id = operador_id; existente.status = status; existente.motivo_ban = null; }
+    else { chips.push({ id: Date.now().toString(), numero, operador_id, status, motivo_ban: null, criado_em: new Date().toISOString() }); }
+    sucessos++;
+  }
+  salvarLocalStorage();
+  carregarDados();
+  document.getElementById('import-preview').innerHTML = `✅ Importados: ${sucessos} chips, ${erros} erros.`;
+  toast(`${sucessos} chips importados`, sucessos ? 'ok' : 'err');
+  arquivoLinhas = null;
+}
+
+// ==================== UTILIDADES ====================
+function fecharModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+
+function toast(msg, tipo) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = `show ${tipo || ''}`;
+  setTimeout(() => el.className = '', 3000);
+}
+
+// Navegação
+document.querySelectorAll('.nav-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const page = btn.getAttribute('data-page');
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(`page-${page}`).classList.add('active');
+    btn.classList.add('active');
+  });
+});
+
+document.querySelectorAll('.modal-overlay').forEach(modal => {
+  modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.remove('open'); });
+});
+
+// Inicializar
+carregarDados();
 </script>
 </body>
 </html>
