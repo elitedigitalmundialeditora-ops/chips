@@ -10,11 +10,7 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
 :root {
   --bg: #0b0b10;
@@ -630,7 +626,7 @@ input, select {
   </nav>
   <div class="sidebar-foot">
     <span class="dot"></span>Cloud Sync
-    <div class="sync-status" id="sync-status">✅ Conectado</div>
+    <div class="sync-status" id="sync-status">🔄 Conectando...</div>
   </div>
 </div>
 
@@ -646,7 +642,7 @@ input, select {
       <div class="header-actions">
         <div class="user-info" id="user-info-header"><span class="user-avatar" id="user-avatar">U</span><span id="user-name-display"></span></div>
         <button class="theme-toggle" onclick="toggleTheme()">🌓</button>
-        <button class="btn-ghost" onclick="syncAllData()">🔄 Sincronizar</button>
+        <button class="btn-ghost" onclick="carregarDadosDoSupabase()">🔄 Recarregar</button>
       </div>
     </div>
     <div class="cards-grid">
@@ -766,7 +762,7 @@ input, select {
     <div class="page-header">
       <div><div class="page-title">Histórico</div><div class="page-sub">Logs de todas as ações</div></div>
       <div class="header-actions">
-        <button class="btn-ghost" onclick="carregarDados(); renderizarHistoricoCentral();">Atualizar</button>
+        <button class="btn-ghost" onclick="carregarHistoricoDoSupabase()">Atualizar</button>
       </div>
     </div>
     <div class="table-wrap">
@@ -790,21 +786,23 @@ input, select {
 <div id="toast"></div>
 
 <script>
-// ==================== SUPABASE CONFIGURAÇÃO ====================
+// ==================== SUPABASE CONFIG ====================
 const SUPABASE_URL = 'https://fyeqxmokaiovnjfmoior.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_3bthuT44LXmjRVYAFw9peQ_6ityZ0cL';
 
-// Variáveis globais
-let supabaseClient = null;
+let supabase = null;
 let supabaseConnected = false;
 let usuarioLogado = null;
 let usuarioLogadoObj = null;
-const USUARIO_MASTER = { login: 'beatriz_rodrigues', senha: 'beatriz123', cor: '#9d4dff', isMaster: true };
 
-let usuariosSistema = [];
+// Dados globais
 let chips = [];
 let operadores = [];
 let classes = [];
+let usuariosSistema = [];
+let historicoAlteracoes = [];
+
+// Variáveis de UI
 let filtroChip = 'todos';
 let editandoChipId = null;
 let editandoOpId = null;
@@ -815,18 +813,22 @@ let classesExpandidas = {};
 let chipsSelecionados = new Set();
 let arquivoLinhas = null;
 let arquivoSeparador = null;
-let historicoAlteracoes = [];
 
-// ==================== INICIALIZAÇÃO ====================
+// ==================== SUPABASE FUNCTIONS ====================
 async function initSupabase() {
     try {
-        supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        const { error } = await supabaseClient.from('classes').select('count', { count: 'exact', head: true });
+        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        // Testar conexão
+        const { error } = await supabase.from('classes').select('count', { count: 'exact', head: true });
         if (error) throw error;
+        
         supabaseConnected = true;
         document.getElementById('sync-status').innerHTML = '✅ Conectado';
         document.getElementById('sync-status').className = 'sync-status synced';
-        console.log('✅ Supabase conectado!');
+        console.log('✅ Supabase conectado com sucesso!');
+        
+        // Carregar todos os dados
         await carregarDadosDoSupabase();
         return true;
     } catch (error) {
@@ -834,25 +836,45 @@ async function initSupabase() {
         supabaseConnected = false;
         document.getElementById('sync-status').innerHTML = '⚠️ Offline';
         document.getElementById('sync-status').className = 'sync-status error';
-        toast('Modo offline - usando localStorage', 'err');
-        carregarDados();
+        toast('Erro ao conectar com Supabase! Verifique sua internet.', 'err');
         return false;
     }
 }
 
 async function carregarDadosDoSupabase() {
     if (!supabaseConnected) return;
+    
     try {
-        const { data: classesData } = await supabaseClient.from('classes').select('*');
-        if (classesData && classesData.length) classes = classesData;
+        // Carregar classes
+        const { data: classesData, error: classesError } = await supabase.from('classes').select('*');
+        if (classesError) throw classesError;
+        if (classesData && classesData.length) {
+            classes = classesData;
+            console.log('📁 Classes carregadas:', classes.length);
+        } else {
+            // Inserir classes padrão se não existirem
+            await inserirClassesPadrao();
+        }
         
-        const { data: operadoresData } = await supabaseClient.from('operadores').select('*');
-        if (operadoresData && operadoresData.length) operadores = operadoresData;
+        // Carregar operadores
+        const { data: operadoresData, error: opsError } = await supabase.from('operadores').select('*');
+        if (opsError) throw opsError;
+        if (operadoresData) {
+            operadores = operadoresData;
+            console.log('👥 Operadores carregados:', operadores.length);
+        }
         
-        const { data: chipsData } = await supabaseClient.from('chips').select('*');
-        if (chipsData && chipsData.length) chips = chipsData;
+        // Carregar chips
+        const { data: chipsData, error: chipsError } = await supabase.from('chips').select('*');
+        if (chipsError) throw chipsError;
+        if (chipsData) {
+            chips = chipsData;
+            console.log('📱 Chips carregados:', chips.length);
+        }
         
-        const { data: usuariosData } = await supabaseClient.from('usuarios_sistema').select('*');
+        // Carregar usuários
+        const { data: usuariosData, error: usersError } = await supabase.from('usuarios_sistema').select('*');
+        if (usersError) throw usersError;
         if (usuariosData && usuariosData.length) {
             usuariosSistema = usuariosData.map(u => ({
                 login: u.login,
@@ -860,142 +882,184 @@ async function carregarDadosDoSupabase() {
                 cor: u.cor,
                 isMaster: u.is_master
             }));
+            console.log('👤 Usuários carregados:', usuariosSistema.length);
+        } else {
+            await inserirUsuarioMaster();
         }
         
-        const { data: historicoData } = await supabaseClient
+        // Carregar histórico
+        const { data: historicoData, error: histError } = await supabase
             .from('historico_central')
             .select('*')
             .order('data', { ascending: false })
             .limit(500);
-        if (historicoData && historicoData.length) historicoAlteracoes = historicoData;
+        if (histError) throw histError;
+        if (historicoData) {
+            historicoAlteracoes = historicoData;
+            console.log('📜 Histórico carregado:', historicoAlteracoes.length);
+        }
         
-        salvarLocalStorage();
-        carregarDados();
+        // Atualizar UI
+        atualizarDashboard();
+        renderizarChips();
+        renderizarClasses();
+        popularSelects();
+        renderizarHistoricoCentral();
+        
     } catch (error) {
-        console.error('Erro ao carregar dados do Supabase:', error);
+        console.error('Erro ao carregar dados:', error);
+        toast('Erro ao carregar dados do Supabase', 'err');
     }
 }
 
-async function syncToSupabase(tabela, dados) {
+async function inserirClassesPadrao() {
+    const classesPadrao = [
+        { id: '1', nome: 'CRM', icone: '🚀', cor: '#4d9eff' },
+        { id: '2', nome: 'Digital', icone: '🎯', cor: '#00e5a0' },
+        { id: '3', nome: 'Home', icone: '🏠', cor: '#ffd60a' },
+        { id: '4', nome: 'Novatos', icone: '🌱', cor: '#ff9f4d' },
+        { id: '5', nome: 'Menor', icone: '👶', cor: '#ff6b9d' },
+        { id: '6', nome: 'Elite', icone: '⭐', cor: '#9d4dff' }
+    ];
+    
+    for (const classe of classesPadrao) {
+        await supabase.from('classes').upsert(classe, { onConflict: 'id' });
+    }
+    classes = classesPadrao;
+    console.log('📁 Classes padrão inseridas');
+}
+
+async function inserirUsuarioMaster() {
+    const usuarioMaster = {
+        login: 'beatriz_rodrigues',
+        senha: 'beatriz123',
+        cor: '#9d4dff',
+        is_master: true
+    };
+    await supabase.from('usuarios_sistema').upsert(usuarioMaster, { onConflict: 'login' });
+    usuariosSistema = [{
+        login: 'beatriz_rodrigues',
+        senha: 'beatriz123',
+        cor: '#9d4dff',
+        isMaster: true
+    }];
+    console.log('👤 Usuário master inserido');
+}
+
+async function salvarClasseNoSupabase(classe) {
+    if (!supabaseConnected) return false;
+    try {
+        const { error } = await supabase.from('classes').upsert(classe, { onConflict: 'id' });
+        if (error) throw error;
+        return true;
+    } catch (error) {
+        console.error('Erro ao salvar classe:', error);
+        return false;
+    }
+}
+
+async function salvarOperadorNoSupabase(operador) {
+    if (!supabaseConnected) return false;
+    try {
+        const { error } = await supabase.from('operadores').upsert(operador, { onConflict: 'id' });
+        if (error) throw error;
+        return true;
+    } catch (error) {
+        console.error('Erro ao salvar operador:', error);
+        return false;
+    }
+}
+
+async function salvarChipNoSupabase(chip) {
+    if (!supabaseConnected) return false;
+    try {
+        const { error } = await supabase.from('chips').upsert(chip, { onConflict: 'id' });
+        if (error) throw error;
+        return true;
+    } catch (error) {
+        console.error('Erro ao salvar chip:', error);
+        return false;
+    }
+}
+
+async function salvarHistoricoNoSupabase(historico) {
     if (!supabaseConnected) return;
     try {
-        for (const item of dados) {
-            await supabaseClient.from(tabela).upsert(item, { onConflict: 'id' });
+        await supabase.from('historico_central').insert(historico);
+    } catch (error) {
+        console.error('Erro ao salvar histórico:', error);
+    }
+}
+
+async function excluirChipDoSupabase(id) {
+    if (!supabaseConnected) return false;
+    try {
+        const { error } = await supabase.from('chips').delete().eq('id', id);
+        if (error) throw error;
+        return true;
+    } catch (error) {
+        console.error('Erro ao excluir chip:', error);
+        return false;
+    }
+}
+
+async function excluirClasseDoSupabase(id) {
+    if (!supabaseConnected) return false;
+    try {
+        const { error } = await supabase.from('classes').delete().eq('id', id);
+        if (error) throw error;
+        return true;
+    } catch (error) {
+        console.error('Erro ao excluir classe:', error);
+        return false;
+    }
+}
+
+async function excluirOperadorDoSupabase(id) {
+    if (!supabaseConnected) return false;
+    try {
+        const { error } = await supabase.from('operadores').delete().eq('id', id);
+        if (error) throw error;
+        return true;
+    } catch (error) {
+        console.error('Erro ao excluir operador:', error);
+        return false;
+    }
+}
+
+async function carregarHistoricoDoSupabase() {
+    if (!supabaseConnected) return;
+    try {
+        const { data, error } = await supabase
+            .from('historico_central')
+            .select('*')
+            .order('data', { ascending: false })
+            .limit(500);
+        if (error) throw error;
+        if (data) {
+            historicoAlteracoes = data;
+            renderizarHistoricoCentral();
         }
     } catch (error) {
-        console.error(`Erro ao sync ${tabela}:`, error);
+        console.error('Erro ao carregar histórico:', error);
     }
 }
 
-async function syncAllData() {
-    if (!supabaseConnected) {
-        toast('Modo offline - não é possível sincronizar', 'err');
-        return;
-    }
-    document.getElementById('sync-status').innerHTML = '🔄 Sincronizando...';
-    document.getElementById('sync-status').className = 'sync-status syncing';
-    try {
-        await syncToSupabase('classes', classes);
-        await syncToSupabase('operadores', operadores);
-        await syncToSupabase('chips', chips);
-        await syncToSupabase('usuarios_sistema', usuariosSistema.map(u => ({
-            login: u.login,
-            senha: u.senha,
-            cor: u.cor,
-            is_master: u.isMaster
-        })));
-        await syncToSupabase('historico_central', historicoAlteracoes);
-        document.getElementById('sync-status').innerHTML = '✅ Sincronizado';
-        document.getElementById('sync-status').className = 'sync-status synced';
-        toast('Dados sincronizados com sucesso!', 'ok');
-    } catch (error) {
-        console.error('Erro na sincronização:', error);
-        document.getElementById('sync-status').innerHTML = '⚠️ Erro';
-        document.getElementById('sync-status').className = 'sync-status error';
-        toast('Erro ao sincronizar dados', 'err');
-    }
-}
-
-async function adicionarHistoricoCentralSupabase(resumoAcao, detalhes) {
+// ==================== FUNÇÕES DE NEGÓCIO ====================
+async function adicionarHistorico(resumo, detalhes) {
     const novoHistorico = {
         id: Date.now(),
         usuario: usuarioLogado,
-        resumo: resumoAcao,
+        resumo: resumo,
         detalhes: detalhes,
         data: new Date().toISOString()
     };
+    
     historicoAlteracoes.unshift(novoHistorico);
-    if (historicoAlteracoes.length > 1000) historicoAlteracoes.pop();
-    salvarHistoricoCentral();
+    await salvarHistoricoNoSupabase(novoHistorico);
     renderizarHistoricoCentral();
-    if (supabaseConnected) await supabaseClient.from('historico_central').insert(novoHistorico);
 }
 
-async function adicionarHistoricoChipSupabase(chipId, acao, detalhes) {
-    const novoHistorico = {
-        id: Date.now(),
-        chip_id: chipId,
-        usuario: usuarioLogado,
-        acao: acao,
-        detalhes: detalhes,
-        data: new Date().toISOString()
-    };
-    if (supabaseConnected) await supabaseClient.from('historico_chips').insert(novoHistorico);
-    const individualHistory = JSON.parse(localStorage.getItem('receptivo_historico') || '[]');
-    individualHistory.unshift({
-        id: Date.now(),
-        chipId: chipId,
-        usuario: usuarioLogado,
-        acao: acao,
-        detalhes: detalhes,
-        data: new Date().toISOString()
-    });
-    if (individualHistory.length > 500) individualHistory.pop();
-    localStorage.setItem('receptivo_historico', JSON.stringify(individualHistory));
-}
-
-function salvarLocalStorage() {
-    localStorage.setItem('receptivo_classes', JSON.stringify(classes));
-    localStorage.setItem('receptivo_operadores', JSON.stringify(operadores));
-    localStorage.setItem('receptivo_chips', JSON.stringify(chips));
-}
-
-function salvarUsuarios() {
-    localStorage.setItem('receptivo_usuarios', JSON.stringify(usuariosSistema));
-}
-
-function salvarHistoricoCentral() {
-    localStorage.setItem('receptivo_historico_central', JSON.stringify(historicoAlteracoes));
-}
-
-function carregarUsuarios() {
-    const saved = localStorage.getItem('receptivo_usuarios');
-    if (saved) {
-        usuariosSistema = JSON.parse(saved);
-    } else {
-        usuariosSistema = [USUARIO_MASTER];
-    }
-    salvarUsuarios();
-}
-
-function carregarHistoricoCentral() {
-    const saved = localStorage.getItem('receptivo_historico_central');
-    if (saved) {
-        historicoAlteracoes = JSON.parse(saved);
-    } else {
-        historicoAlteracoes = [];
-    }
-}
-
-function adicionarHistoricoCentral(resumoAcao, detalhes) {
-    adicionarHistoricoCentralSupabase(resumoAcao, detalhes);
-}
-
-function adicionarHistorico(chipId, acao, detalhes) {
-    adicionarHistoricoChipSupabase(chipId, acao, detalhes);
-}
-
-// ==================== LOGIN ====================
 async function fazerLogin() {
     const login = document.getElementById('login-user').value;
     const senha = document.getElementById('login-pass').value;
@@ -1019,14 +1083,15 @@ async function fazerLogin() {
         if(avatarEl) avatarEl.style.backgroundColor = usuarioLogadoObj.cor;
         if(nameEl) nameEl.innerText = login;
         
-        const isAdmin = (login === USUARIO_MASTER.login);
+        const isAdmin = (login === 'beatriz_rodrigues');
         const navUsuarios = document.getElementById('nav-usuarios');
         const navHistorico = document.getElementById('nav-historico');
         if(navUsuarios) navUsuarios.style.display = isAdmin ? 'flex' : 'none';
         if(navHistorico) navHistorico.style.display = isAdmin ? 'flex' : 'none';
         
         if(isAdmin) renderizarUsuarios();
-        renderizarHistoricoCentral();
+        
+        await adicionarHistorico('Login realizado', `Usuário ${login} fez login no sistema`);
     } else {
         errorEl.style.display = 'block';
     }
@@ -1046,133 +1111,16 @@ function verificarLogin() {
             if(avatarEl) avatarEl.style.backgroundColor = user.cor;
             if(nameEl) nameEl.innerText = user.login;
             
-            const isAdmin = (user.login === USUARIO_MASTER.login);
+            const isAdmin = (user.login === 'beatriz_rodrigues');
             const navUsuarios = document.getElementById('nav-usuarios');
             const navHistorico = document.getElementById('nav-historico');
             if(navUsuarios) navUsuarios.style.display = isAdmin ? 'flex' : 'none';
             if(navHistorico) navHistorico.style.display = isAdmin ? 'flex' : 'none';
             
-            carregarDados();
             if(isAdmin) renderizarUsuarios();
-            renderizarHistoricoCentral();
             return;
         }
     }
-    localStorage.removeItem('receptivo_logado');
-}
-
-function carregarDados() {
-    const savedClasses = localStorage.getItem('receptivo_classes');
-    const savedOps = localStorage.getItem('receptivo_operadores');
-    const savedChips = localStorage.getItem('receptivo_chips');
-    
-    if (savedClasses && savedClasses !== '[]') {
-        classes = JSON.parse(savedClasses);
-    } else if (classes.length === 0) {
-        classes = [
-            { id: '1', nome: 'CRM', icone: '🚀', cor: '#4d9eff' },
-            { id: '2', nome: 'Digital', icone: '🎯', cor: '#00e5a0' },
-            { id: '3', nome: 'Home', icone: '🏠', cor: '#ffd60a' },
-            { id: '4', nome: 'Novatos', icone: '🌱', cor: '#ff9f4d' },
-            { id: '5', nome: 'Menor', icone: '👶', cor: '#ff6b9d' },
-            { id: '6', nome: 'Elite', icone: '⭐', cor: '#9d4dff' }
-        ];
-    }
-    
-    if (savedOps && savedOps !== '[]') operadores = JSON.parse(savedOps);
-    if (savedChips && savedChips !== '[]') chips = JSON.parse(savedChips);
-    
-    classes.forEach(c => { if(classesExpandidas[c.id] === undefined) classesExpandidas[c.id] = true; });
-    
-    atualizarDashboard();
-    renderizarChips();
-    renderizarClasses();
-    popularSelects();
-    salvarLocalStorage();
-}
-
-function renderizarUsuarios() {
-    const tbody = document.getElementById('usuarios-tbody');
-    if(!tbody) return;
-    tbody.innerHTML = usuariosSistema.map(user => `
-        <tr>
-            <td><div style="display:flex;align-items:center;gap:8px"><span style="display:inline-block;width:24px;height:24px;border-radius:50%;background:${user.cor};"></span> ${user.login}</div></td>
-            <td><span id="senha-vis-${user.login}">********</span> <button class="btn-ghost btn-sm" onclick="toggleSenhaVisibilidade('${user.login}', '${user.senha}')">👁️</button></td>
-            <td><input type="color" value="${user.cor}" onchange="atualizarCorUsuario('${user.login}', this.value)"></td>
-            <td>${user.login !== USUARIO_MASTER.login ? `<button class="btn-sm btn-del" onclick="excluirUsuario('${user.login}')">Excluir</button>` : '<span class="badge">Master</span>'}</td>
-        </tr>
-    `).join('');
-}
-
-function toggleSenhaVisibilidade(login, senhaReal) {
-    const span = document.getElementById(`senha-vis-${login}`);
-    if(span.innerText === '********') span.innerText = senhaReal;
-    else span.innerText = '********';
-}
-
-function atualizarCorUsuario(login, novaCor) {
-    const user = usuariosSistema.find(u => u.login === login);
-    if(user) {
-        user.cor = novaCor;
-        salvarUsuarios();
-        if(usuarioLogado === login) {
-            usuarioLogadoObj.cor = novaCor;
-            const avatarEl = document.getElementById('user-avatar');
-            if(avatarEl) avatarEl.style.backgroundColor = novaCor;
-        }
-        renderizarUsuarios();
-        toast(`Cor de ${login} atualizada`, 'ok');
-    }
-}
-
-function excluirUsuario(login) {
-    abrirConfirmModal('Excluir Usuário', `Deseja realmente excluir o usuário ${login}?`, '👤', () => {
-        usuariosSistema = usuariosSistema.filter(u => u.login !== login);
-        salvarUsuarios();
-        renderizarUsuarios();
-        toast('Usuário excluído', 'ok');
-    });
-}
-
-function abrirModalUsuario() {
-    if(usuarioLogado !== USUARIO_MASTER.login) return toast('Apenas o gerente pode criar usuários', 'err');
-    document.getElementById('modal-usuario-title').innerText = 'Novo Usuário';
-    document.getElementById('usuario-login').value = '';
-    document.getElementById('usuario-senha').value = '';
-    document.getElementById('usuario-cor').value = '#00e5a0';
-    document.getElementById('modal-usuario').classList.add('open');
-}
-
-function salvarUsuario() {
-    const login = document.getElementById('usuario-login').value.trim();
-    const senha = document.getElementById('usuario-senha').value.trim();
-    const cor = document.getElementById('usuario-cor').value;
-    if(!login || !senha) { toast('Preencha login e senha', 'err'); return; }
-    if(usuariosSistema.find(u => u.login === login)) { toast('Login já existe', 'err'); return; }
-    usuariosSistema.push({ login, senha, cor, isMaster: false });
-    salvarUsuarios();
-    renderizarUsuarios();
-    fecharModal('modal-usuario');
-    toast(`Usuário ${login} criado`, 'ok');
-}
-
-function renderizarHistoricoCentral() {
-    const container = document.getElementById('central-history-log');
-    if(!container) return;
-    if(historicoAlteracoes.length === 0) { container.innerHTML = '<div class="empty-class">Nenhuma ação registrada</div>'; return; }
-    container.innerHTML = historicoAlteracoes.slice(0, 200).map(h => {
-        const dataObj = new Date(h.data);
-        const dataStr = dataObj.toLocaleDateString('pt-BR');
-        const horaStr = dataObj.toLocaleTimeString('pt-BR');
-        const userColor = usuariosSistema.find(u=>u.login===h.usuario)?.cor || '#888';
-        return `
-            <div class="history-item">
-                <div class="history-date">📅 ${dataStr}, ${horaStr} | <span style="background:${userColor}20; padding:2px 8px; border-radius:12px;">👤 ${h.usuario}</span></div>
-                <div class="history-action">📌 ${h.resumo}</div>
-                <div class="history-detail">${h.detalhes}</div>
-            </div>
-        `;
-    }).join('');
 }
 
 function atualizarDashboard() {
@@ -1192,7 +1140,7 @@ function atualizarDashboard() {
         pieChart = new Chart(ctx, {
             type: 'doughnut',
             data: { labels: ['Ativos', 'Banidos', 'Novos'], datasets: [{ data: [ativos, banidos, novos], backgroundColor: ['#00e5a0', '#ff4d6d', '#4d9eff'], borderWidth: 0 }] },
-            options: { responsive: true, maintainAspectRatio: true, cutout: '60%', plugins: { legend: { display: false } }, animation: { duration: 300 } }
+            options: { responsive: true, maintainAspectRatio: true, cutout: '60%', plugins: { legend: { display: false } } }
         });
     }
     
@@ -1223,7 +1171,7 @@ function atualizarDashboard() {
         barChart = new Chart(barCtx, {
             type: 'bar',
             data: { labels: dadosClasse.map(d => d[0]), datasets: [{ data: dadosClasse.map(d => d[1]), backgroundColor: coresBarras, borderRadius: 8 }] },
-            options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } }, animation: { duration: 300 } }
+            options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
         });
     }
     
@@ -1268,8 +1216,6 @@ function renderizarChips() {
     
     document.getElementById('selected-count').textContent = chipsSelecionados.size;
     document.getElementById('bulk-actions').classList.toggle('show', chipsSelecionados.size > 0);
-    const selectAll = document.getElementById('select-all-chips');
-    if (selectAll) selectAll.checked = filtrados.length > 0 && filtrados.every(c => chipsSelecionados.has(c.id));
 }
 
 function toggleSelecionarChip(id) {
@@ -1289,25 +1235,29 @@ function selecionarTodosChips() {
 
 function limparSelecao() { chipsSelecionados.clear(); renderizarChips(); }
 
-function aplicarEdicaoEmMassa() {
+async function aplicarEdicaoEmMassa() {
     const novoStatus = document.getElementById('bulk-status').value;
     const novoOperadorId = document.getElementById('bulk-operador').value;
     if (!novoStatus && !novoOperadorId) { toast('Selecione uma ação para aplicar', 'err'); return; }
+    
     let alterados = 0;
-    chipsSelecionados.forEach(id => {
+    for (const id of chipsSelecionados) {
         const chipIndex = chips.findIndex(c => c.id === id);
         if (chipIndex !== -1) {
             const chipOriginal = { ...chips[chipIndex] };
             if (novoStatus) chips[chipIndex].status = novoStatus;
             if (novoOperadorId) chips[chipIndex].operador_id = novoOperadorId || null;
+            
+            await salvarChipNoSupabase(chips[chipIndex]);
+            
             if (chipOriginal.status !== chips[chipIndex].status || chipOriginal.operador_id !== chips[chipIndex].operador_id) {
-                adicionarHistorico(id, 'Edição em massa', `Alterado: ${novoStatus ? `status para ${novoStatus}` : ''} ${novoOperadorId ? `operador para ${operadores.find(o=>o.id===novoOperadorId)?.nome || 'nenhum'}` : ''}`);
+                await adicionarHistorico('Edição em massa', `Chip ${chips[chipIndex].numero} alterado: ${novoStatus ? `status para ${novoStatus}` : ''} ${novoOperadorId ? `operador para ${operadores.find(o=>o.id===novoOperadorId)?.nome || 'nenhum'}` : ''}`);
                 alterados++;
             }
         }
-    });
-    salvarLocalStorage();
-    carregarDados();
+    }
+    
+    await carregarDadosDoSupabase();
     limparSelecao();
     toast(`${alterados} chips atualizados`, 'ok');
 }
@@ -1362,7 +1312,7 @@ function formatarTelefone(numero) {
     return numero;
 }
 
-function salvarChip() {
+async function salvarChip() {
     const numero = formatarTelefone(document.getElementById('chip-numero').value.trim());
     if (!numero) { toast('Informe o número', 'err'); return; }
     const operador_id = document.getElementById('chip-operador').value || null;
@@ -1374,28 +1324,31 @@ function salvarChip() {
         if (index !== -1) {
             const chipOriginal = { ...chips[index] };
             chips[index] = { ...chips[index], numero, operador_id, status, motivo_ban };
-            if (chipOriginal.status !== status) adicionarHistorico(editandoChipId, 'Status alterado', `Status: ${chipOriginal.status} → ${status}`);
-            if (chipOriginal.operador_id !== operador_id) adicionarHistorico(editandoChipId, 'Operador alterado', `Operador: ${operadores.find(o=>o.id===chipOriginal.operador_id)?.nome || 'nenhum'} → ${operadores.find(o=>o.id===operador_id)?.nome || 'nenhum'}`);
+            await salvarChipNoSupabase(chips[index]);
+            
+            if (chipOriginal.status !== status) await adicionarHistorico('Status alterado', `Chip ${numero}: ${chipOriginal.status} → ${status}`);
+            if (chipOriginal.operador_id !== operador_id) await adicionarHistorico('Operador alterado', `Chip ${numero}: ${operadores.find(o=>o.id===chipOriginal.operador_id)?.nome || 'nenhum'} → ${operadores.find(o=>o.id===operador_id)?.nome || 'nenhum'}`);
         }
         toast('Chip atualizado', 'ok');
     } else {
         const newId = Date.now().toString();
-        chips.unshift({ id: newId, numero, operador_id, status, motivo_ban, criado_em: new Date().toISOString() });
-        adicionarHistorico(newId, 'Chip criado', `Chip ${numero} criado`);
+        const novoChip = { id: newId, numero, operador_id, status, motivo_ban, criado_em: new Date().toISOString() };
+        chips.unshift(novoChip);
+        await salvarChipNoSupabase(novoChip);
+        await adicionarHistorico('Chip criado', `Chip ${numero} criado`);
         toast('Chip adicionado', 'ok');
     }
     fecharModal('modal-chip');
-    salvarLocalStorage();
-    carregarDados();
+    await carregarDadosDoSupabase();
 }
 
-function confirmarExcluirChip(id) {
+async function confirmarExcluirChip(id) {
     const chip = chips.find(c => c.id === id);
-    abrirConfirmModal('Excluir Chip', `Tem certeza que deseja excluir o chip <strong>${chip?.numero}</strong>?`, '🗑️', () => {
+    abrirConfirmModal('Excluir Chip', `Tem certeza que deseja excluir o chip <strong>${chip?.numero}</strong>?`, '🗑️', async () => {
         chips = chips.filter(c => c.id !== id);
-        adicionarHistorico(id, 'Chip excluído', `Chip ${chip.numero} excluído`);
-        salvarLocalStorage();
-        carregarDados();
+        await excluirChipDoSupabase(id);
+        await adicionarHistorico('Chip excluído', `Chip ${chip.numero} excluído`);
+        await carregarDadosDoSupabase();
         toast('Chip excluído', 'ok');
     });
 }
@@ -1457,18 +1410,120 @@ function recolherTodas() { classes.forEach(c => classesExpandidas[c.id] = false)
 
 function abrirModalClasse() { editandoClasseId = null; document.getElementById('modal-classe-title').innerText = 'Nova Classe'; document.getElementById('classe-nome').value = ''; document.getElementById('classe-icon').value = '📁'; document.getElementById('classe-cor').value = '#00e5a0'; document.getElementById('modal-classe').classList.add('open'); }
 function editarClasse(id) { const classe = classes.find(c => c.id === id); if (!classe) return; editandoClasseId = id; document.getElementById('modal-classe-title').innerText = 'Editar Classe'; document.getElementById('classe-nome').value = classe.nome; document.getElementById('classe-icon').value = classe.icone || '📁'; document.getElementById('classe-cor').value = classe.cor || '#00e5a0'; document.getElementById('modal-classe').classList.add('open'); }
-function salvarClasse() { const nome = document.getElementById('classe-nome').value.trim(); if (!nome) { toast('Informe o nome', 'err'); return; } const icone = document.getElementById('classe-icon').value; const cor = document.getElementById('classe-cor').value; if (editandoClasseId) { const index = classes.findIndex(c => c.id === editandoClasseId); if (index !== -1) classes[index] = { ...classes[index], nome, icone, cor }; toast('Classe atualizada', 'ok'); } else { classes.push({ id: Date.now().toString(), nome, icone, cor }); toast('Classe criada', 'ok'); } fecharModal('modal-classe'); salvarLocalStorage(); carregarDados(); }
-function confirmarExcluirClasse(id) { const classe = classes.find(c => c.id === id); const opsNaClasse = operadores.filter(op => op.classe_id === id); let mensagem = `Tem certeza que deseja excluir a classe <strong>${classe?.nome}</strong>?`; if (opsNaClasse.length) mensagem += `<br><br>⚠️ Esta classe tem ${opsNaClasse.length} operador(es). Eles serão movidos para "Sem classe".`; abrirConfirmModal('Excluir Classe', mensagem, '🗑️', () => { operadores = operadores.map(op => op.classe_id === id ? { ...op, classe_id: null } : op); classes = classes.filter(c => c.id !== id); salvarLocalStorage(); carregarDados(); toast('Classe excluída', 'ok'); }); }
 
-function abrirModalOp() { editandoOpId = null; document.getElementById('modal-op-title').innerText = 'Novo Operador'; document.getElementById('op-nome').value = ''; document.getElementById('op-classe').value = ''; const modal = document.getElementById('modal-op'); if(modal) modal.classList.add('open'); }
-function abrirModalOpComClasse(classeId) { editandoOpId = null; document.getElementById('modal-op-title').innerText = 'Novo Operador'; document.getElementById('op-nome').value = ''; document.getElementById('op-classe').value = classeId; const modal = document.getElementById('modal-op'); if(modal) modal.classList.add('open'); }
-function editarOperador(id) { const op = operadores.find(o => o.id === id); if (!op) return; editandoOpId = id; document.getElementById('modal-op-title').innerText = 'Editar Operador'; document.getElementById('op-nome').value = op.nome; document.getElementById('op-classe').value = op.classe_id || ''; const modal = document.getElementById('modal-op'); if(modal) modal.classList.add('open'); }
-function salvarOperador() { const nome = document.getElementById('op-nome').value.trim(); if (!nome) { toast('Informe o nome', 'err'); return; } const classe_id = document.getElementById('op-classe').value || null; if (editandoOpId) { const index = operadores.findIndex(o => o.id === editandoOpId); if (index !== -1) operadores[index] = { ...operadores[index], nome, classe_id }; toast('Operador atualizado', 'ok'); } else { operadores.push({ id: Date.now().toString(), nome, classe_id }); toast('Operador criado', 'ok'); } fecharModal('modal-op'); salvarLocalStorage(); carregarDados(); }
-function confirmarExcluirOperador(id) { const op = operadores.find(o => o.id === id); const chipsDoOperador = chips.filter(c => c.operador_id === id); let mensagem = `Tem certeza que deseja excluir o operador <strong>${op?.nome}</strong>?`; if (chipsDoOperador.length) mensagem += `<br><br>⚠️ Este operador tem ${chipsDoOperador.length} chip(s) atribuído(s). Eles ficarão sem operador.`; abrirConfirmModal('Excluir Operador', mensagem, '🗑️', () => { operadores = operadores.filter(o => o.id !== id); chips = chips.map(c => c.operador_id === id ? { ...c, operador_id: null } : c); salvarLocalStorage(); carregarDados(); toast('Operador excluído', 'ok'); }); }
+async function salvarClasse() {
+    const nome = document.getElementById('classe-nome').value.trim();
+    if (!nome) { toast('Informe o nome', 'err'); return; }
+    const icone = document.getElementById('classe-icon').value;
+    const cor = document.getElementById('classe-cor').value;
+    
+    if (editandoClasseId) {
+        const index = classes.findIndex(c => c.id === editandoClasseId);
+        if (index !== -1) {
+            classes[index] = { ...classes[index], nome, icone, cor };
+            await salvarClasseNoSupabase(classes[index]);
+            await adicionarHistorico('Classe atualizada', `Classe ${nome} foi atualizada`);
+            toast('Classe atualizada', 'ok');
+        }
+    } else {
+        const novaClasse = { id: Date.now().toString(), nome, icone, cor };
+        classes.push(novaClasse);
+        await salvarClasseNoSupabase(novaClasse);
+        await adicionarHistorico('Classe criada', `Classe ${nome} foi criada`);
+        toast('Classe criada', 'ok');
+    }
+    fecharModal('modal-classe');
+    await carregarDadosDoSupabase();
+}
 
-function abrirModalMoverOperador(id) { const op = operadores.find(o => o.id === id); if (!op) return; const modalHtml = `<div class="modal-overlay" id="modal-mover" style="display:flex"><div class="modal"><div class="modal-header"><div class="modal-title">Mover Operador</div><button onclick="fecharModalMover()">✕</button></div><div class="form-group"><label class="form-label">Operador: <strong>${op.nome}</strong></label></div><div class="form-group"><label class="form-label">Selecionar Classe</label><select id="mover-classe-select"><option value="">-- Sem classe --</option>${classes.map(c => `<option value="${c.id}" ${op.classe_id === c.id ? 'selected' : ''}>${c.icone} ${c.nome}</option>`).join('')}</select></div><div class="form-actions"><button class="btn-cancel" onclick="fecharModalMover()">Cancelar</button><button class="btn-primary" onclick="confirmarMoverOperador('${id}')">Mover</button></div></div></div>`; const existingModal = document.getElementById('modal-mover'); if (existingModal) existingModal.remove(); document.body.insertAdjacentHTML('beforeend', modalHtml); }
+async function confirmarExcluirClasse(id) {
+    const classe = classes.find(c => c.id === id);
+    const opsNaClasse = operadores.filter(op => op.classe_id === id);
+    let mensagem = `Tem certeza que deseja excluir a classe <strong>${classe?.nome}</strong>?`;
+    if (opsNaClasse.length) mensagem += `<br><br>⚠️ Esta classe tem ${opsNaClasse.length} operador(es). Eles serão movidos para "Sem classe".`;
+    
+    abrirConfirmModal('Excluir Classe', mensagem, '🗑️', async () => {
+        for (const op of opsNaClasse) {
+            op.classe_id = null;
+            await salvarOperadorNoSupabase(op);
+        }
+        classes = classes.filter(c => c.id !== id);
+        await excluirClasseDoSupabase(id);
+        await adicionarHistorico('Classe excluída', `Classe ${classe.nome} foi excluída`);
+        await carregarDadosDoSupabase();
+        toast('Classe excluída', 'ok');
+    });
+}
+
+function abrirModalOp() { editandoOpId = null; document.getElementById('modal-op-title').innerText = 'Novo Operador'; document.getElementById('op-nome').value = ''; document.getElementById('op-classe').value = ''; document.getElementById('modal-op').classList.add('open'); }
+function abrirModalOpComClasse(classeId) { editandoOpId = null; document.getElementById('modal-op-title').innerText = 'Novo Operador'; document.getElementById('op-nome').value = ''; document.getElementById('op-classe').value = classeId; document.getElementById('modal-op').classList.add('open'); }
+function editarOperador(id) { const op = operadores.find(o => o.id === id); if (!op) return; editandoOpId = id; document.getElementById('modal-op-title').innerText = 'Editar Operador'; document.getElementById('op-nome').value = op.nome; document.getElementById('op-classe').value = op.classe_id || ''; document.getElementById('modal-op').classList.add('open'); }
+
+async function salvarOperador() {
+    const nome = document.getElementById('op-nome').value.trim();
+    if (!nome) { toast('Informe o nome', 'err'); return; }
+    const classe_id = document.getElementById('op-classe').value || null;
+    
+    if (editandoOpId) {
+        const index = operadores.findIndex(o => o.id === editandoOpId);
+        if (index !== -1) {
+            operadores[index] = { ...operadores[index], nome, classe_id };
+            await salvarOperadorNoSupabase(operadores[index]);
+            await adicionarHistorico('Operador atualizado', `Operador ${nome} foi atualizado`);
+            toast('Operador atualizado', 'ok');
+        }
+    } else {
+        const novoOperador = { id: Date.now().toString(), nome, classe_id };
+        operadores.push(novoOperador);
+        await salvarOperadorNoSupabase(novoOperador);
+        await adicionarHistorico('Operador criado', `Operador ${nome} foi criado`);
+        toast('Operador criado', 'ok');
+    }
+    fecharModal('modal-op');
+    await carregarDadosDoSupabase();
+}
+
+async function confirmarExcluirOperador(id) {
+    const op = operadores.find(o => o.id === id);
+    const chipsDoOperador = chips.filter(c => c.operador_id === id);
+    let mensagem = `Tem certeza que deseja excluir o operador <strong>${op?.nome}</strong>?`;
+    if (chipsDoOperador.length) mensagem += `<br><br>⚠️ Este operador tem ${chipsDoOperador.length} chip(s) atribuído(s). Eles ficarão sem operador.`;
+    
+    abrirConfirmModal('Excluir Operador', mensagem, '🗑️', async () => {
+        for (const chip of chipsDoOperador) {
+            chip.operador_id = null;
+            await salvarChipNoSupabase(chip);
+        }
+        operadores = operadores.filter(o => o.id !== id);
+        await excluirOperadorDoSupabase(id);
+        await adicionarHistorico('Operador excluído', `Operador ${op.nome} foi excluído`);
+        await carregarDadosDoSupabase();
+        toast('Operador excluído', 'ok');
+    });
+}
+
+function abrirModalMoverOperador(id) { 
+    const op = operadores.find(o => o.id === id); 
+    if (!op) return; 
+    const modalHtml = `<div class="modal-overlay" id="modal-mover" style="display:flex"><div class="modal"><div class="modal-header"><div class="modal-title">Mover Operador</div><button onclick="fecharModalMover()">✕</button></div><div class="form-group"><label class="form-label">Operador: <strong>${op.nome}</strong></label></div><div class="form-group"><label class="form-label">Selecionar Classe</label><select id="mover-classe-select"><option value="">-- Sem classe --</option>${classes.map(c => `<option value="${c.id}" ${op.classe_id === c.id ? 'selected' : ''}>${c.icone} ${c.nome}</option>`).join('')}</select></div><div class="form-actions"><button class="btn-cancel" onclick="fecharModalMover()">Cancelar</button><button class="btn-primary" onclick="confirmarMoverOperador('${id}')">Mover</button></div></div></div>`; 
+    const existingModal = document.getElementById('modal-mover'); 
+    if (existingModal) existingModal.remove(); 
+    document.body.insertAdjacentHTML('beforeend', modalHtml); 
+}
 function fecharModalMover() { const modal = document.getElementById('modal-mover'); if (modal) modal.remove(); }
-function confirmarMoverOperador(id) { const select = document.getElementById('mover-classe-select'); const novaClasseId = select?.value || null; const index = operadores.findIndex(o => o.id === id); if (index !== -1) { operadores[index] = { ...operadores[index], classe_id: novaClasseId }; salvarLocalStorage(); carregarDados(); const classeNome = classes.find(c => c.id === novaClasseId)?.nome || 'nenhuma classe'; toast(`Operador movido para ${classeNome}`, 'ok'); } fecharModalMover(); }
+async function confirmarMoverOperador(id) { 
+    const select = document.getElementById('mover-classe-select'); 
+    const novaClasseId = select?.value || null; 
+    const index = operadores.findIndex(o => o.id === id); 
+    if (index !== -1) { 
+        operadores[index] = { ...operadores[index], classe_id: novaClasseId }; 
+        await salvarOperadorNoSupabase(operadores[index]); 
+        await adicionarHistorico('Operador movido', `Operador ${operadores[index].nome} movido para ${classes.find(c => c.id === novaClasseId)?.nome || 'nenhuma classe'}`); 
+        await carregarDadosDoSupabase(); 
+        toast(`Operador movido com sucesso!`, 'ok'); 
+    } 
+    fecharModalMover(); 
+}
 
 function popularSelects() { 
     const opSelect = document.getElementById('chip-operador'); 
@@ -1485,6 +1540,100 @@ function popularSelects() {
         classeSelect.innerHTML = '<option value="">Sem classe</option>' + classes.map(c => `<option value="${c.id}">${c.icone} ${c.nome}</option>`).join(''); 
         classeSelect.value = atual; 
     } 
+}
+
+function renderizarUsuarios() {
+    const tbody = document.getElementById('usuarios-tbody');
+    if(!tbody) return;
+    tbody.innerHTML = usuariosSistema.map(user => `
+        <tr>
+            <td><div style="display:flex;align-items:center;gap:8px"><span style="display:inline-block;width:24px;height:24px;border-radius:50%;background:${user.cor};"></span> ${user.login}</div></td>
+            <td><span id="senha-vis-${user.login}">********</span> <button class="btn-ghost btn-sm" onclick="toggleSenhaVisibilidade('${user.login}', '${user.senha}')">👁️</button></td>
+            <td><input type="color" value="${user.cor}" onchange="atualizarCorUsuario('${user.login}', this.value)"></td>
+            <td>${user.login !== 'beatriz_rodrigues' ? `<button class="btn-sm btn-del" onclick="excluirUsuario('${user.login}')">Excluir</button>` : '<span class="badge">Master</span>'}</td>
+        </tr>
+    `).join('');
+}
+
+function toggleSenhaVisibilidade(login, senhaReal) {
+    const span = document.getElementById(`senha-vis-${login}`);
+    if(span.innerText === '********') span.innerText = senhaReal;
+    else span.innerText = '********';
+}
+
+async function atualizarCorUsuario(login, novaCor) {
+    const user = usuariosSistema.find(u => u.login === login);
+    if(user) {
+        user.cor = novaCor;
+        if (supabaseConnected) {
+            await supabase.from('usuarios_sistema').update({ cor: novaCor }).eq('login', login);
+        }
+        if(usuarioLogado === login) {
+            usuarioLogadoObj.cor = novaCor;
+            const avatarEl = document.getElementById('user-avatar');
+            if(avatarEl) avatarEl.style.backgroundColor = novaCor;
+        }
+        renderizarUsuarios();
+        toast(`Cor de ${login} atualizada`, 'ok');
+    }
+}
+
+async function excluirUsuario(login) {
+    abrirConfirmModal('Excluir Usuário', `Deseja realmente excluir o usuário ${login}?`, '👤', async () => {
+        usuariosSistema = usuariosSistema.filter(u => u.login !== login);
+        if (supabaseConnected) {
+            await supabase.from('usuarios_sistema').delete().eq('login', login);
+        }
+        renderizarUsuarios();
+        toast('Usuário excluído', 'ok');
+    });
+}
+
+function abrirModalUsuario() {
+    if(usuarioLogado !== 'beatriz_rodrigues') return toast('Apenas o gerente pode criar usuários', 'err');
+    document.getElementById('modal-usuario-title').innerText = 'Novo Usuário';
+    document.getElementById('usuario-login').value = '';
+    document.getElementById('usuario-senha').value = '';
+    document.getElementById('usuario-cor').value = '#00e5a0';
+    document.getElementById('modal-usuario').classList.add('open');
+}
+
+async function salvarUsuario() {
+    const login = document.getElementById('usuario-login').value.trim();
+    const senha = document.getElementById('usuario-senha').value.trim();
+    const cor = document.getElementById('usuario-cor').value;
+    if(!login || !senha) { toast('Preencha login e senha', 'err'); return; }
+    if(usuariosSistema.find(u => u.login === login)) { toast('Login já existe', 'err'); return; }
+    
+    const novoUsuario = { login, senha, cor, is_master: false };
+    usuariosSistema.push({ login, senha, cor, isMaster: false });
+    
+    if (supabaseConnected) {
+        await supabase.from('usuarios_sistema').insert(novoUsuario);
+    }
+    
+    renderizarUsuarios();
+    fecharModal('modal-usuario');
+    toast(`Usuário ${login} criado`, 'ok');
+}
+
+function renderizarHistoricoCentral() {
+    const container = document.getElementById('central-history-log');
+    if(!container) return;
+    if(historicoAlteracoes.length === 0) { container.innerHTML = '<div class="empty-class">Nenhuma ação registrada</div>'; return; }
+    container.innerHTML = historicoAlteracoes.slice(0, 200).map(h => {
+        const dataObj = new Date(h.data);
+        const dataStr = dataObj.toLocaleDateString('pt-BR');
+        const horaStr = dataObj.toLocaleTimeString('pt-BR');
+        const userColor = usuariosSistema.find(u=>u.login===h.usuario)?.cor || '#888';
+        return `
+            <div class="history-item">
+                <div class="history-date">📅 ${dataStr}, ${horaStr} | <span style="background:${userColor}20; padding:2px 8px; border-radius:12px;">👤 ${h.usuario}</span></div>
+                <div class="history-action">📌 ${h.resumo}</div>
+                <div class="history-detail">${h.detalhes}</div>
+            </div>
+        `;
+    }).join('');
 }
 
 function exportarDados() { 
@@ -1564,6 +1713,7 @@ async function processarImportacao() {
     const idxClasse = headers.indexOf('CLASSE'); 
     let sucessos = 0, erros = 0, atualizados = 0; 
     const chipsProcessados = new Map(); 
+    
     for (let i = 1; i < arquivoLinhas.length; i++) { 
         if (!arquivoLinhas[i].trim()) continue; 
         const cols = arquivoLinhas[i].split(arquivoSeparador).map(c => c.replace(/^"|"$/g, '').trim()); 
@@ -1584,7 +1734,9 @@ async function processarImportacao() {
             if (existente) classe_id = existente.id; 
             else { 
                 classe_id = Date.now().toString() + Math.random(); 
-                classes.push({ id: classe_id, nome: nomeClasse, icone: '📁', cor: '#00e5a0' }); 
+                const novaClasse = { id: classe_id, nome: nomeClasse, icone: '📁', cor: '#00e5a0' };
+                classes.push(novaClasse); 
+                await salvarClasseNoSupabase(novaClasse);
             } 
         } 
         let operador_id = null; 
@@ -1593,24 +1745,31 @@ async function processarImportacao() {
             if (existente) operador_id = existente.id; 
             else { 
                 operador_id = Date.now().toString() + Math.random(); 
-                operadores.push({ id: operador_id, nome: nomeOp, classe_id }); 
+                const novoOperador = { id: operador_id, nome: nomeOp, classe_id };
+                operadores.push(novoOperador); 
+                await salvarOperadorNoSupabase(novoOperador);
             } 
         } 
         const chipExistente = chips.find(c => c.numero.replace(/\D/g, '') === numeroRaw); 
         if (chipExistente) { 
             if (chipExistente.status !== status) { 
                 const chipIndex = chips.findIndex(c => c.id === chipExistente.id); 
-                if (chipIndex !== -1) chips[chipIndex] = { ...chips[chipIndex], status }; 
+                if (chipIndex !== -1) {
+                    chips[chipIndex] = { ...chips[chipIndex], status }; 
+                    await salvarChipNoSupabase(chips[chipIndex]);
+                }
                 atualizados++; 
             } 
         } else if (!chipsProcessados.has(numeroRaw)) { 
-            chips.push({ id: Date.now().toString() + Math.random() + i, numero, operador_id, status, motivo_ban: null, criado_em: new Date().toISOString() }); 
+            const novoChip = { id: Date.now().toString() + Math.random() + i, numero, operador_id, status, motivo_ban: null, criado_em: new Date().toISOString() };
+            chips.push(novoChip); 
+            await salvarChipNoSupabase(novoChip);
             chipsProcessados.set(numeroRaw, true); 
             sucessos++; 
         } 
     } 
-    salvarLocalStorage(); 
-    carregarDados(); 
+    await adicionarHistorico('Importação de dados', `${sucessos} chips importados, ${atualizados} atualizados, ${erros} erros`);
+    await carregarDadosDoSupabase(); 
     document.getElementById('import-preview').innerHTML = `✅ Importação concluída!<br>📱 Novos chips: ${sucessos}<br>🔄 Status atualizados: ${atualizados}<br>❌ Erros: ${erros}`; 
     toast(`${sucessos} novos chips, ${atualizados} atualizados`, sucessos || atualizados ? 'ok' : 'err'); 
     arquivoLinhas = null; 
@@ -1641,7 +1800,6 @@ if (savedTheme === 'light') document.documentElement.setAttribute('data-theme', 
 
 // Inicialização
 carregarUsuarios();
-carregarHistoricoCentral();
 initSupabase();
 verificarLogin();
 </script>
