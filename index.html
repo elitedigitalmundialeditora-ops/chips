@@ -10,7 +10,11 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-* { margin: 0; padding: 0; box-sizing: border-box; }
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
 :root {
   --bg: #0b0b10;
@@ -90,43 +94,6 @@ body {
   font-size: 12px;
   color: var(--text2);
   display: none;
-}
-.login-tabs {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 20px;
-}
-.login-tab {
-  flex: 1;
-  padding: 10px;
-  background: var(--bg3);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: 600;
-}
-.login-tab.active {
-  background: var(--accent);
-  color: #000;
-  border-color: var(--accent);
-}
-.password-wrapper {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-.password-wrapper input {
-  flex: 1;
-  padding-right: 40px;
-}
-.toggle-password {
-  position: absolute;
-  right: 10px;
-  cursor: pointer;
-  background: none;
-  border: none;
-  font-size: 16px;
-  padding: 0;
 }
 
 #sidebar {
@@ -244,7 +211,6 @@ nav {
   gap: 8px;
   font-size: 12px;
   font-weight: 600;
-  cursor: pointer;
 }
 .user-avatar {
   width: 24px;
@@ -278,7 +244,7 @@ nav {
 }
 .cards-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 16px;
   margin-bottom: 28px;
 }
@@ -342,9 +308,7 @@ tr:hover td { background: var(--bg3); }
 }
 .badge-ativo { background: #00e5a018; color: var(--accent); border: 1px solid #00e5a030; }
 .badge-banido { background: #ff4d6d18; color: var(--red); border: 1px solid #ff4d6d30; }
-.badge-gerente { background: #9d4dff18; color: #9d4dff; border: 1px solid #9d4dff30; }
-.badge-master { background: #4d9eff18; color: var(--blue); border: 1px solid #4d9eff30; }
-.badge-padrao { background: var(--bg4); color: var(--text2); border: 1px solid var(--border); }
+.badge-novo { background: #4d9eff18; color: var(--blue); border: 1px solid #4d9eff30; }
 button {
   cursor: pointer;
   border: none;
@@ -357,7 +321,6 @@ button {
 .btn-edit { background: var(--bg3); color: var(--text); border: 1px solid var(--border); }
 .btn-del { background: #ff4d6d18; color: var(--red); border: 1px solid #ff4d6d30; }
 .btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--text2); padding: 8px 16px; }
-.btn-error { background: #ff4d6d18; color: var(--red); border: 1px solid var(--red); padding: 8px 16px; }
 .btn-cancel { background: var(--bg3); color: var(--text2); border: 1px solid var(--border); }
 .checkbox-col { width: 40px; }
 .bulk-actions { background: var(--bg3); padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; display: none; gap: 12px; align-items: center; flex-wrap: wrap; }
@@ -483,7 +446,7 @@ input, select {
 }
 .op-stats {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 8px;
   margin: 12px 0;
 }
@@ -521,10 +484,6 @@ input, select {
   overflow: auto;
   font-size: 12px;
 }
-.error-button-container {
-  margin-top: 10px;
-  text-align: center;
-}
 #toast {
   position: fixed;
   bottom: 24px;
@@ -541,6 +500,39 @@ input, select {
 #toast.show { transform: translateY(0); opacity: 1; }
 #toast.ok { border-color: var(--accent); color: var(--accent); }
 #toast.err { border-color: var(--red); color: var(--red); }
+.history-log {
+  max-height: 300px;
+  overflow-y: auto;
+  font-size: 12px;
+}
+.history-item {
+  padding: 12px;
+  border-bottom: 1px solid var(--border);
+  font-family: var(--mono);
+  line-height: 1.5;
+}
+.history-date {
+  font-size: 11px;
+  color: var(--text2);
+  margin-bottom: 4px;
+}
+.history-user {
+  font-weight: 700;
+  display: inline-block;
+  background: var(--bg3);
+  padding: 2px 8px;
+  border-radius: 12px;
+  margin-left: 8px;
+}
+.history-action {
+  font-weight: 800;
+  margin: 6px 0 2px 0;
+}
+.history-detail {
+  font-size: 11px;
+  color: var(--text2);
+  margin-left: 20px;
+}
 .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px; }
 .chart-card {
   background: var(--bg2);
@@ -601,40 +593,9 @@ input, select {
   align-items: center;
   gap: 4px;
 }
-.user-menu {
-  position: absolute;
-  background: var(--bg2);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 8px 0;
-  min-width: 150px;
-  z-index: 1000;
-  box-shadow: var(--shadow);
-  display: none;
-}
-.user-menu.show { display: block; }
-.user-menu-item {
-  padding: 8px 16px;
-  cursor: pointer;
-  color: var(--text);
-}
-.user-menu-item:hover { background: var(--bg3); }
-.user-menu-item.danger { color: var(--red); }
-.error-log-modal {
-  max-width: 600px;
-  max-height: 80vh;
-  overflow-y: auto;
-}
-.error-log-item {
-  padding: 10px;
-  border-bottom: 1px solid var(--border);
-  font-size: 12px;
-  font-family: monospace;
-}
-.error-log-line {
-  color: var(--red);
-  margin-bottom: 5px;
-}
+.sync-status.syncing { color: var(--blue); }
+.sync-status.synced { color: var(--accent); }
+.sync-status.error { color: var(--red); }
 </style>
 </head>
 <body>
@@ -642,45 +603,14 @@ input, select {
 <div id="login-screen">
   <div class="login-card">
     <div class="login-logo">RECEP<span>TIVO</span></div>
-    <div class="login-tabs">
-      <div class="login-tab active" data-tab="login">Entrar</div>
-      <div class="login-tab" data-tab="register">Cadastrar</div>
+    <div class="form-group">
+      <input type="text" id="login-user" placeholder="Usuário" style="text-align:center">
     </div>
-    <div id="login-form">
-      <div class="form-group">
-        <input type="text" id="login-user" placeholder="Usuário">
-      </div>
-      <div class="form-group">
-        <div class="password-wrapper">
-          <input type="password" id="login-pass" placeholder="Senha">
-          <button type="button" class="toggle-password" onclick="togglePasswordVisibility('login-pass')">👁️</button>
-        </div>
-      </div>
-      <button class="btn-primary" style="width:100%" id="login-btn">Entrar</button>
+    <div class="form-group">
+      <input type="password" id="login-pass" placeholder="Senha" style="text-align:center">
     </div>
-    <div id="register-form" style="display:none">
-      <div class="form-group">
-        <input type="text" id="register-user" placeholder="Novo Usuário">
-      </div>
-      <div class="form-group">
-        <div class="password-wrapper">
-          <input type="password" id="register-pass" placeholder="Senha">
-          <button type="button" class="toggle-password" onclick="togglePasswordVisibility('register-pass')">👁️</button>
-        </div>
-      </div>
-      <div class="form-group">
-        <div class="password-wrapper">
-          <input type="password" id="register-gerente-pass" placeholder="Senha do Gerente">
-          <button type="button" class="toggle-password" onclick="togglePasswordVisibility('register-gerente-pass')">👁️</button>
-        </div>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Cor do Usuário</label>
-        <input type="color" id="register-color" value="#00e5a0">
-      </div>
-      <button class="btn-primary" style="width:100%" id="register-btn">Cadastrar</button>
-    </div>
-    <div class="login-error" id="login-error"></div>
+    <button class="btn-primary" style="width:100%" id="login-btn">Entrar</button>
+    <div class="login-error" id="login-error">Usuário ou senha incorretos</div>
     <div class="login-loading" id="login-loading">Conectando ao Supabase...</div>
   </div>
 </div>
@@ -696,10 +626,11 @@ input, select {
     <button class="nav-btn" data-page="operadores">👥 Operadores</button>
     <button class="nav-btn" data-page="exportar">📦 Import/Export</button>
     <button class="nav-btn" data-page="usuarios" id="nav-usuarios" style="display: none;">👤 Usuários</button>
+    <button class="nav-btn" data-page="historico" id="nav-historico" style="display: none;">📜 Histórico</button>
   </nav>
   <div class="sidebar-foot">
     <span class="dot"></span>Cloud Sync
-    <div class="sync-status" id="sync-status">🔄 Conectando...</div>
+    <div class="sync-status" id="sync-status">✅ Conectado</div>
   </div>
 </div>
 
@@ -713,22 +644,16 @@ input, select {
         <div class="page-sub">Visão geral do sistema</div>
       </div>
       <div class="header-actions">
-        <div class="user-info" id="user-info-header" onclick="toggleUserMenu(event)">
-          <span class="user-avatar" id="user-avatar">U</span>
-          <span id="user-name-display"></span>
-        </div>
-        <div id="user-menu" class="user-menu">
-          <div class="user-menu-item danger" onclick="logout()">🚪 Desconectar</div>
-        </div>
+        <div class="user-info" id="user-info-header"><span class="user-avatar" id="user-avatar">U</span><span id="user-name-display"></span></div>
         <button class="theme-toggle" onclick="toggleTheme()">🌓</button>
-        <button class="btn-ghost" onclick="carregarDadosDoSupabase()">🔄 Recarregar</button>
-        <button class="btn-primary" onclick="logout()" style="background:var(--red); color:white;">🔓 Sair</button>
+        <button class="btn-ghost" onclick="syncAllData()">🔄 Sincronizar</button>
       </div>
     </div>
     <div class="cards-grid">
       <div class="stat-card"><div class="stat-label">Total de Chips</div><div class="stat-value" id="d-total">0</div><div class="stat-change">📈 Todos os chips</div></div>
       <div class="stat-card"><div class="stat-label">Ativos</div><div class="stat-value" id="d-ativos" style="color:var(--accent)">0</div><div class="stat-change">✅ Em operação</div></div>
       <div class="stat-card"><div class="stat-label">Banidos</div><div class="stat-value" id="d-banidos" style="color:var(--red)">0</div><div class="stat-change">⚠️ Bloqueados</div></div>
+      <div class="stat-card"><div class="stat-label">Novos</div><div class="stat-value" id="d-novos" style="color:var(--blue)">0</div><div class="stat-change">🆕 Aguardando</div></div>
     </div>
     <div class="charts-row">
       <div class="chart-card">
@@ -745,7 +670,7 @@ input, select {
       <div class="ranking-card"><div class="chart-title">📉 Ranking — Mais Banidos</div><div id="rank-banidos"></div></div>
     </div>
     <div class="ranking-card">
-      <div class="chart-title">📊 Eficiência por Chip</div>
+      <div class="chart-title">📊 Taxa de Aprovação por Operador</div>
       <div id="taxa-aprovacao"></div>
     </div>
   </div>
@@ -763,24 +688,25 @@ input, select {
         <option value="">Alterar Status</option>
         <option value="ativo">Ativo</option>
         <option value="banido">Banido</option>
+        <option value="novo">Novo</option>
       </select>
       <select id="bulk-operador" style="width:auto">
         <option value="">Alterar Operador</option>
       </select>
       <button class="btn-primary btn-sm" onclick="aplicarEdicaoEmMassa()">Aplicar</button>
-      <button class="btn-del btn-sm" onclick="confirmarExclusaoEmMassa()">🗑️ Excluir Selecionados</button>
       <button class="btn-ghost btn-sm" onclick="limparSelecao()">Limpar</button>
     </div>
     <div class="filters">
-      <div class="search-wrap"><span class="search-icon">🔍</span><input id="chip-search" placeholder="Buscar por número, operador ou classe..." oninput="renderizarChips()"></div>
+      <div class="search-wrap"><span class="search-icon">🔍</span><input id="chip-search" placeholder="Buscar..." oninput="renderizarChips()"></div>
       <button class="filter-btn active" onclick="setFiltroChip('todos',this)">Todos</button>
       <button class="filter-btn" onclick="setFiltroChip('ativo',this)">Ativo</button>
       <button class="filter-btn" onclick="setFiltroChip('banido',this)">Banido</button>
+      <button class="filter-btn" onclick="setFiltroChip('novo',this)">Novo</button>
     </div>
     <div class="table-wrap">
       <table>
         <thead>
-          <tr><th class="checkbox-col"><input type="checkbox" id="select-all-chips" onchange="selecionarTodosChips()"></th><th>Número</th><th>Operador</th><th>Classe</th><th>Status</th><th>Obs</th><th>Ações</th></tr>
+          <tr><th class="checkbox-col"><input type="checkbox" id="select-all-chips" onchange="selecionarTodosChips()"></th><th>Número</th><th>Operador</th><th>Classe</th><th>Status</th><th>Motivo</th><th>Ações</th></tr>
         </thead>
         <tbody id="chips-tbody"></tbody>
       </table>
@@ -816,9 +742,6 @@ input, select {
         <button class="btn-ghost" style="width:100%;margin-bottom:12px" onclick="baixarModelo()">Baixar Modelo</button>
         <div class="file-dropzone" id="dropzone">📂 Clique ou arraste arquivo CSV<input type="file" id="import-file" accept=".csv" style="display:none"></div>
         <button class="btn-primary" style="width:100%" onclick="processarImportacao()">Processar Importação</button>
-        <div id="import-error-button" class="error-button-container" style="display:none">
-          <button class="btn-error btn-sm" onclick="mostrarErrosImportacao()">⚠️ Ver Erros</button>
-        </div>
         <div id="import-preview" class="import-preview" style="display:none"></div>
       </div>
     </div>
@@ -833,1390 +756,894 @@ input, select {
     </div>
     <div class="table-wrap">
       <table>
-        <thead>
-          <tr><th>Usuário</th><th>Senha</th><th>Cor</th><th>Perfil</th><th>Ações</th></tr>
-        </thead>
+        <thead><tr><th>Usuário</th><th>Senha</th><th>Cor</th><th>Ações</th></tr></thead>
         <tbody id="usuarios-tbody"></tbody>
       </table>
     </div>
   </div>
+
+  <div class="page" id="page-historico">
+    <div class="page-header">
+      <div><div class="page-title">Histórico</div><div class="page-sub">Logs de todas as ações</div></div>
+      <div class="header-actions">
+        <button class="btn-ghost" onclick="carregarDados(); renderizarHistoricoCentral();">Atualizar</button>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <div class="history-log" id="central-history-log" style="max-height: 70vh;"></div>
+    </div>
+  </div>
 </div>
 
-<div class="modal-overlay" id="modal-chip"><div class="modal"><div class="modal-header"><div class="modal-title" id="modal-chip-title">Novo Chip</div><button onclick="fecharModal('modal-chip')">✕</button></div><div class="form-group"><label class="form-label">Número</label><input id="chip-numero" placeholder="(11) 99999-9999"></div><div class="form-group"><label class="form-label">Operador</label><select id="chip-operador"></select></div><div class="form-group"><label class="form-label">Status</label><select id="chip-status" onchange="toggleObsGroup()"><option value="ativo">Ativo</option><option value="banido">Banido</option></select></div><div class="form-group" id="obs-group" style="display:none"><label class="form-label">Obs</label><input id="chip-obs" placeholder="Observação sobre o chip..."></div><div class="form-actions"><button class="btn-cancel" onclick="fecharModal('modal-chip')">Cancelar</button><button class="btn-primary" onclick="salvarChip()">Salvar</button></div></div></div>
+<div class="modal-overlay" id="modal-chip"><div class="modal"><div class="modal-header"><div class="modal-title" id="modal-chip-title">Novo Chip</div><button onclick="fecharModal('modal-chip')">✕</button></div><div class="form-group"><label class="form-label">Número</label><input id="chip-numero" placeholder="(11) 99999-9999"></div><div class="form-group"><label class="form-label">Operador</label><select id="chip-operador"></select></div><div class="form-group"><label class="form-label">Status</label><select id="chip-status" onchange="toggleMotivoBan()"><option value="novo">Novo</option><option value="ativo">Ativo</option><option value="banido">Banido</option></select></div><div class="form-group" id="motivo-group" style="display:none"><label class="form-label">Motivo do Ban</label><input id="chip-motivo"></div><div class="form-actions"><button class="btn-cancel" onclick="fecharModal('modal-chip')">Cancelar</button><button class="btn-primary" onclick="salvarChip()">Salvar</button></div></div></div>
 
 <div class="modal-overlay" id="modal-op"><div class="modal"><div class="modal-header"><div class="modal-title" id="modal-op-title">Novo Operador</div><button onclick="fecharModal('modal-op')">✕</button></div><div class="form-group"><label class="form-label">Nome</label><input id="op-nome"></div><div class="form-group"><label class="form-label">Classe</label><select id="op-classe"></select></div><div class="form-actions"><button class="btn-cancel" onclick="fecharModal('modal-op')">Cancelar</button><button class="btn-primary" onclick="salvarOperador()">Salvar</button></div></div></div>
 
 <div class="modal-overlay" id="modal-classe"><div class="modal"><div class="modal-header"><div class="modal-title" id="modal-classe-title">Nova Classe</div><button onclick="fecharModal('modal-classe')">✕</button></div><div class="form-group"><label class="form-label">Nome da Classe</label><input id="classe-nome"></div><div class="form-group"><label class="form-label">Ícone</label><select id="classe-icon"><option value="📁">📁 Pasta</option><option value="🚀">🚀 CRM</option><option value="🎯">🎯 Digital</option><option value="🏠">🏠 Home</option><option value="🌱">🌱 Novatos</option><option value="👶">👶 Menor</option><option value="⭐">⭐ Elite</option><option value="💎">💎 Diamante</option><option value="🔥">🔥 Top</option></select></div><div class="form-group"><label class="form-label">Cor da Classe</label><input type="color" id="classe-cor" value="#00e5a0"></div><div class="form-actions"><button class="btn-cancel" onclick="fecharModal('modal-classe')">Cancelar</button><button class="btn-primary" onclick="salvarClasse()">Salvar</button></div></div></div>
 
-<div class="modal-overlay" id="modal-usuario"><div class="modal"><div class="modal-header"><div class="modal-title" id="modal-usuario-title">Novo Usuário</div><button onclick="fecharModal('modal-usuario')">✕</button></div><div class="form-group"><label class="form-label">Login</label><input id="usuario-login" placeholder="ex: joao_silva"></div><div class="form-group"><label class="form-label">Senha</label><div class="password-wrapper"><input id="usuario-senha" type="password" placeholder="******"><button type="button" class="toggle-password" onclick="togglePasswordVisibility('usuario-senha')">👁️</button></div></div><div class="form-group"><label class="form-label">Cor do Usuário</label><input type="color" id="usuario-cor" value="#00e5a0"></div><div class="form-group"><label class="form-label">Perfil</label><select id="usuario-perfil"><option value="padrao">Padrão</option><option value="master">Master</option><option value="gerente">Gerente</option></select></div><div class="form-actions"><button class="btn-cancel" onclick="fecharModal('modal-usuario')">Cancelar</button><button class="btn-primary" onclick="salvarUsuario()">Salvar</button></div></div></div>
+<div class="modal-overlay" id="modal-history"><div class="modal"><div class="modal-header"><div class="modal-title">Histórico do Chip</div><button onclick="fecharModal('modal-history')">✕</button></div><div id="history-content" class="history-log"></div></div></div>
 
-<div class="modal-overlay" id="modal-editar-usuario"><div class="modal"><div class="modal-header"><div class="modal-title">Editar Usuário</div><button onclick="fecharModal('modal-editar-usuario')">✕</button></div><div class="form-group"><label class="form-label">Login</label><input id="edit-usuario-login" readonly style="background:var(--bg4)"></div><div class="form-group"><label class="form-label">Senha</label><div class="password-wrapper"><input id="edit-usuario-senha" type="password"><button type="button" class="toggle-password" onclick="togglePasswordVisibility('edit-usuario-senha')">👁️</button></div></div><div class="form-group"><label class="form-label">Cor do Usuário</label><input type="color" id="edit-usuario-cor"></div><div class="form-group"><label class="form-label">Perfil</label><select id="edit-usuario-perfil"><option value="padrao">Padrão</option><option value="master">Master</option><option value="gerente">Gerente</option></select></div><div class="form-actions"><button class="btn-cancel" onclick="fecharModal('modal-editar-usuario')">Cancelar</button><button class="btn-primary" onclick="salvarEdicaoUsuario()">Salvar</button></div></div></div>
-
-<div class="modal-overlay" id="modal-erros-importacao"><div class="modal error-log-modal"><div class="modal-header"><div class="modal-title">⚠️ Erros na Importação</div><button onclick="fecharModal('modal-erros-importacao')">✕</button></div><div id="erros-importacao-content" class="error-log-modal" style="max-height: 60vh; overflow-y: auto;"></div><div class="form-actions"><button class="btn-primary" onclick="fecharModal('modal-erros-importacao')">Fechar</button></div></div></div>
+<div class="modal-overlay" id="modal-usuario"><div class="modal"><div class="modal-header"><div class="modal-title" id="modal-usuario-title">Novo Usuário</div><button onclick="fecharModal('modal-usuario')">✕</button></div><div class="form-group"><label class="form-label">Login</label><input id="usuario-login" placeholder="ex: joao_silva"></div><div class="form-group"><label class="form-label">Senha</label><input id="usuario-senha" type="password" placeholder="******"></div><div class="form-group"><label class="form-label">Cor do Usuário (Avatar)</label><input type="color" id="usuario-cor" value="#00e5a0"></div><div class="form-actions"><button class="btn-cancel" onclick="fecharModal('modal-usuario')">Cancelar</button><button class="btn-primary" onclick="salvarUsuario()">Salvar</button></div></div></div>
 
 <div class="confirm-modal-overlay" id="confirm-modal"><div class="confirm-modal"><div class="confirm-modal-icon" id="confirm-icon">⚠️</div><div class="confirm-modal-title" id="confirm-title">Confirmar</div><div class="confirm-modal-message" id="confirm-message"></div><div class="confirm-modal-actions"><button class="btn-cancel" onclick="fecharConfirmModal()">Cancelar</button><button class="btn-primary" id="confirm-btn" onclick="executarAcaoConfirmada()">Confirmar</button></div></div></div>
 
 <div id="toast"></div>
 
 <script>
-(function() {
-    const SUPABASE_URL = 'https://fyeqxmokaiovnjfmoior.supabase.co';
-    const SUPABASE_ANON_KEY = 'sb_publishable_3bthuT44LXmjRVYAFw9peQ_6ityZ0cL';
+// ==================== SUPABASE CONFIGURAÇÃO ====================
+const SUPABASE_URL = 'https://fyeqxmokaiovnjfmoior.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_3bthuT44LXmjRVYAFw9peQ_6ityZ0cL';
 
-    let supabase = null;
-    let supabaseConnected = false;
-    let usuarioLogado = null;
-    let usuarioLogadoObj = null;
-    let timeoutDesconexao = null;
-    let errosImportacao = [];
-    let timeoutErroBotao = null;
+// Variáveis globais
+let supabaseClient = null;
+let supabaseConnected = false;
+let usuarioLogado = null;
+let usuarioLogadoObj = null;
+const USUARIO_MASTER = { login: 'beatriz_rodrigues', senha: 'beatriz123', cor: '#9d4dff', isMaster: true };
 
-    let chips = [];
-    let operadores = [];
-    let classes = [];
-    let usuariosSistema = [];
+let usuariosSistema = [];
+let chips = [];
+let operadores = [];
+let classes = [];
+let filtroChip = 'todos';
+let editandoChipId = null;
+let editandoOpId = null;
+let editandoClasseId = null;
+let pieChart = null;
+let barChart = null;
+let classesExpandidas = {};
+let chipsSelecionados = new Set();
+let arquivoLinhas = null;
+let arquivoSeparador = null;
+let historicoAlteracoes = [];
 
-    let filtroChip = 'todos';
-    let editandoChipId = null;
-    let editandoOpId = null;
-    let editandoClasseId = null;
-    let editandoUsuarioLogin = null;
-    let pieChart = null;
-    let barChart = null;
-    let classesExpandidas = {};
-    let chipsSelecionados = new Set();
-    let arquivoLinhas = null;
-    let arquivoSeparador = null;
-
-    const TEMPO_SESSAO = 3 * 60 * 60 * 1000;
-
-    function iniciarTimerDesconexao() {
-        if (timeoutDesconexao) clearTimeout(timeoutDesconexao);
-        timeoutDesconexao = setTimeout(() => {
-            if (usuarioLogado) {
-                localStorage.removeItem('receptivo_logado');
-                localStorage.removeItem('receptivo_login_time');
-                usuarioLogado = null;
-                usuarioLogadoObj = null;
-                document.getElementById('login-screen').style.display = 'flex';
-                document.getElementById('sidebar').classList.remove('open');
-                toast('Sessão expirada. Faça login novamente.', 'err');
-            }
-        }, TEMPO_SESSAO);
-        localStorage.setItem('receptivo_login_time', Date.now().toString());
+// ==================== INICIALIZAÇÃO ====================
+async function initSupabase() {
+    try {
+        supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const { error } = await supabaseClient.from('classes').select('count', { count: 'exact', head: true });
+        if (error) throw error;
+        supabaseConnected = true;
+        document.getElementById('sync-status').innerHTML = '✅ Conectado';
+        document.getElementById('sync-status').className = 'sync-status synced';
+        console.log('✅ Supabase conectado!');
+        await carregarDadosDoSupabase();
+        return true;
+    } catch (error) {
+        console.error('❌ Erro ao conectar Supabase:', error);
+        supabaseConnected = false;
+        document.getElementById('sync-status').innerHTML = '⚠️ Offline';
+        document.getElementById('sync-status').className = 'sync-status error';
+        toast('Modo offline - usando localStorage', 'err');
+        carregarDados();
+        return false;
     }
+}
 
-    function reiniciarTimer() {
-        if (usuarioLogado) {
-            iniciarTimerDesconexao();
+async function carregarDadosDoSupabase() {
+    if (!supabaseConnected) return;
+    try {
+        const { data: classesData } = await supabaseClient.from('classes').select('*');
+        if (classesData && classesData.length) classes = classesData;
+        
+        const { data: operadoresData } = await supabaseClient.from('operadores').select('*');
+        if (operadoresData && operadoresData.length) operadores = operadoresData;
+        
+        const { data: chipsData } = await supabaseClient.from('chips').select('*');
+        if (chipsData && chipsData.length) chips = chipsData;
+        
+        const { data: usuariosData } = await supabaseClient.from('usuarios_sistema').select('*');
+        if (usuariosData && usuariosData.length) {
+            usuariosSistema = usuariosData.map(u => ({
+                login: u.login,
+                senha: u.senha,
+                cor: u.cor,
+                isMaster: u.is_master
+            }));
         }
+        
+        const { data: historicoData } = await supabaseClient
+            .from('historico_central')
+            .select('*')
+            .order('data', { ascending: false })
+            .limit(500);
+        if (historicoData && historicoData.length) historicoAlteracoes = historicoData;
+        
+        salvarLocalStorage();
+        carregarDados();
+    } catch (error) {
+        console.error('Erro ao carregar dados do Supabase:', error);
     }
+}
 
-    document.addEventListener('click', reiniciarTimer);
-    document.addEventListener('keypress', reiniciarTimer);
-    document.addEventListener('mousemove', reiniciarTimer);
-
-    async function initSupabase() {
-        try {
-            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-            const { error } = await supabase.from('classes').select('count', { count: 'exact', head: true });
-            if (error) throw error;
-            supabaseConnected = true;
-            const syncStatus = document.getElementById('sync-status');
-            if (syncStatus) {
-                syncStatus.innerHTML = '✅ Conectado';
-                syncStatus.className = 'sync-status synced';
-            }
-            await carregarUsuariosDoSupabase();
-            await carregarDadosDoSupabase();
-            return true;
-        } catch (error) {
-            supabaseConnected = false;
-            const syncStatus = document.getElementById('sync-status');
-            if (syncStatus) {
-                syncStatus.innerHTML = '⚠️ Offline';
-                syncStatus.className = 'sync-status error';
-            }
-            toast('Erro ao conectar com Supabase!', 'err');
-            return false;
+async function syncToSupabase(tabela, dados) {
+    if (!supabaseConnected) return;
+    try {
+        for (const item of dados) {
+            await supabaseClient.from(tabela).upsert(item, { onConflict: 'id' });
         }
+    } catch (error) {
+        console.error(`Erro ao sync ${tabela}:`, error);
     }
+}
 
-    async function carregarUsuariosDoSupabase() {
-        if (!supabaseConnected) return;
-        try {
-            const { data: usuariosData, error: usersError } = await supabase.from('usuarios_sistema').select('*');
-            if (usersError) throw usersError;
-            if (usuariosData && usuariosData.length) {
-                usuariosSistema = usuariosData.map(u => ({
-                    login: u.login,
-                    senha: u.senha,
-                    cor: u.cor || '#00e5a0',
-                    perfil: u.perfil || 'padrao'
-                }));
-            } else {
-                await inserirUsuarioGerente();
-            }
-            console.log('Usuarios carregados:', usuariosSistema.length);
-        } catch (error) {
-            console.error('Erro ao carregar usuarios:', error);
-        }
+async function syncAllData() {
+    if (!supabaseConnected) {
+        toast('Modo offline - não é possível sincronizar', 'err');
+        return;
     }
-
-    async function inserirUsuarioGerente() {
-        const usuarioGerente = {
-            login: 'beatriz_rodrigues',
-            senha: 'beatriz123',
-            cor: '#9d4dff',
-            perfil: 'gerente'
-        };
-        await supabase.from('usuarios_sistema').upsert(usuarioGerente, { onConflict: 'login' });
-        usuariosSistema = [{
-            login: 'beatriz_rodrigues',
-            senha: 'beatriz123',
-            cor: '#9d4dff',
-            perfil: 'gerente'
-        }];
-        console.log('Usuario gerente inserido');
+    document.getElementById('sync-status').innerHTML = '🔄 Sincronizando...';
+    document.getElementById('sync-status').className = 'sync-status syncing';
+    try {
+        await syncToSupabase('classes', classes);
+        await syncToSupabase('operadores', operadores);
+        await syncToSupabase('chips', chips);
+        await syncToSupabase('usuarios_sistema', usuariosSistema.map(u => ({
+            login: u.login,
+            senha: u.senha,
+            cor: u.cor,
+            is_master: u.isMaster
+        })));
+        await syncToSupabase('historico_central', historicoAlteracoes);
+        document.getElementById('sync-status').innerHTML = '✅ Sincronizado';
+        document.getElementById('sync-status').className = 'sync-status synced';
+        toast('Dados sincronizados com sucesso!', 'ok');
+    } catch (error) {
+        console.error('Erro na sincronização:', error);
+        document.getElementById('sync-status').innerHTML = '⚠️ Erro';
+        document.getElementById('sync-status').className = 'sync-status error';
+        toast('Erro ao sincronizar dados', 'err');
     }
+}
 
-    async function carregarDadosDoSupabase() {
-        if (!supabaseConnected) return;
-        try {
-            const { data: classesData } = await supabase.from('classes').select('*');
-            if (classesData && classesData.length) classes = classesData;
-            else await inserirClassesPadrao();
+async function adicionarHistoricoCentralSupabase(resumoAcao, detalhes) {
+    const novoHistorico = {
+        id: Date.now(),
+        usuario: usuarioLogado,
+        resumo: resumoAcao,
+        detalhes: detalhes,
+        data: new Date().toISOString()
+    };
+    historicoAlteracoes.unshift(novoHistorico);
+    if (historicoAlteracoes.length > 1000) historicoAlteracoes.pop();
+    salvarHistoricoCentral();
+    renderizarHistoricoCentral();
+    if (supabaseConnected) await supabaseClient.from('historico_central').insert(novoHistorico);
+}
+
+async function adicionarHistoricoChipSupabase(chipId, acao, detalhes) {
+    const novoHistorico = {
+        id: Date.now(),
+        chip_id: chipId,
+        usuario: usuarioLogado,
+        acao: acao,
+        detalhes: detalhes,
+        data: new Date().toISOString()
+    };
+    if (supabaseConnected) await supabaseClient.from('historico_chips').insert(novoHistorico);
+    const individualHistory = JSON.parse(localStorage.getItem('receptivo_historico') || '[]');
+    individualHistory.unshift({
+        id: Date.now(),
+        chipId: chipId,
+        usuario: usuarioLogado,
+        acao: acao,
+        detalhes: detalhes,
+        data: new Date().toISOString()
+    });
+    if (individualHistory.length > 500) individualHistory.pop();
+    localStorage.setItem('receptivo_historico', JSON.stringify(individualHistory));
+}
+
+function salvarLocalStorage() {
+    localStorage.setItem('receptivo_classes', JSON.stringify(classes));
+    localStorage.setItem('receptivo_operadores', JSON.stringify(operadores));
+    localStorage.setItem('receptivo_chips', JSON.stringify(chips));
+}
+
+function salvarUsuarios() {
+    localStorage.setItem('receptivo_usuarios', JSON.stringify(usuariosSistema));
+}
+
+function salvarHistoricoCentral() {
+    localStorage.setItem('receptivo_historico_central', JSON.stringify(historicoAlteracoes));
+}
+
+function carregarUsuarios() {
+    const saved = localStorage.getItem('receptivo_usuarios');
+    if (saved) {
+        usuariosSistema = JSON.parse(saved);
+    } else {
+        usuariosSistema = [USUARIO_MASTER];
+    }
+    salvarUsuarios();
+}
+
+function carregarHistoricoCentral() {
+    const saved = localStorage.getItem('receptivo_historico_central');
+    if (saved) {
+        historicoAlteracoes = JSON.parse(saved);
+    } else {
+        historicoAlteracoes = [];
+    }
+}
+
+function adicionarHistoricoCentral(resumoAcao, detalhes) {
+    adicionarHistoricoCentralSupabase(resumoAcao, detalhes);
+}
+
+function adicionarHistorico(chipId, acao, detalhes) {
+    adicionarHistoricoChipSupabase(chipId, acao, detalhes);
+}
+
+// ==================== LOGIN ====================
+async function fazerLogin() {
+    const login = document.getElementById('login-user').value;
+    const senha = document.getElementById('login-pass').value;
+    const loadingEl = document.getElementById('login-loading');
+    const errorEl = document.getElementById('login-error');
+    
+    loadingEl.style.display = 'block';
+    errorEl.style.display = 'none';
+    
+    await initSupabase();
+    
+    const usuarioEncontrado = usuariosSistema.find(u => u.login === login && u.senha === senha);
+    if (usuarioEncontrado) {
+        usuarioLogado = login;
+        usuarioLogadoObj = usuarioEncontrado;
+        localStorage.setItem('receptivo_logado', login);
+        document.getElementById('login-screen').style.display = 'none';
+        
+        const avatarEl = document.getElementById('user-avatar');
+        const nameEl = document.getElementById('user-name-display');
+        if(avatarEl) avatarEl.style.backgroundColor = usuarioLogadoObj.cor;
+        if(nameEl) nameEl.innerText = login;
+        
+        const isAdmin = (login === USUARIO_MASTER.login);
+        const navUsuarios = document.getElementById('nav-usuarios');
+        const navHistorico = document.getElementById('nav-historico');
+        if(navUsuarios) navUsuarios.style.display = isAdmin ? 'flex' : 'none';
+        if(navHistorico) navHistorico.style.display = isAdmin ? 'flex' : 'none';
+        
+        if(isAdmin) renderizarUsuarios();
+        renderizarHistoricoCentral();
+    } else {
+        errorEl.style.display = 'block';
+    }
+    loadingEl.style.display = 'none';
+}
+
+function verificarLogin() {
+    const loggedUser = localStorage.getItem('receptivo_logado');
+    if (loggedUser) {
+        const user = usuariosSistema.find(u => u.login === loggedUser);
+        if(user) {
+            usuarioLogado = loggedUser;
+            usuarioLogadoObj = user;
+            document.getElementById('login-screen').style.display = 'none';
+            const avatarEl = document.getElementById('user-avatar');
+            const nameEl = document.getElementById('user-name-display');
+            if(avatarEl) avatarEl.style.backgroundColor = user.cor;
+            if(nameEl) nameEl.innerText = user.login;
             
-            const { data: operadoresData } = await supabase.from('operadores').select('*');
-            if (operadoresData) operadores = operadoresData;
+            const isAdmin = (user.login === USUARIO_MASTER.login);
+            const navUsuarios = document.getElementById('nav-usuarios');
+            const navHistorico = document.getElementById('nav-historico');
+            if(navUsuarios) navUsuarios.style.display = isAdmin ? 'flex' : 'none';
+            if(navHistorico) navHistorico.style.display = isAdmin ? 'flex' : 'none';
             
-            const { data: chipsData } = await supabase.from('chips').select('*');
-            if (chipsData) chips = chipsData;
-            
-            atualizarDashboard();
-            renderizarChips();
-            renderizarClasses();
-            popularSelects();
-        } catch (error) {
-            console.error('Erro ao carregar dados:', error);
+            carregarDados();
+            if(isAdmin) renderizarUsuarios();
+            renderizarHistoricoCentral();
+            return;
         }
     }
+    localStorage.removeItem('receptivo_logado');
+}
 
-    async function inserirClassesPadrao() {
-        const classesPadrao = [
+function carregarDados() {
+    const savedClasses = localStorage.getItem('receptivo_classes');
+    const savedOps = localStorage.getItem('receptivo_operadores');
+    const savedChips = localStorage.getItem('receptivo_chips');
+    
+    if (savedClasses && savedClasses !== '[]') {
+        classes = JSON.parse(savedClasses);
+    } else if (classes.length === 0) {
+        classes = [
             { id: '1', nome: 'CRM', icone: '🚀', cor: '#4d9eff' },
             { id: '2', nome: 'Digital', icone: '🎯', cor: '#00e5a0' },
             { id: '3', nome: 'Home', icone: '🏠', cor: '#ffd60a' },
-            { id: '4', nome: 'Elite', icone: '⭐', cor: '#9d4dff' }
+            { id: '4', nome: 'Novatos', icone: '🌱', cor: '#ff9f4d' },
+            { id: '5', nome: 'Menor', icone: '👶', cor: '#ff6b9d' },
+            { id: '6', nome: 'Elite', icone: '⭐', cor: '#9d4dff' }
         ];
-        for (const classe of classesPadrao) {
-            await supabase.from('classes').upsert(classe, { onConflict: 'id' });
-        }
-        classes = classesPadrao;
     }
+    
+    if (savedOps && savedOps !== '[]') operadores = JSON.parse(savedOps);
+    if (savedChips && savedChips !== '[]') chips = JSON.parse(savedChips);
+    
+    classes.forEach(c => { if(classesExpandidas[c.id] === undefined) classesExpandidas[c.id] = true; });
+    
+    atualizarDashboard();
+    renderizarChips();
+    renderizarClasses();
+    popularSelects();
+    salvarLocalStorage();
+}
 
-    async function registrarUsuario() {
-        const login = document.getElementById('register-user').value.trim();
-        const senha = document.getElementById('register-pass').value.trim();
-        const gerenteSenha = document.getElementById('register-gerente-pass').value.trim();
-        const cor = document.getElementById('register-color').value;
+function renderizarUsuarios() {
+    const tbody = document.getElementById('usuarios-tbody');
+    if(!tbody) return;
+    tbody.innerHTML = usuariosSistema.map(user => `
+        <tr>
+            <td><div style="display:flex;align-items:center;gap:8px"><span style="display:inline-block;width:24px;height:24px;border-radius:50%;background:${user.cor};"></span> ${user.login}</div></td>
+            <td><span id="senha-vis-${user.login}">********</span> <button class="btn-ghost btn-sm" onclick="toggleSenhaVisibilidade('${user.login}', '${user.senha}')">👁️</button></td>
+            <td><input type="color" value="${user.cor}" onchange="atualizarCorUsuario('${user.login}', this.value)"></td>
+            <td>${user.login !== USUARIO_MASTER.login ? `<button class="btn-sm btn-del" onclick="excluirUsuario('${user.login}')">Excluir</button>` : '<span class="badge">Master</span>'}</td>
+        </tr>
+    `).join('');
+}
 
-        if (!login || !senha) {
-            document.getElementById('login-error').textContent = 'Preencha todos os campos';
-            document.getElementById('login-error').style.display = 'block';
-            return;
-        }
-        
-        const gerente = usuariosSistema.find(u => u.perfil === 'gerente');
-        
-        if (!gerente || gerente.senha !== gerenteSenha) {
-            document.getElementById('login-error').textContent = 'Senha do gerente incorreta';
-            document.getElementById('login-error').style.display = 'block';
-            return;
-        }
-        
-        if (usuariosSistema.find(u => u.login === login)) {
-            document.getElementById('login-error').textContent = 'Usuario ja existe';
-            document.getElementById('login-error').style.display = 'block';
-            return;
-        }
+function toggleSenhaVisibilidade(login, senhaReal) {
+    const span = document.getElementById(`senha-vis-${login}`);
+    if(span.innerText === '********') span.innerText = senhaReal;
+    else span.innerText = '********';
+}
 
-        const novoUsuario = { login, senha, cor, perfil: 'padrao' };
-        usuariosSistema.push({ login, senha, cor, perfil: 'padrao' });
-        if (supabaseConnected) {
-            await supabase.from('usuarios_sistema').insert(novoUsuario);
-        }
-        document.getElementById('login-error').style.display = 'none';
-        document.getElementById('login-error').textContent = '';
-        document.querySelector('.login-tab[data-tab="login"]').click();
-        toast('Usuario cadastrado com sucesso!', 'ok');
-    }
-
-    async function fazerLogin() {
-        const login = document.getElementById('login-user').value;
-        const senha = document.getElementById('login-pass').value;
-        const loadingEl = document.getElementById('login-loading');
-        const errorEl = document.getElementById('login-error');
-        
-        loadingEl.style.display = 'block';
-        errorEl.style.display = 'none';
-        
-        await carregarUsuariosDoSupabase();
-        
-        const usuarioEncontrado = usuariosSistema.find(u => u.login === login && u.senha === senha);
-        if (usuarioEncontrado) {
-            usuarioLogado = login;
-            usuarioLogadoObj = usuarioEncontrado;
-            localStorage.setItem('receptivo_logado', login);
-            document.getElementById('login-screen').style.display = 'none';
-            
+function atualizarCorUsuario(login, novaCor) {
+    const user = usuariosSistema.find(u => u.login === login);
+    if(user) {
+        user.cor = novaCor;
+        salvarUsuarios();
+        if(usuarioLogado === login) {
+            usuarioLogadoObj.cor = novaCor;
             const avatarEl = document.getElementById('user-avatar');
-            const nameEl = document.getElementById('user-name-display');
-            if(avatarEl) avatarEl.style.backgroundColor = usuarioLogadoObj.cor;
-            if(nameEl) nameEl.innerText = login;
-            
-            const podeAcessarUsuarios = (usuarioLogadoObj.perfil === 'gerente' || usuarioLogadoObj.perfil === 'master');
-            const navUsuarios = document.getElementById('nav-usuarios');
-            if(navUsuarios) navUsuarios.style.display = podeAcessarUsuarios ? 'flex' : 'none';
-            
-            if (podeAcessarUsuarios) {
-                renderizarUsuarios();
-            }
-            
-            await carregarDadosDoSupabase();
-            iniciarTimerDesconexao();
-        } else {
-            errorEl.textContent = 'Usuario ou senha incorretos';
-            errorEl.style.display = 'block';
+            if(avatarEl) avatarEl.style.backgroundColor = novaCor;
         }
-        loadingEl.style.display = 'none';
+        renderizarUsuarios();
+        toast(`Cor de ${login} atualizada`, 'ok');
     }
+}
 
-    function logout() {
-        if (timeoutDesconexao) clearTimeout(timeoutDesconexao);
-        localStorage.removeItem('receptivo_logado');
-        localStorage.removeItem('receptivo_login_time');
-        usuarioLogado = null;
-        usuarioLogadoObj = null;
-        document.getElementById('login-screen').style.display = 'flex';
-        document.getElementById('sidebar').classList.remove('open');
-        document.getElementById('user-menu').classList.remove('show');
-        toast('Desconectado com sucesso', 'ok');
-    }
-
-    function toggleUserMenu(event) {
-        event.stopPropagation();
-        const menu = document.getElementById('user-menu');
-        menu.classList.toggle('show');
-    }
-
-    document.addEventListener('click', function() {
-        const menu = document.getElementById('user-menu');
-        if (menu) menu.classList.remove('show');
+function excluirUsuario(login) {
+    abrirConfirmModal('Excluir Usuário', `Deseja realmente excluir o usuário ${login}?`, '👤', () => {
+        usuariosSistema = usuariosSistema.filter(u => u.login !== login);
+        salvarUsuarios();
+        renderizarUsuarios();
+        toast('Usuário excluído', 'ok');
     });
+}
 
-    async function verificarLogin() {
-        await carregarUsuariosDoSupabase();
-        
-        const loggedUser = localStorage.getItem('receptivo_logado');
-        const loginTime = localStorage.getItem('receptivo_login_time');
-        
-        if (loggedUser && loginTime) {
-            const elapsed = Date.now() - parseInt(loginTime);
-            if (elapsed > TEMPO_SESSAO) {
-                localStorage.removeItem('receptivo_logado');
-                localStorage.removeItem('receptivo_login_time');
-                return false;
-            }
-            const user = usuariosSistema.find(u => u.login === loggedUser);
-            if(user) {
-                usuarioLogado = loggedUser;
-                usuarioLogadoObj = user;
-                document.getElementById('login-screen').style.display = 'none';
-                const avatarEl = document.getElementById('user-avatar');
-                const nameEl = document.getElementById('user-name-display');
-                if(avatarEl) avatarEl.style.backgroundColor = user.cor;
-                if(nameEl) nameEl.innerText = user.login;
-                
-                const podeAcessarUsuarios = (user.perfil === 'gerente' || user.perfil === 'master');
-                const navUsuarios = document.getElementById('nav-usuarios');
-                if(navUsuarios) navUsuarios.style.display = podeAcessarUsuarios ? 'flex' : 'none';
-                
-                if (podeAcessarUsuarios) {
-                    renderizarUsuarios();
-                }
-                await carregarDadosDoSupabase();
-                iniciarTimerDesconexao();
-                return true;
-            } else {
-                localStorage.removeItem('receptivo_logado');
-                localStorage.removeItem('receptivo_login_time');
-            }
-        }
-        return false;
-    }
+function abrirModalUsuario() {
+    if(usuarioLogado !== USUARIO_MASTER.login) return toast('Apenas o gerente pode criar usuários', 'err');
+    document.getElementById('modal-usuario-title').innerText = 'Novo Usuário';
+    document.getElementById('usuario-login').value = '';
+    document.getElementById('usuario-senha').value = '';
+    document.getElementById('usuario-cor').value = '#00e5a0';
+    document.getElementById('modal-usuario').classList.add('open');
+}
 
-    function atualizarDashboard() {
-        const total = chips.length;
-        const ativos = chips.filter(c => c.status === 'ativo').length;
-        const banidos = chips.filter(c => c.status === 'banido').length;
-        
-        document.getElementById('d-total').textContent = total;
-        document.getElementById('d-ativos').textContent = ativos;
-        document.getElementById('d-banidos').textContent = banidos;
-        
-        const ctx = document.getElementById('pie-chart');
-        if (ctx) {
-            if (pieChart) pieChart.destroy();
-            pieChart = new Chart(ctx, {
-                type: 'doughnut',
-                data: { labels: ['Ativos', 'Banidos'], datasets: [{ data: [ativos, banidos], backgroundColor: ['#00e5a0', '#ff4d6d'], borderWidth: 0 }] },
-                options: { responsive: true, maintainAspectRatio: true, cutout: '60%', plugins: { legend: { display: false } } }
-            });
-        }
-        
-        document.getElementById('pie-legend').innerHTML = [
-            ['Ativos', ativos, '#00e5a0'],
-            ['Banidos', banidos, '#ff4d6d']
-        ].map(function(item) {
-            return '<div class="legend-item"><div class="legend-dot" style="background:' + item[2] + '"></div><span>' + item[0] + '</span><span style="margin-left:auto">' + item[1] + '</span></div>';
-        }).join('');
-        
-        var porClasse = {};
-        chips.forEach(function(chip) {
-            var op = operadores.find(function(o) { return o.id === chip.operador_id; });
-            if (op && op.classe_id) {
-                var classe = classes.find(function(c) { return c.id === op.classe_id; });
-                var nome = classe ? classe.nome : 'Sem classe';
-                porClasse[nome] = (porClasse[nome] || 0) + 1;
-            }
+function salvarUsuario() {
+    const login = document.getElementById('usuario-login').value.trim();
+    const senha = document.getElementById('usuario-senha').value.trim();
+    const cor = document.getElementById('usuario-cor').value;
+    if(!login || !senha) { toast('Preencha login e senha', 'err'); return; }
+    if(usuariosSistema.find(u => u.login === login)) { toast('Login já existe', 'err'); return; }
+    usuariosSistema.push({ login, senha, cor, isMaster: false });
+    salvarUsuarios();
+    renderizarUsuarios();
+    fecharModal('modal-usuario');
+    toast(`Usuário ${login} criado`, 'ok');
+}
+
+function renderizarHistoricoCentral() {
+    const container = document.getElementById('central-history-log');
+    if(!container) return;
+    if(historicoAlteracoes.length === 0) { container.innerHTML = '<div class="empty-class">Nenhuma ação registrada</div>'; return; }
+    container.innerHTML = historicoAlteracoes.slice(0, 200).map(h => {
+        const dataObj = new Date(h.data);
+        const dataStr = dataObj.toLocaleDateString('pt-BR');
+        const horaStr = dataObj.toLocaleTimeString('pt-BR');
+        const userColor = usuariosSistema.find(u=>u.login===h.usuario)?.cor || '#888';
+        return `
+            <div class="history-item">
+                <div class="history-date">📅 ${dataStr}, ${horaStr} | <span style="background:${userColor}20; padding:2px 8px; border-radius:12px;">👤 ${h.usuario}</span></div>
+                <div class="history-action">📌 ${h.resumo}</div>
+                <div class="history-detail">${h.detalhes}</div>
+            </div>
+        `;
+    }).join('');
+}
+
+function atualizarDashboard() {
+    const total = chips.length;
+    const ativos = chips.filter(c => c.status === 'ativo').length;
+    const banidos = chips.filter(c => c.status === 'banido').length;
+    const novos = chips.filter(c => c.status === 'novo').length;
+    
+    document.getElementById('d-total').textContent = total;
+    document.getElementById('d-ativos').textContent = ativos;
+    document.getElementById('d-banidos').textContent = banidos;
+    document.getElementById('d-novos').textContent = novos;
+    
+    const ctx = document.getElementById('pie-chart');
+    if (ctx) {
+        if (pieChart) pieChart.destroy();
+        pieChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: { labels: ['Ativos', 'Banidos', 'Novos'], datasets: [{ data: [ativos, banidos, novos], backgroundColor: ['#00e5a0', '#ff4d6d', '#4d9eff'], borderWidth: 0 }] },
+            options: { responsive: true, maintainAspectRatio: true, cutout: '60%', plugins: { legend: { display: false } }, animation: { duration: 300 } }
         });
-        
-        var dadosClasse = Object.entries(porClasse).sort(function(a,b) { return b[1] - a[1]; }).slice(0,7);
-        var barCtx = document.getElementById('bar-chart');
-        if (barCtx && dadosClasse.length) {
-            if (barChart) barChart.destroy();
-            var coresBarras = dadosClasse.map(function(d) {
-                var classe = classes.find(function(c) { return c.nome === d[0]; });
-                return classe ? classe.cor : '#00e5a0';
-            });
-            barChart = new Chart(barCtx, {
-                type: 'bar',
-                data: { labels: dadosClasse.map(function(d) { return d[0]; }), datasets: [{ data: dadosClasse.map(function(d) { return d[1]; }), backgroundColor: coresBarras, borderRadius: 8 }] },
-                options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
-            });
-        }
-        
-        var rankingAtivos = operadores.map(function(op) {
-            return { id: op.id, nome: op.nome, ativos: chips.filter(function(c) { return c.operador_id === op.id && c.status === 'ativo'; }).length };
-        }).filter(function(op) { return op.ativos > 0; }).sort(function(a,b) { return b.ativos - a.ativos; }).slice(0,6);
-        
-        var rankingBanidos = operadores.map(function(op) {
-            return { id: op.id, nome: op.nome, banidos: chips.filter(function(c) { return c.operador_id === op.id && c.status === 'banido'; }).length };
-        }).filter(function(op) { return op.banidos > 0; }).sort(function(a,b) { return b.banidos - a.banidos; }).slice(0,6);
-        
-        var rankAtivosHtml = rankingAtivos.length ? rankingAtivos.map(function(o,i) {
-            return '<div class="ranking-row"><span class="rank-num" style="color:' + (i===0?'#00e5a0':'var(--border)') + '">' + (i+1) + '</span><span class="rank-name">' + o.nome + '</span><span style="color:#00e5a0">' + o.ativos + '</span></div>';
-        }).join('') : '<div class="empty-class">Sem dados</div>';
-        
-        var rankBanidosHtml = rankingBanidos.length ? rankingBanidos.map(function(o,i) {
-            return '<div class="ranking-row"><span class="rank-num" style="color:' + (i===0?'#ff4d6d':'var(--border)') + '">' + (i+1) + '</span><span class="rank-name">' + o.nome + '</span><span style="color:#ff4d6d">' + o.banidos + '</span></div>';
-        }).join('') : '<div class="empty-class">Sem dados</div>';
-        
-        document.getElementById('rank-ativos').innerHTML = rankAtivosHtml;
-        document.getElementById('rank-banidos').innerHTML = rankBanidosHtml;
-        
-        var eficiencia = operadores.map(function(op) {
-            var totalChips = chips.filter(function(c) { return c.operador_id === op.id; }).length;
-            var ativosChips = chips.filter(function(c) { return c.operador_id === op.id && c.status === 'ativo'; }).length;
-            var taxa = totalChips > 0 ? ((ativosChips / totalChips) * 100).toFixed(1) : 0;
-            return { id: op.id, nome: op.nome, taxa: taxa, totalChips: totalChips };
-        }).filter(function(op) { return op.totalChips > 0; }).sort(function(a,b) { return b.taxa - a.taxa; }).slice(0,6);
-        
-        var eficienciaHtml = eficiencia.length ? eficiencia.map(function(o,i) {
-            var corTaxa = o.taxa >= 70 ? '#00e5a0' : (o.taxa >= 40 ? '#ffd60a' : '#ff4d6d');
-            return '<div class="ranking-row"><span class="rank-num">' + (i+1) + '</span><span class="rank-name">' + o.nome + '</span><span style="color:' + corTaxa + '">' + o.taxa + '%</span></div>';
-        }).join('') : '<div class="empty-class">Sem dados</div>';
-        
-        document.getElementById('taxa-aprovacao').innerHTML = eficienciaHtml;
     }
-
-    function renderizarChips() {
-        var busca = document.getElementById('chip-search') ? (document.getElementById('chip-search').value.toLowerCase() || '') : '';
-        
-        var filtrados = chips.filter(function(c) {
-            if (filtroChip !== 'todos' && c.status !== filtroChip) return false;
-            if (!busca) return true;
-            
-            var op = operadores.find(function(o) { return o.id === c.operador_id; });
-            var classe = op ? classes.find(function(cl) { return cl.id === op.classe_id; }) : null;
-            var nomeOp = op ? op.nome.toLowerCase() : '';
-            var nomeClasse = classe ? classe.nome.toLowerCase() : '';
-            var numero = c.numero.toLowerCase();
-            
-            return numero.indexOf(busca) !== -1 || nomeOp.indexOf(busca) !== -1 || nomeClasse.indexOf(busca) !== -1;
-        });
-        
-        var chipsCountEl = document.getElementById('chips-count');
-        if (chipsCountEl) chipsCountEl.textContent = chips.length + ' chips (' + chips.filter(function(c) { return c.status === 'ativo'; }).length + ' ativos)';
-        
-        var tbody = document.getElementById('chips-tbody');
-        if (!tbody) return;
-        
-        if (!filtrados.length) {
-            tbody.innerHTML = '<tr><td colspan="7">Nenhum chip encontrado</td></tr>';
-            return;
+    
+    document.getElementById('pie-legend').innerHTML = [
+        ['Ativos', ativos, '#00e5a0'],
+        ['Banidos', banidos, '#ff4d6d'],
+        ['Novos', novos, '#4d9eff']
+    ].map(([l, v, c]) => `<div class="legend-item"><div class="legend-dot" style="background:${c}"></div><span>${l}</span><span style="margin-left:auto">${v}</span></div>`).join('');
+    
+    const porClasse = {};
+    chips.forEach(chip => {
+        const op = operadores.find(o => o.id === chip.operador_id);
+        if (op && op.classe_id) {
+            const classe = classes.find(c => c.id === op.classe_id);
+            const nome = classe?.nome || 'Sem classe';
+            porClasse[nome] = (porClasse[nome] || 0) + 1;
         }
-        
-        tbody.innerHTML = filtrados.map(function(c) {
-            var op = operadores.find(function(o) { return o.id === c.operador_id; });
-            var classe = op ? classes.find(function(cl) { return cl.id === op.classe_id; }) : null;
-            var corClasse = classe ? classe.cor : '#7777a0';
-            var statusClass = c.status === 'ativo' ? 'badge-ativo' : 'badge-banido';
-            var statusText = c.status === 'ativo' ? 'Ativo' : 'Banido';
-            var obsText = c.obs || '—';
-            var opNome = op ? op.nome : '—';
-            var classeHtml = classe ? '<span style="display:inline-flex;align-items:center;gap:4px"><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:' + corClasse + '"></span> ' + classe.icone + ' ' + classe.nome + '</span>' : '📁 Sem classe';
-            return '<tr>' +
-                '<td class="checkbox-col"><input type="checkbox" class="chip-checkbox" value="' + c.id + '" ' + (chipsSelecionados.has(c.id) ? 'checked' : '') + ' onchange="window.toggleSelecionarChip(\'' + c.id + '\')"></td>' +
-                '<td>' + c.numero + '</td>' +
-                '<td>' + opNome + '</td>' +
-                '<td>' + classeHtml + '</td>' +
-                '<td><span class="badge ' + statusClass + '">' + statusText + '</span></td>' +
-                '<td>' + obsText + '</td>' +
-                '<td><button class="btn-sm btn-edit" onclick="window.editarChip(\'' + c.id + '\')">Editar</button> <button class="btn-sm btn-del" onclick="window.confirmarExcluirChip(\'' + c.id + '\')">Excluir</button></td>' +
-                '</tr>';
-        }).join('');
-        
-        var selectedCountEl = document.getElementById('selected-count');
-        var bulkActionsEl = document.getElementById('bulk-actions');
-        if (selectedCountEl) selectedCountEl.textContent = chipsSelecionados.size;
-        if (bulkActionsEl) bulkActionsEl.classList.toggle('show', chipsSelecionados.size > 0);
+    });
+    
+    const dadosClasse = Object.entries(porClasse).sort((a,b) => b[1] - a[1]).slice(0,7);
+    const barCtx = document.getElementById('bar-chart');
+    if (barCtx && dadosClasse.length) {
+        if (barChart) barChart.destroy();
+        const coresBarras = dadosClasse.map(d => {
+            const classe = classes.find(c => c.nome === d[0]);
+            return classe?.cor || '#00e5a0';
+        });
+        barChart = new Chart(barCtx, {
+            type: 'bar',
+            data: { labels: dadosClasse.map(d => d[0]), datasets: [{ data: dadosClasse.map(d => d[1]), backgroundColor: coresBarras, borderRadius: 8 }] },
+            options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } }, animation: { duration: 300 } }
+        });
     }
+    
+    const rankingAtivos = [...operadores].map(op => ({ ...op, ativos: chips.filter(c => c.operador_id === op.id && c.status === 'ativo').length })).filter(op => op.ativos > 0).sort((a,b) => b.ativos - a.ativos).slice(0,6);
+    const rankingBanidos = [...operadores].map(op => ({ ...op, banidos: chips.filter(c => c.operador_id === op.id && c.status === 'banido').length })).filter(op => op.banidos > 0).sort((a,b) => b.banidos - a.banidos).slice(0,6);
+    
+    document.getElementById('rank-ativos').innerHTML = rankingAtivos.length ? rankingAtivos.map((o,i) => `<div class="ranking-row"><span class="rank-num" style="color:${i===0?'#00e5a0':'var(--border)'}">${i+1}</span><span class="rank-name">${o.nome}</span><span style="color:#00e5a0">${o.ativos}</span></div>`).join('') : '<div class="empty-class">Sem dados</div>';
+    document.getElementById('rank-banidos').innerHTML = rankingBanidos.length ? rankingBanidos.map((o,i) => `<div class="ranking-row"><span class="rank-num" style="color:${i===0?'#ff4d6d':'var(--border)'}">${i+1}</span><span class="rank-name">${o.nome}</span><span style="color:#ff4d6d">${o.banidos}</span></div>`).join('') : '<div class="empty-class">Sem dados</div>';
+    
+    const taxas = [...operadores].map(op => {
+        const totalChips = chips.filter(c => c.operador_id === op.id).length;
+        const ativosChips = chips.filter(c => c.operador_id === op.id && c.status === 'ativo').length;
+        const taxa = totalChips > 0 ? ((ativosChips / totalChips) * 100).toFixed(1) : 0;
+        return { ...op, taxa, totalChips };
+    }).filter(op => op.totalChips > 0).sort((a,b) => b.taxa - a.taxa).slice(0,6);
+    
+    document.getElementById('taxa-aprovacao').innerHTML = taxas.length ? taxas.map((o,i) => `<div class="ranking-row"><span class="rank-num">${i+1}</span><span class="rank-name">${o.nome}</span><span style="color:${o.taxa >= 70 ? '#00e5a0' : o.taxa >= 40 ? '#ffd60a' : '#ff4d6d'}">${o.taxa}%</span></div>`).join('') : '<div class="empty-class">Sem dados</div>';
+}
 
-    window.toggleSelecionarChip = function(id) {
-        if (chipsSelecionados.has(id)) chipsSelecionados.delete(id);
-        else chipsSelecionados.add(id);
-        renderizarChips();
-    };
+function renderizarChips() {
+    const busca = document.getElementById('chip-search')?.value.toLowerCase() || '';
+    const filtrados = chips.filter(c => (filtroChip === 'todos' || c.status === filtroChip) && (!busca || c.numero.includes(busca) || (operadores.find(o=>o.id===c.operador_id)?.nome || '').toLowerCase().includes(busca)));
+    
+    document.getElementById('chips-count').textContent = `${chips.length} chips (${chips.filter(c=>c.status==='novo').length} novos)`;
+    const tbody = document.getElementById('chips-tbody');
+    if (!filtrados.length) { tbody.innerHTML = '<tr><td colspan="7">Nenhum chip encontrado</td></tr>'; return; }
+    
+    tbody.innerHTML = filtrados.map(c => {
+        const op = operadores.find(o => o.id === c.operador_id);
+        const classe = op ? classes.find(cl => cl.id === op.classe_id) : null;
+        const corClasse = classe?.cor || '#7777a0';
+        return `<tr>
+            <td class="checkbox-col"><input type="checkbox" class="chip-checkbox" value="${c.id}" ${chipsSelecionados.has(c.id) ? 'checked' : ''} onchange="toggleSelecionarChip('${c.id}')"></td>
+            <td>${c.numero}</td>
+            <td>${op?.nome || '—'}</td>
+            <td><span style="display:inline-flex;align-items:center;gap:4px"><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:${corClasse}"></span> ${classe ? `${classe.icone} ${classe.nome}` : '📁 Sem classe'}</span></td>
+            <td><span class="badge badge-${c.status}">${c.status === 'ativo' ? 'Ativo' : (c.status === 'banido' ? 'Banido' : 'Novo')}</span></td>
+            <td>${c.motivo_ban || '—'}</td>
+            <td><button class="btn-sm btn-edit" onclick="editarChip('${c.id}')">Editar</button> <button class="btn-sm btn-ghost" onclick="verHistorico('${c.id}')">Histórico</button> <button class="btn-sm btn-del" onclick="confirmarExcluirChip('${c.id}')">Excluir</button></td>
+        </tr>`;
+    }).join('');
+    
+    document.getElementById('selected-count').textContent = chipsSelecionados.size;
+    document.getElementById('bulk-actions').classList.toggle('show', chipsSelecionados.size > 0);
+    const selectAll = document.getElementById('select-all-chips');
+    if (selectAll) selectAll.checked = filtrados.length > 0 && filtrados.every(c => chipsSelecionados.has(c.id));
+}
 
-    window.selecionarTodosChips = function() {
-        var busca = document.getElementById('chip-search') ? (document.getElementById('chip-search').value.toLowerCase() || '') : '';
-        var filtrados = chips.filter(function(c) {
-            if (filtroChip !== 'todos' && c.status !== filtroChip) return false;
-            if (!busca) return true;
-            var op = operadores.find(function(o) { return o.id === c.operador_id; });
-            var classe = op ? classes.find(function(cl) { return cl.id === op.classe_id; }) : null;
-            var nomeOp = op ? op.nome.toLowerCase() : '';
-            var nomeClasse = classe ? classe.nome.toLowerCase() : '';
-            return c.numero.toLowerCase().indexOf(busca) !== -1 || nomeOp.indexOf(busca) !== -1 || nomeClasse.indexOf(busca) !== -1;
-        });
-        var selectAll = document.getElementById('select-all-chips');
-        if (selectAll && selectAll.checked) {
-            filtrados.forEach(function(c) { chipsSelecionados.add(c.id); });
-        } else {
-            filtrados.forEach(function(c) { chipsSelecionados.delete(c.id); });
-        }
-        renderizarChips();
-    };
+function toggleSelecionarChip(id) {
+    if (chipsSelecionados.has(id)) chipsSelecionados.delete(id);
+    else chipsSelecionados.add(id);
+    renderizarChips();
+}
 
-    window.limparSelecao = function() { chipsSelecionados.clear(); renderizarChips(); };
+function selecionarTodosChips() {
+    const busca = document.getElementById('chip-search')?.value.toLowerCase() || '';
+    const filtrados = chips.filter(c => (filtroChip === 'todos' || c.status === filtroChip) && (!busca || c.numero.includes(busca) || (operadores.find(o=>o.id===c.operador_id)?.nome || '').toLowerCase().includes(busca)));
+    const selectAll = document.getElementById('select-all-chips');
+    if (selectAll.checked) filtrados.forEach(c => chipsSelecionados.add(c.id));
+    else filtrados.forEach(c => chipsSelecionados.delete(c.id));
+    renderizarChips();
+}
 
-    window.aplicarEdicaoEmMassa = async function() {
-        var novoStatus = document.getElementById('bulk-status').value;
-        var novoOperadorId = document.getElementById('bulk-operador').value;
-        if (!novoStatus && !novoOperadorId) { toast('Selecione uma acao para aplicar', 'err'); return; }
-        
-        var alterados = 0;
-        for (var id of chipsSelecionados) {
-            var chipIndex = chips.findIndex(function(c) { return c.id === id; });
-            if (chipIndex !== -1) {
-                if (novoStatus) chips[chipIndex].status = novoStatus;
-                if (novoOperadorId) chips[chipIndex].operador_id = novoOperadorId || null;
-                await salvarChipNoSupabase(chips[chipIndex]);
+function limparSelecao() { chipsSelecionados.clear(); renderizarChips(); }
+
+function aplicarEdicaoEmMassa() {
+    const novoStatus = document.getElementById('bulk-status').value;
+    const novoOperadorId = document.getElementById('bulk-operador').value;
+    if (!novoStatus && !novoOperadorId) { toast('Selecione uma ação para aplicar', 'err'); return; }
+    let alterados = 0;
+    chipsSelecionados.forEach(id => {
+        const chipIndex = chips.findIndex(c => c.id === id);
+        if (chipIndex !== -1) {
+            const chipOriginal = { ...chips[chipIndex] };
+            if (novoStatus) chips[chipIndex].status = novoStatus;
+            if (novoOperadorId) chips[chipIndex].operador_id = novoOperadorId || null;
+            if (chipOriginal.status !== chips[chipIndex].status || chipOriginal.operador_id !== chips[chipIndex].operador_id) {
+                adicionarHistorico(id, 'Edição em massa', `Alterado: ${novoStatus ? `status para ${novoStatus}` : ''} ${novoOperadorId ? `operador para ${operadores.find(o=>o.id===novoOperadorId)?.nome || 'nenhum'}` : ''}`);
                 alterados++;
             }
         }
-        await carregarDadosDoSupabase();
-        chipsSelecionados.clear();
-        renderizarChips();
-        toast(alterados + ' chips atualizados', 'ok');
-    };
-
-    window.confirmarExclusaoEmMassa = function() {
-        if (chipsSelecionados.size === 0) { toast('Nenhum chip selecionado', 'err'); return; }
-        abrirConfirmModal('Excluir em Massa', 'Tem certeza que deseja excluir ' + chipsSelecionados.size + ' chip(s)?', '🗑️', async function() {
-            var excluidos = 0;
-            for (var id of chipsSelecionados) {
-                var index = chips.findIndex(function(c) { return c.id === id; });
-                if (index !== -1) {
-                    chips.splice(index, 1);
-                    await excluirChipDoSupabase(id);
-                    excluidos++;
-                }
-            }
-            await carregarDadosDoSupabase();
-            chipsSelecionados.clear();
-            renderizarChips();
-            toast(excluidos + ' chips excluidos', 'ok');
-        });
-    };
-
-    window.setFiltroChip = function(filtro, btn) {
-        filtroChip = filtro;
-        var btns = document.querySelectorAll('.filter-btn');
-        for (var i = 0; i < btns.length; i++) {
-            btns[i].classList.remove('active');
-        }
-        btn.classList.add('active');
-        chipsSelecionados.clear();
-        renderizarChips();
-    };
-
-    window.abrirModalChip = function() {
-        editandoChipId = null;
-        document.getElementById('modal-chip-title').innerText = 'Novo Chip';
-        document.getElementById('chip-numero').value = '';
-        document.getElementById('chip-operador').value = '';
-        document.getElementById('chip-status').value = 'ativo';
-        document.getElementById('chip-obs').value = '';
-        document.getElementById('obs-group').style.display = 'none';
-        document.getElementById('modal-chip').classList.add('open');
-    };
-
-    window.editarChip = function(id) {
-        var chip = chips.find(function(c) { return c.id === id; });
-        if (!chip) return;
-        editandoChipId = id;
-        document.getElementById('modal-chip-title').innerText = 'Editar Chip';
-        document.getElementById('chip-numero').value = chip.numero;
-        document.getElementById('chip-operador').value = chip.operador_id || '';
-        document.getElementById('chip-status').value = chip.status;
-        document.getElementById('chip-obs').value = chip.obs || '';
-        document.getElementById('obs-group').style.display = chip.status === 'banido' ? 'block' : 'none';
-        document.getElementById('modal-chip').classList.add('open');
-    };
-
-    window.toggleObsGroup = function() {
-        var status = document.getElementById('chip-status').value;
-        document.getElementById('obs-group').style.display = status === 'banido' ? 'block' : 'none';
-    };
-
-    function formatarTelefone(numero) {
-        var digits = numero.toString().replace(/\D/g, '');
-        if (digits.length === 11) return '(' + digits.substring(0,2) + ') ' + digits.substring(2,7) + '-' + digits.substring(7,11);
-        if (digits.length === 10) return '(' + digits.substring(0,2) + ') ' + digits.substring(2,6) + '-' + digits.substring(6,10);
-        return numero;
-    }
-
-    async function salvarChipNoSupabase(chip) {
-        if (!supabaseConnected) return false;
-        try {
-            var { error } = await supabase.from('chips').upsert(chip, { onConflict: 'id' });
-            if (error) throw error;
-            return true;
-        } catch (error) {
-            console.error('Erro ao salvar chip:', error);
-            return false;
-        }
-    }
-
-    async function excluirChipDoSupabase(id) {
-        if (!supabaseConnected) return false;
-        try {
-            var { error } = await supabase.from('chips').delete().eq('id', id);
-            if (error) throw error;
-            return true;
-        } catch (error) {
-            console.error('Erro ao excluir chip:', error);
-            return false;
-        }
-    }
-
-    window.salvarChip = async function() {
-        var numeroInput = document.getElementById('chip-numero');
-        var numero = formatarTelefone(numeroInput.value.trim());
-        if (!numero) { toast('Informe o numero', 'err'); return; }
-        var operador_id = document.getElementById('chip-operador').value || null;
-        var status = document.getElementById('chip-status').value;
-        var obs = document.getElementById('chip-obs').value.trim() || null;
-        
-        if (editandoChipId) {
-            var index = chips.findIndex(function(c) { return c.id === editandoChipId; });
-            if (index !== -1) {
-                chips[index] = { id: chips[index].id, numero: numero, operador_id: operador_id, status: status, obs: obs, criado_em: chips[index].criado_em };
-                await salvarChipNoSupabase(chips[index]);
-            }
-            toast('Chip atualizado', 'ok');
-        } else {
-            var newId = Date.now().toString();
-            var novoChip = { id: newId, numero: numero, operador_id: operador_id, status: status, obs: obs, criado_em: new Date().toISOString() };
-            chips.unshift(novoChip);
-            await salvarChipNoSupabase(novoChip);
-            toast('Chip adicionado', 'ok');
-        }
-        fecharModal('modal-chip');
-        await carregarDadosDoSupabase();
-    };
-
-    window.confirmarExcluirChip = function(id) {
-        var chip = chips.find(function(c) { return c.id === id; });
-        abrirConfirmModal('Excluir Chip', 'Tem certeza que deseja excluir o chip <strong>' + (chip ? chip.numero : '') + '</strong>?', '🗑️', async function() {
-            chips = chips.filter(function(c) { return c.id !== id; });
-            await excluirChipDoSupabase(id);
-            await carregarDadosDoSupabase();
-            toast('Chip excluido', 'ok');
-        });
-    };
-
-    function renderizarClasses() {
-        var container = document.getElementById('classes-container');
-        if (!container) return;
-        if (!classes.length) { container.innerHTML = '<div class="empty-class">Nenhuma classe. Clique em "+ Nova Classe"</div>'; return; }
-        
-        var operadoresCountEl = document.getElementById('operadores-count');
-        if (operadoresCountEl) operadoresCountEl.textContent = operadores.length + ' operadores em ' + classes.length + ' classes';
-        
-        var classesHtml = classes.map(function(classe) {
-            var opsDaClasse = operadores.filter(function(op) { return op.classe_id === classe.id; });
-            var stats = { total: 0, ativos: 0, banidos: 0 };
-            opsDaClasse.forEach(function(op) {
-                var chipsOp = chips.filter(function(c) { return c.operador_id === op.id; });
-                stats.total += chipsOp.length;
-                stats.ativos += chipsOp.filter(function(c) { return c.status === 'ativo'; }).length;
-                stats.banidos += chipsOp.filter(function(c) { return c.status === 'banido'; }).length;
-            });
-            var isOpen = classesExpandidas[classe.id] !== false;
-            var corClasse = classe.cor || '#7777a0';
-            var opsHtml = '';
-            if (opsDaClasse.length) {
-                opsHtml = '<div class="op-mini-grid">' + opsDaClasse.map(function(op) {
-                    var opChips = chips.filter(function(c) { return c.operador_id === op.id; });
-                    var opAtivos = opChips.filter(function(c) { return c.status === 'ativo'; }).length;
-                    var opBanidos = opChips.filter(function(c) { return c.status === 'banido'; }).length;
-                    var iniciais = op.nome.split(' ').map(function(n) { return n[0]; }).join('').slice(0,2).toUpperCase();
-                    return '<div class="op-card-mini"><div class="op-head"><div class="op-info"><div class="op-avatar" style="background:' + corClasse + '30;color:' + corClasse + '">' + iniciais + '</div><div><strong>' + op.nome + '</strong></div></div><span class="badge badge-ativo">ativo</span></div><div class="op-stats"><div class="op-stat"><div class="op-stat-label">Total</div><div class="op-stat-val">' + opChips.length + '</div></div><div class="op-stat"><div class="op-stat-label">Ativos</div><div class="op-stat-val" style="color:var(--accent)">' + opAtivos + '</div></div><div class="op-stat"><div class="op-stat-label">Banidos</div><div class="op-stat-val" style="color:var(--red)">' + opBanidos + '</div></div></div><div style="display:flex;gap:6px"><button class="btn-sm btn-edit" onclick="window.editarOperador(\'' + op.id + '\')">Editar</button><button class="btn-sm btn-del" onclick="window.confirmarExcluirOperador(\'' + op.id + '\')">Excluir</button><button class="btn-sm btn-ghost" onclick="window.abrirModalMoverOperador(\'' + op.id + '\')">Mover</button></div></div>';
-                }).join('') + '</div>';
-            } else {
-                opsHtml = '<div class="empty-class">📭 Nenhum operador<br><button class="btn-sm btn-ghost" onclick="window.abrirModalOpComClasse(\'' + classe.id + '\')">+ Adicionar</button></div>';
-            }
-            return '<div class="class-card" style="border-left: 4px solid ' + corClasse + '">' +
-                '<div class="class-header" onclick="window.toggleClasse(\'' + classe.id + '\')">' +
-                    '<div class="class-header-left">' +
-                        '<span class="class-icon">' + (classe.icone || '📁') + '</span>' +
-                        '<span class="class-name" style="color:' + corClasse + '">' + classe.nome + '</span>' +
-                        '<div class="class-stats">' +
-                            '<span class="class-stat"><strong>' + stats.total + '</strong> chips</span>' +
-                            '<span class="class-stat" style="color:var(--accent)">▲ ' + stats.ativos + '</span>' +
-                            '<span class="class-stat" style="color:var(--red)">▼ ' + stats.banidos + '</span>' +
-                            '<span class="class-stat">👥 ' + opsDaClasse.length + '</span>' +
-                        '</div>' +
-                    '</div>' +
-                    '<div class="class-actions" onclick="event.stopPropagation()">' +
-                        '<button class="btn-sm btn-edit" onclick="window.editarClasse(\'' + classe.id + '\')">✏️</button>' +
-                        '<button class="btn-sm btn-del" onclick="window.confirmarExcluirClasse(\'' + classe.id + '\')">🗑️</button>' +
-                    '</div>' +
-                '</div>' +
-                '<div class="class-content ' + (isOpen ? 'open' : '') + '" id="class-content-' + classe.id + '">' +
-                    opsHtml +
-                '</div>' +
-            '</div>';
-        }).join('');
-        
-        container.innerHTML = classesHtml;
-    }
-
-    window.toggleClasse = function(id) { 
-        classesExpandidas[id] = !classesExpandidas[id]; 
-        var content = document.getElementById('class-content-' + id); 
-        if (content) content.classList.toggle('open'); 
-    };
-    
-    window.expandirTodas = function() { 
-        classes.forEach(function(c) { classesExpandidas[c.id] = true; }); 
-        renderizarClasses(); 
-    };
-    
-    window.recolherTodas = function() { 
-        classes.forEach(function(c) { classesExpandidas[c.id] = false; }); 
-        renderizarClasses(); 
-    };
-
-    window.abrirModalClasse = function() { 
-        editandoClasseId = null; 
-        document.getElementById('modal-classe-title').innerText = 'Nova Classe';
-        document.getElementById('classe-nome').value = '';
-        document.getElementById('classe-icon').value = '📁';
-        document.getElementById('classe-cor').value = '#00e5a0';
-        document.getElementById('modal-classe').classList.add('open');
-    };
-    
-    window.editarClasse = function(id) { 
-        var classe = classes.find(function(c) { return c.id === id; }); 
-        if (!classe) return; 
-        editandoClasseId = id; 
-        document.getElementById('modal-classe-title').innerText = 'Editar Classe';
-        document.getElementById('classe-nome').value = classe.nome;
-        document.getElementById('classe-icon').value = classe.icone || '📁';
-        document.getElementById('classe-cor').value = classe.cor || '#00e5a0';
-        document.getElementById('modal-classe').classList.add('open');
-    };
-
-    async function salvarClasseNoSupabase(classe) {
-        if (!supabaseConnected) return false;
-        try {
-            var { error } = await supabase.from('classes').upsert(classe, { onConflict: 'id' });
-            if (error) throw error;
-            return true;
-        } catch (error) {
-            console.error('Erro ao salvar classe:', error);
-            return false;
-        }
-    }
-
-    async function excluirClasseDoSupabase(id) {
-        if (!supabaseConnected) return false;
-        try {
-            var { error } = await supabase.from('classes').delete().eq('id', id);
-            if (error) throw error;
-            return true;
-        } catch (error) {
-            console.error('Erro ao excluir classe:', error);
-            return false;
-        }
-    }
-
-    window.salvarClasse = async function() {
-        var nome = document.getElementById('classe-nome').value.trim();
-        if (!nome) { toast('Informe o nome', 'err'); return; }
-        var icone = document.getElementById('classe-icon').value;
-        var cor = document.getElementById('classe-cor').value;
-        
-        if (editandoClasseId) {
-            var index = classes.findIndex(function(c) { return c.id === editandoClasseId; });
-            if (index !== -1) {
-                classes[index] = { id: classes[index].id, nome: nome, icone: icone, cor: cor };
-                await salvarClasseNoSupabase(classes[index]);
-                toast('Classe atualizada', 'ok');
-            }
-        } else {
-            var novaClasse = { id: Date.now().toString(), nome: nome, icone: icone, cor: cor };
-            classes.push(novaClasse);
-            await salvarClasseNoSupabase(novaClasse);
-            toast('Classe criada', 'ok');
-        }
-        fecharModal('modal-classe');
-        await carregarDadosDoSupabase();
-    };
-
-    window.confirmarExcluirClasse = function(id) {
-        var classe = classes.find(function(c) { return c.id === id; });
-        var opsNaClasse = operadores.filter(function(op) { return op.classe_id === id; });
-        var mensagem = 'Tem certeza que deseja excluir a classe <strong>' + (classe ? classe.nome : '') + '</strong>?';
-        if (opsNaClasse.length) mensagem += '<br><br>⚠️ Esta classe tem ' + opsNaClasse.length + ' operador(es). Eles serao movidos para "Sem classe".';
-        
-        abrirConfirmModal('Excluir Classe', mensagem, '🗑️', async function() {
-            for (var i = 0; i < opsNaClasse.length; i++) {
-                opsNaClasse[i].classe_id = null;
-                await salvarOperadorNoSupabase(opsNaClasse[i]);
-            }
-            classes = classes.filter(function(c) { return c.id !== id; });
-            await excluirClasseDoSupabase(id);
-            await carregarDadosDoSupabase();
-            toast('Classe excluida', 'ok');
-        });
-    };
-
-    async function salvarOperadorNoSupabase(operador) {
-        if (!supabaseConnected) return false;
-        try {
-            var { error } = await supabase.from('operadores').upsert(operador, { onConflict: 'id' });
-            if (error) throw error;
-            return true;
-        } catch (error) {
-            console.error('Erro ao salvar operador:', error);
-            return false;
-        }
-    }
-
-    async function excluirOperadorDoSupabase(id) {
-        if (!supabaseConnected) return false;
-        try {
-            var { error } = await supabase.from('operadores').delete().eq('id', id);
-            if (error) throw error;
-            return true;
-        } catch (error) {
-            console.error('Erro ao excluir operador:', error);
-            return false;
-        }
-    }
-
-    window.abrirModalOp = function() { 
-        editandoOpId = null; 
-        document.getElementById('modal-op-title').innerText = 'Novo Operador';
-        document.getElementById('op-nome').value = '';
-        document.getElementById('op-classe').value = '';
-        document.getElementById('modal-op').classList.add('open');
-    };
-    
-    window.abrirModalOpComClasse = function(classeId) { 
-        editandoOpId = null; 
-        document.getElementById('modal-op-title').innerText = 'Novo Operador';
-        document.getElementById('op-nome').value = '';
-        document.getElementById('op-classe').value = classeId;
-        document.getElementById('modal-op').classList.add('open');
-    };
-    
-    window.editarOperador = function(id) { 
-        var op = operadores.find(function(o) { return o.id === id; }); 
-        if (!op) return; 
-        editandoOpId = id; 
-        document.getElementById('modal-op-title').innerText = 'Editar Operador';
-        document.getElementById('op-nome').value = op.nome;
-        document.getElementById('op-classe').value = op.classe_id || '';
-        document.getElementById('modal-op').classList.add('open');
-    };
-
-    window.salvarOperador = async function() {
-        var nome = document.getElementById('op-nome').value.trim();
-        if (!nome) { toast('Informe o nome', 'err'); return; }
-        var classe_id = document.getElementById('op-classe').value || null;
-        
-        if (editandoOpId) {
-            var index = operadores.findIndex(function(o) { return o.id === editandoOpId; });
-            if (index !== -1) {
-                operadores[index] = { id: operadores[index].id, nome: nome, classe_id: classe_id };
-                await salvarOperadorNoSupabase(operadores[index]);
-                toast('Operador atualizado', 'ok');
-            }
-        } else {
-            var novoOperador = { id: Date.now().toString(), nome: nome, classe_id: classe_id };
-            operadores.push(novoOperador);
-            await salvarOperadorNoSupabase(novoOperador);
-            toast('Operador criado', 'ok');
-        }
-        fecharModal('modal-op');
-        await carregarDadosDoSupabase();
-    };
-
-    window.confirmarExcluirOperador = function(id) {
-        var op = operadores.find(function(o) { return o.id === id; });
-        var chipsDoOperador = chips.filter(function(c) { return c.operador_id === id; });
-        var mensagem = 'Tem certeza que deseja excluir o operador <strong>' + (op ? op.nome : '') + '</strong>?';
-        if (chipsDoOperador.length) mensagem += '<br><br>⚠️ Este operador tem ' + chipsDoOperador.length + ' chip(s) atribuido(s). Eles ficarao sem operador.';
-        
-        abrirConfirmModal('Excluir Operador', mensagem, '🗑️', async function() {
-            for (var i = 0; i < chipsDoOperador.length; i++) {
-                chipsDoOperador[i].operador_id = null;
-                await salvarChipNoSupabase(chipsDoOperador[i]);
-            }
-            operadores = operadores.filter(function(o) { return o.id !== id; });
-            await excluirOperadorDoSupabase(id);
-            await carregarDadosDoSupabase();
-            toast('Operador excluido', 'ok');
-        });
-    };
-
-    window.abrirModalMoverOperador = function(id) { 
-        var op = operadores.find(function(o) { return o.id === id; }); 
-        if (!op) return; 
-        var classesOptions = classes.map(function(c) {
-            var selected = op.classe_id === c.id ? 'selected' : '';
-            return '<option value="' + c.id + '" ' + selected + '>' + c.icone + ' ' + c.nome + '</option>';
-        }).join('');
-        var modalHtml = '<div class="modal-overlay" id="modal-mover" style="display:flex"><div class="modal"><div class="modal-header"><div class="modal-title">Mover Operador</div><button onclick="window.fecharModalMover()">✕</button></div><div class="form-group"><label class="form-label">Operador: <strong>' + op.nome + '</strong></label></div><div class="form-group"><label class="form-label">Selecionar Classe</label><select id="mover-classe-select"><option value="">-- Sem classe --</option>' + classesOptions + '</select></div><div class="form-actions"><button class="btn-cancel" onclick="window.fecharModalMover()">Cancelar</button><button class="btn-primary" onclick="window.confirmarMoverOperador(\'' + id + '\')">Mover</button></div></div></div>'; 
-        var existingModal = document.getElementById('modal-mover'); 
-        if (existingModal) existingModal.remove(); 
-        document.body.insertAdjacentHTML('beforeend', modalHtml); 
-    };
-    
-    window.fecharModalMover = function() { var modal = document.getElementById('modal-mover'); if (modal) modal.remove(); };
-    
-    window.confirmarMoverOperador = async function(id) { 
-        var select = document.getElementById('mover-classe-select'); 
-        var novaClasseId = select ? select.value || null : null; 
-        var index = operadores.findIndex(function(o) { return o.id === id; }); 
-        if (index !== -1) { 
-            operadores[index] = { id: operadores[index].id, nome: operadores[index].nome, classe_id: novaClasseId }; 
-            await salvarOperadorNoSupabase(operadores[index]); 
-            await carregarDadosDoSupabase(); 
-            toast('Operador movido com sucesso!', 'ok'); 
-        } 
-        window.fecharModalMover(); 
-    };
-
-    function popularSelects() { 
-        var opSelect = document.getElementById('chip-operador'); 
-        if (opSelect) { 
-            var atual = opSelect.value; 
-            opSelect.innerHTML = '<option value="">Nenhum operador</option>' + operadores.map(function(o) { return '<option value="' + o.id + '">' + o.nome + '</option>'; }).join(''); 
-            opSelect.value = atual; 
-        } 
-        var bulkOp = document.getElementById('bulk-operador'); 
-        if (bulkOp) bulkOp.innerHTML = '<option value="">Alterar Operador</option>' + operadores.map(function(o) { return '<option value="' + o.id + '">' + o.nome + '</option>'; }).join(''); 
-        var classeSelect = document.getElementById('op-classe'); 
-        if (classeSelect) { 
-            var atualClasse = classeSelect.value; 
-            classeSelect.innerHTML = '<option value="">Sem classe</option>' + classes.map(function(c) { return '<option value="' + c.id + '">' + c.icone + ' ' + c.nome + '</option>'; }).join(''); 
-            classeSelect.value = atualClasse; 
-        } 
-    }
-
-    function renderizarUsuarios() {
-        var tbody = document.getElementById('usuarios-tbody');
-        if(!tbody) return;
-        
-        var podeEditarGlobal = usuarioLogadoObj && (usuarioLogadoObj.perfil === 'gerente' || usuarioLogadoObj.perfil === 'master');
-        
-        tbody.innerHTML = usuariosSistema.map(function(user) {
-            var perfilClass = '';
-            var perfilLabel = '';
-            if (user.perfil === 'gerente') {
-                perfilClass = 'badge-gerente';
-                perfilLabel = 'Gerente';
-            } else if (user.perfil === 'master') {
-                perfilClass = 'badge-master';
-                perfilLabel = 'Master';
-            } else {
-                perfilClass = 'badge-padrao';
-                perfilLabel = 'Padrao';
-            }
-            var podeEditar = podeEditarGlobal && user.perfil !== 'gerente';
-            var acoes = '';
-            if (podeEditar) {
-                acoes = '<button class="btn-sm btn-edit" onclick="window.editarUsuario(\'' + user.login + '\')">✏️</button> ' +
-                        '<button class="btn-sm btn-del" onclick="window.excluirUsuario(\'' + user.login + '\')">🗑️</button>';
-            } else if (user.perfil === 'gerente') {
-                acoes = '<span class="badge badge-gerente">Gerente</span>';
-            } else {
-                acoes = '<span class="badge badge-padrao">Sem permissao</span>';
-            }
-            return '<tr>' +
-                '<td><div style="display:flex;align-items:center;gap:8px"><span style="display:inline-block;width:24px;height:24px;border-radius:50%;background:' + user.cor + ';"></span> ' + user.login + '</div></td>' +
-                '<td><span id="senha-vis-' + user.login + '">********</span> <button class="btn-ghost btn-sm" onclick="window.toggleSenhaVisibilidade(\'' + user.login + '\', \'' + user.senha + '\')">👁️</button></td>' +
-                '<td><input type="color" value="' + user.cor + '" onchange="window.atualizarCorUsuario(\'' + user.login + '\', this.value)"></td>' +
-                '<td><span class="badge ' + perfilClass + '">' + perfilLabel + '</span></td>' +
-                '<td>' + acoes + '</td>' +
-                '</tr>';
-        }).join('');
-    }
-
-    window.editarUsuario = function(login) {
-        var user = usuariosSistema.find(function(u) { return u.login === login; });
-        if (!user) return;
-        editandoUsuarioLogin = login;
-        document.getElementById('edit-usuario-login').value = user.login;
-        document.getElementById('edit-usuario-senha').value = user.senha;
-        document.getElementById('edit-usuario-cor').value = user.cor;
-        document.getElementById('edit-usuario-perfil').value = user.perfil || 'padrao';
-        document.getElementById('modal-editar-usuario').classList.add('open');
-    };
-
-    window.salvarEdicaoUsuario = async function() {
-        var login = editandoUsuarioLogin;
-        var novaSenha = document.getElementById('edit-usuario-senha').value;
-        var novaCor = document.getElementById('edit-usuario-cor').value;
-        var novoPerfil = document.getElementById('edit-usuario-perfil').value;
-        
-        var userIndex = usuariosSistema.findIndex(function(u) { return u.login === login; });
-        if (userIndex !== -1) {
-            usuariosSistema[userIndex].senha = novaSenha;
-            usuariosSistema[userIndex].cor = novaCor;
-            usuariosSistema[userIndex].perfil = novoPerfil;
-            
-            if (supabaseConnected) {
-                await supabase.from('usuarios_sistema').update({ 
-                    senha: novaSenha, 
-                    cor: novaCor, 
-                    perfil: novoPerfil 
-                }).eq('login', login);
-            }
-            
-            if (usuarioLogado === login) {
-                usuarioLogadoObj = usuariosSistema[userIndex];
-                var avatarEl = document.getElementById('user-avatar');
-                if(avatarEl) avatarEl.style.backgroundColor = novaCor;
-            }
-            
-            renderizarUsuarios();
-            fecharModal('modal-editar-usuario');
-            toast('Usuario ' + login + ' atualizado', 'ok');
-        }
-    };
-
-    window.toggleSenhaVisibilidade = function(login, senhaReal) {
-        var span = document.getElementById('senha-vis-' + login);
-        if(span.innerText === '********') span.innerText = senhaReal;
-        else span.innerText = '********';
-    };
-
-    window.atualizarCorUsuario = async function(login, novaCor) {
-        var userIndex = usuariosSistema.findIndex(function(u) { return u.login === login; });
-        if(userIndex !== -1) {
-            usuariosSistema[userIndex].cor = novaCor;
-            if (supabaseConnected) {
-                await supabase.from('usuarios_sistema').update({ cor: novaCor }).eq('login', login);
-            }
-            if(usuarioLogado === login) {
-                usuarioLogadoObj.cor = novaCor;
-                var avatarEl = document.getElementById('user-avatar');
-                if(avatarEl) avatarEl.style.backgroundColor = novaCor;
-            }
-            renderizarUsuarios();
-            toast('Cor de ' + login + ' atualizada', 'ok');
-        }
-    };
-
-    window.excluirUsuario = function(login) {
-        abrirConfirmModal('Excluir Usuario', 'Deseja realmente excluir o usuario ' + login + '?', '👤', async function() {
-            usuariosSistema = usuariosSistema.filter(function(u) { return u.login !== login; });
-            if (supabaseConnected) {
-                await supabase.from('usuarios_sistema').delete().eq('login', login);
-            }
-            renderizarUsuarios();
-            toast('Usuario excluido', 'ok');
-        });
-    };
-
-    window.abrirModalUsuario = function() {
-        if(!usuarioLogadoObj || usuarioLogadoObj.perfil !== 'gerente') return toast('Apenas o gerente pode criar usuarios', 'err');
-        document.getElementById('modal-usuario-title').innerText = 'Novo Usuario';
-        document.getElementById('usuario-login').value = '';
-        document.getElementById('usuario-senha').value = '';
-        document.getElementById('usuario-cor').value = '#00e5a0';
-        document.getElementById('usuario-perfil').value = 'padrao';
-        document.getElementById('modal-usuario').classList.add('open');
-    };
-
-    window.salvarUsuario = async function() {
-        var login = document.getElementById('usuario-login').value.trim();
-        var senha = document.getElementById('usuario-senha').value.trim();
-        var cor = document.getElementById('usuario-cor').value;
-        var perfil = document.getElementById('usuario-perfil').value;
-        
-        if(!login || !senha) { toast('Preencha login e senha', 'err'); return; }
-        if(usuariosSistema.find(function(u) { return u.login === login; })) { toast('Login ja existe', 'err'); return; }
-        
-        var novoUsuario = { login: login, senha: senha, cor: cor, perfil: perfil };
-        usuariosSistema.push({ login: login, senha: senha, cor: cor, perfil: perfil });
-        
-        if (supabaseConnected) {
-            await supabase.from('usuarios_sistema').insert(novoUsuario);
-        }
-        
-        renderizarUsuarios();
-        fecharModal('modal-usuario');
-        toast('Usuario ' + login + ' criado', 'ok');
-    };
-
-    window.exportarDados = function() { 
-        var linhas = [['OPERADOR', 'CHIP', 'SITUACAO', 'CLASSE', 'OBS']]; 
-        chips.forEach(function(chip) { 
-            var op = operadores.find(function(o) { return o.id === chip.operador_id; }); 
-            var classe = op ? classes.find(function(c) { return c.id === op.classe_id; }) : null; 
-            linhas.push([(op ? op.nome : ''), chip.numero, (chip.status === 'ativo' ? 'Ativo' : 'Banido'), (classe ? classe.nome : ''), chip.obs || '']); 
-        }); 
-        var csv = linhas.map(function(row) { 
-            return row.map(function(cell) { return '"' + String(cell).replace(/"/g, '""') + '"'; }).join(';');
-        }).join('\n'); 
-        var blob = new Blob(["\uFEFF" + csv], { type: 'text/csv;charset=utf-8' }); 
-        var link = document.createElement('a'); 
-        link.href = URL.createObjectURL(blob); 
-        link.download = 'chips_' + new Date().toISOString().slice(0,19) + '.csv'; 
-        link.click(); 
-        toast('Exportado!', 'ok'); 
-    };
-
-    window.baixarModelo = function() { 
-        var headers = ['OPERADOR', 'CHIP', 'SITUACAO', 'CLASSE', 'OBS']; 
-        var exemplos = [['Exemplo_operador', '(11) 99999-9999', 'Ativo', 'CRM', 'Observacao opcional']]; 
-        var csv = [headers.join(';')].concat(exemplos.map(function(row) { return row.map(function(c) { return '"' + c + '"'; }).join(';'); })).join('\n'); 
-        var blob = new Blob(["\uFEFF" + csv], { type: 'text/csv' }); 
-        var link = document.createElement('a'); 
-        link.href = URL.createObjectURL(blob); 
-        link.download = 'modelo_chips.csv'; 
-        link.click(); 
-        toast('Modelo baixado!', 'ok'); 
-    };
-
-    var dropzone = document.getElementById('dropzone'); 
-    var fileInput = document.getElementById('import-file'); 
-    if (dropzone && fileInput) { 
-        dropzone.addEventListener('click', function() { fileInput.click(); }); 
-        dropzone.addEventListener('dragover', function(e) { e.preventDefault(); dropzone.classList.add('drag-over'); }); 
-        dropzone.addEventListener('dragleave', function() { dropzone.classList.remove('drag-over'); }); 
-        dropzone.addEventListener('drop', function(e) { e.preventDefault(); dropzone.classList.remove('drag-over'); if (e.dataTransfer.files.length) { fileInput.files = e.dataTransfer.files; previewArquivo(e.dataTransfer.files[0]); } }); 
-        fileInput.addEventListener('change', function(e) { if (e.target.files.length) previewArquivo(e.target.files[0]); }); 
-    }
-
-    function previewArquivo(file) { 
-        var reader = new FileReader(); 
-        reader.onload = function(ev) { 
-            var preview = document.getElementById('import-preview'); 
-            var conteudo = ev.target.result; 
-            arquivoSeparador = conteudo.indexOf(';') !== -1 ? ';' : ','; 
-            var linhas = conteudo.split(/\r?\n/).filter(function(l) { return l.trim(); }); 
-            if (linhas.length < 2) { 
-                if (preview) {
-                    preview.innerHTML = '<span style="color:var(--red)">Arquivo vazio</span>'; 
-                    preview.style.display = 'block'; 
-                }
-                return; 
-            } 
-            var headers = linhas[0].split(arquivoSeparador).map(function(h) { return h.replace(/^"|"$/g, '').trim().toUpperCase(); }); 
-            var valid = headers.indexOf('OPERADOR') !== -1 && headers.indexOf('CHIP') !== -1 && headers.indexOf('SITUACAO') !== -1; 
-            if (!valid) { 
-                if (preview) {
-                    preview.innerHTML = '<span style="color:var(--red)">Colunas esperadas: OPERADOR; CHIP; SITUACAO; CLASSE; OBS (opcional)</span>'; 
-                    preview.style.display = 'block'; 
-                }
-                return; 
-            } 
-            var previewRows = linhas.slice(1, 6).map(function(l) { return l.split(arquivoSeparador).map(function(c) { return c.replace(/^"|"$/g, '').trim(); }); }); 
-            var html = '<table style="width:100%;border-collapse:collapse"><td><th>OPERADOR</th><th>CHIP</th><th>SITUACAO</th><th>CLASSE</th><th>OBS</th></tr>'; 
-            previewRows.forEach(function(r) { if (r.length >= 3) html += '<tr><td>' + (r[0]||'') + '</td><td>' + (r[1]||'') + '</td><td>' + (r[2]||'') + '</td><td>' + (r[3]||'') + '</td><td>' + (r[4]||'') + '</td></tr>'; }); 
-            html += '</table><span style="color:var(--accent)">✔️ Pronto para importar</span>'; 
-            if (preview) {
-                preview.innerHTML = html; 
-                preview.style.display = 'block'; 
-            }
-            arquivoLinhas = linhas; 
-        }; 
-        reader.readAsText(file, 'UTF-8'); 
-    }
-
-    function mostrarErrosImportacao() {
-        var content = document.getElementById('erros-importacao-content');
-        if (content) {
-            content.innerHTML = errosImportacao.map(function(err, idx) {
-                return '<div class="error-log-item"><div class="error-log-line">❌ Erro ' + (idx + 1) + ':</div><div>' + err + '</div></div>';
-            }).join('');
-            if (errosImportacao.length === 0) {
-                content.innerHTML = '<div class="empty-class">Nenhum erro registrado</div>';
-            }
-        }
-        document.getElementById('modal-erros-importacao').classList.add('open');
-    }
-
-    window.mostrarErrosImportacao = mostrarErrosImportacao;
-
-    window.processarImportacao = async function() { 
-        if (!arquivoLinhas) { toast('Nenhum arquivo carregado', 'err'); return; } 
-        
-        errosImportacao = [];
-        var errorButton = document.getElementById('import-error-button');
-        if (errorButton) errorButton.style.display = 'none';
-        if (timeoutErroBotao) clearTimeout(timeoutErroBotao);
-        
-        var headers = arquivoLinhas[0].split(arquivoSeparador).map(function(h) { return h.replace(/^"|"$/g, '').trim().toUpperCase(); }); 
-        var idxOp = headers.indexOf('OPERADOR'); 
-        var idxChip = headers.indexOf('CHIP'); 
-        var idxStatus = headers.indexOf('SITUACAO'); 
-        var idxClasse = headers.indexOf('CLASSE'); 
-        var idxObs = headers.indexOf('OBS');
-        var sucessos = 0, erros = 0, atualizados = 0; 
-        var chipsProcessados = new Map(); 
-        
-        for (var i = 1; i < arquivoLinhas.length; i++) { 
-            if (!arquivoLinhas[i].trim()) continue; 
-            var cols = arquivoLinhas[i].split(arquivoSeparador).map(function(c) { return c.replace(/^"|"$/g, '').trim(); }); 
-            var nomeOp = cols[idxOp] || ''; 
-            var numeroRaw = cols[idxChip] || ''; 
-            var situacao = (cols[idxStatus] || '').toLowerCase(); 
-            var nomeClasse = idxClasse !== -1 ? (cols[idxClasse] || '').trim() : ''; 
-            var obs = idxObs !== -1 ? (cols[idxObs] || '').trim() : '';
-            
-            var linhaErro = 'Linha ' + (i + 1) + ': ';
-            
-            numeroRaw = numeroRaw.toString().replace(/[^\d]/g, ''); 
-            if (numeroRaw.length === 12 && numeroRaw.indexOf('55') === 0) numeroRaw = numeroRaw.substring(2); 
-            else if (numeroRaw.length > 11) numeroRaw = numeroRaw.slice(-11); 
-            
-            if (numeroRaw.length < 10 || numeroRaw.length > 11) { 
-                erros++;
-                errosImportacao.push(linhaErro + 'Numero invalido: "' + (cols[idxChip] || '') + '"');
-                continue; 
-            } 
-            
-            var numero = formatarTelefone(numeroRaw); 
-            var statusMap = { 'ativo':'ativo', 'banido':'banido', 'atividade':'ativo', 'active':'ativo' }; 
-            var status = statusMap[situacao] || 'ativo'; 
-            
-            var classe_id = null; 
-            if (nomeClasse) { 
-                var existente = classes.find(function(c) { return c.nome.toLowerCase() === nomeClasse.toLowerCase(); }); 
-                if (existente) classe_id = existente.id; 
-                else { 
-                    classe_id = Date.now().toString() + Math.random(); 
-                    var novaClasse = { id: classe_id, nome: nomeClasse, icone: '📁', cor: '#00e5a0' };
-                    classes.push(novaClasse); 
-                    await salvarClasseNoSupabase(novaClasse);
-                } 
-            } 
-            
-            var operador_id = null; 
-            if (nomeOp) { 
-                var existenteOp = operadores.find(function(o) { return o.nome.toLowerCase() === nomeOp.toLowerCase(); }); 
-                if (existenteOp) operador_id = existenteOp.id; 
-                else { 
-                    operador_id = Date.now().toString() + Math.random(); 
-                    var novoOperador = { id: operador_id, nome: nomeOp, classe_id: classe_id };
-                    operadores.push(novoOperador); 
-                    await salvarOperadorNoSupabase(novoOperador);
-                } 
-            } 
-            
-            var chipExistente = chips.find(function(c) { return c.numero.replace(/\D/g, '') === numeroRaw; }); 
-            if (chipExistente) { 
-                if (chipExistente.status !== status || chipExistente.obs !== obs) { 
-                    var chipIndex = chips.findIndex(function(c) { return c.id === chipExistente.id; }); 
-                    if (chipIndex !== -1) {
-                        chips[chipIndex] = { id: chips[chipIndex].id, numero: chips[chipIndex].numero, operador_id: chips[chipIndex].operador_id, status: status, obs: obs, criado_em: chips[chipIndex].criado_em };
-                        await salvarChipNoSupabase(chips[chipIndex]);
-                    }
-                    atualizados++; 
-                } 
-            } else if (!chipsProcessados.has(numeroRaw)) { 
-                var novoChip = { id: Date.now().toString() + Math.random() + i, numero: numero, operador_id: operador_id, status: status, obs: obs, criado_em: new Date().toISOString() };
-                chips.push(novoChip); 
-                await salvarChipNoSupabase(novoChip);
-                chipsProcessados.set(numeroRaw, true); 
-                sucessos++; 
-            } 
-        } 
-        
-        await carregarDadosDoSupabase(); 
-        var preview = document.getElementById('import-preview');
-        if (preview) {
-            preview.innerHTML = '✅ Importacao concluida!<br>📱 Novos chips: ' + sucessos + '<br>🔄 Status/obs atualizados: ' + atualizados + '<br>❌ Erros: ' + erros; 
-        }
-        
-        if (erros > 0 && errorButton) {
-            errorButton.style.display = 'block';
-            timeoutErroBotao = setTimeout(function() {
-                if (errorButton) errorButton.style.display = 'none';
-            }, 60000);
-        }
-        
-        toast(sucessos + ' novos chips, ' + atualizados + ' atualizados, ' + erros + ' erros', sucessos || atualizados ? 'ok' : 'err'); 
-        arquivoLinhas = null; 
-    };
-
-    var acaoConfirmada = null;
-    function abrirConfirmModal(titulo, mensagem, icone, acao) { 
-        document.getElementById('confirm-title').textContent = titulo; 
-        document.getElementById('confirm-message').innerHTML = mensagem; 
-        document.getElementById('confirm-icon').textContent = icone || '⚠️'; 
-        acaoConfirmada = acao; 
-        document.getElementById('confirm-modal').classList.add('open'); 
-    }
-    
-    function fecharConfirmModal() { 
-        document.getElementById('confirm-modal').classList.remove('open'); 
-        acaoConfirmada = null; 
-    }
-    
-    function executarAcaoConfirmada() { 
-        if (acaoConfirmada) acaoConfirmada(); 
-        fecharConfirmModal(); 
-    }
-    
-    function fecharModal(id) { 
-        var modal = document.getElementById(id); 
-        if (modal) modal.classList.remove('open'); 
-    }
-    
-    function toast(msg, tipo) { 
-        var el = document.getElementById('toast'); 
-        if (!el) return;
-        el.textContent = msg; 
-        el.className = 'show ' + (tipo || ''); 
-        setTimeout(function() { el.className = ''; }, 3000); 
-    }
-    
-    function toggleSidebar() { 
-        var sidebar = document.getElementById('sidebar');
-        if (sidebar) sidebar.classList.toggle('open'); 
-    }
-    
-    function toggleTheme() { 
-        var currentTheme = document.documentElement.getAttribute('data-theme'); 
-        if (currentTheme === 'light') document.documentElement.setAttribute('data-theme', 'dark'); 
-        else document.documentElement.setAttribute('data-theme', 'light'); 
-        localStorage.setItem('receptivo_theme', document.documentElement.getAttribute('data-theme') || 'dark'); 
-    }
-
-    window.togglePasswordVisibility = function(inputId) {
-        var input = document.getElementById(inputId);
-        if (input.type === 'password') {
-            input.type = 'text';
-        } else {
-            input.type = 'password';
-        }
-    };
-
-    window.toggleSidebar = toggleSidebar;
-    window.toggleTheme = toggleTheme;
-    window.fecharModal = fecharModal;
-    window.fecharConfirmModal = fecharConfirmModal;
-    window.executarAcaoConfirmada = executarAcaoConfirmada;
-    window.carregarDadosDoSupabase = carregarDadosDoSupabase;
-    window.logout = logout;
-
-    var tabs = document.querySelectorAll('.login-tab');
-    for (var t = 0; t < tabs.length; t++) {
-        tabs[t].addEventListener('click', function() {
-            var targetTab = this.getAttribute('data-tab');
-            var allTabs = document.querySelectorAll('.login-tab');
-            for (var at = 0; at < allTabs.length; at++) {
-                allTabs[at].classList.remove('active');
-            }
-            this.classList.add('active');
-            document.getElementById('login-form').style.display = targetTab === 'login' ? 'block' : 'none';
-            document.getElementById('register-form').style.display = targetTab === 'register' ? 'block' : 'none';
-            document.getElementById('login-error').style.display = 'none';
-        });
-    }
-
-    var navBtns = document.querySelectorAll('.nav-btn');
-    for (var nb = 0; nb < navBtns.length; nb++) {
-        navBtns[nb].addEventListener('click', function() {
-            var page = this.getAttribute('data-page');
-            var allPages = document.querySelectorAll('.page');
-            for (var ap = 0; ap < allPages.length; ap++) {
-                allPages[ap].classList.remove('active');
-            }
-            var allNavBtns = document.querySelectorAll('.nav-btn');
-            for (var ab = 0; ab < allNavBtns.length; ab++) {
-                allNavBtns[ab].classList.remove('active');
-            }
-            var pageEl = document.getElementById('page-' + page);
-            if (pageEl) pageEl.classList.add('active');
-            this.classList.add('active');
-            if (window.innerWidth <= 768) {
-                var sidebar = document.getElementById('sidebar');
-                if (sidebar) sidebar.classList.remove('open');
-            }
-        });
-    }
-    
-    var modals = document.querySelectorAll('.modal-overlay');
-    for (var m = 0; m < modals.length; m++) {
-        modals[m].addEventListener('click', function(e) {
-            if (e.target === this) this.classList.remove('open');
-        });
-    }
-    
-    document.getElementById('login-btn').addEventListener('click', fazerLogin);
-    document.getElementById('register-btn').addEventListener('click', registrarUsuario);
-
-    var savedTheme = localStorage.getItem('receptivo_theme');
-    if (savedTheme === 'light') document.documentElement.setAttribute('data-theme', 'light');
-
-    initSupabase().then(function() {
-        verificarLogin();
     });
-})();
+    salvarLocalStorage();
+    carregarDados();
+    limparSelecao();
+    toast(`${alterados} chips atualizados`, 'ok');
+}
+
+function setFiltroChip(filtro, btn) {
+    filtroChip = filtro;
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    limparSelecao();
+    renderizarChips();
+}
+
+function abrirModalChip() {
+    editandoChipId = null;
+    document.getElementById('modal-chip-title').innerText = 'Novo Chip';
+    document.getElementById('chip-numero').value = '';
+    document.getElementById('chip-operador').value = '';
+    document.getElementById('chip-status').value = 'novo';
+    document.getElementById('chip-motivo').value = '';
+    document.getElementById('motivo-group').style.display = 'none';
+    document.getElementById('modal-chip').classList.add('open');
+}
+
+function editarChip(id) {
+    const chip = chips.find(c => c.id === id);
+    if (!chip) return;
+    editandoChipId = id;
+    document.getElementById('modal-chip-title').innerText = 'Editar Chip';
+    document.getElementById('chip-numero').value = chip.numero;
+    document.getElementById('chip-operador').value = chip.operador_id || '';
+    document.getElementById('chip-status').value = chip.status;
+    document.getElementById('chip-motivo').value = chip.motivo_ban || '';
+    document.getElementById('motivo-group').style.display = chip.status === 'banido' ? 'block' : 'none';
+    document.getElementById('modal-chip').classList.add('open');
+}
+
+function toggleMotivoBan() {
+    document.getElementById('motivo-group').style.display = document.getElementById('chip-status').value === 'banido' ? 'block' : 'none';
+}
+
+function verHistorico(id) {
+    const individualHistory = JSON.parse(localStorage.getItem('receptivo_historico') || '[]');
+    const historico = individualHistory.filter(h => h.chipId === id);
+    document.getElementById('history-content').innerHTML = historico.length ? historico.map(h => `<div class="history-item"><div class="history-date">📅 ${new Date(h.data).toLocaleString()}</div><div><strong>👤 ${h.usuario}</strong></div><div>📌 ${h.acao}</div><div class="history-detail">${h.detalhes}</div></div>`).join('') : '<div class="empty-class">Nenhum histórico registrado</div>';
+    document.getElementById('modal-history').classList.add('open');
+}
+
+function formatarTelefone(numero) {
+    let digits = numero.toString().replace(/\D/g, '');
+    if (digits.length === 11) return `(${digits.substring(0,2)}) ${digits.substring(2,7)}-${digits.substring(7,11)}`;
+    if (digits.length === 10) return `(${digits.substring(0,2)}) ${digits.substring(2,6)}-${digits.substring(6,10)}`;
+    return numero;
+}
+
+function salvarChip() {
+    const numero = formatarTelefone(document.getElementById('chip-numero').value.trim());
+    if (!numero) { toast('Informe o número', 'err'); return; }
+    const operador_id = document.getElementById('chip-operador').value || null;
+    const status = document.getElementById('chip-status').value;
+    const motivo_ban = document.getElementById('chip-motivo').value.trim() || null;
+    
+    if (editandoChipId) {
+        const index = chips.findIndex(c => c.id === editandoChipId);
+        if (index !== -1) {
+            const chipOriginal = { ...chips[index] };
+            chips[index] = { ...chips[index], numero, operador_id, status, motivo_ban };
+            if (chipOriginal.status !== status) adicionarHistorico(editandoChipId, 'Status alterado', `Status: ${chipOriginal.status} → ${status}`);
+            if (chipOriginal.operador_id !== operador_id) adicionarHistorico(editandoChipId, 'Operador alterado', `Operador: ${operadores.find(o=>o.id===chipOriginal.operador_id)?.nome || 'nenhum'} → ${operadores.find(o=>o.id===operador_id)?.nome || 'nenhum'}`);
+        }
+        toast('Chip atualizado', 'ok');
+    } else {
+        const newId = Date.now().toString();
+        chips.unshift({ id: newId, numero, operador_id, status, motivo_ban, criado_em: new Date().toISOString() });
+        adicionarHistorico(newId, 'Chip criado', `Chip ${numero} criado`);
+        toast('Chip adicionado', 'ok');
+    }
+    fecharModal('modal-chip');
+    salvarLocalStorage();
+    carregarDados();
+}
+
+function confirmarExcluirChip(id) {
+    const chip = chips.find(c => c.id === id);
+    abrirConfirmModal('Excluir Chip', `Tem certeza que deseja excluir o chip <strong>${chip?.numero}</strong>?`, '🗑️', () => {
+        chips = chips.filter(c => c.id !== id);
+        adicionarHistorico(id, 'Chip excluído', `Chip ${chip.numero} excluído`);
+        salvarLocalStorage();
+        carregarDados();
+        toast('Chip excluído', 'ok');
+    });
+}
+
+function renderizarClasses() {
+    const container = document.getElementById('classes-container');
+    if (!container) return;
+    if (!classes.length) { container.innerHTML = '<div class="empty-class">Nenhuma classe. Clique em "+ Nova Classe"</div>'; return; }
+    document.getElementById('operadores-count').textContent = `${operadores.length} operadores em ${classes.length} classes`;
+    container.innerHTML = classes.map(classe => {
+        const opsDaClasse = operadores.filter(op => op.classe_id === classe.id);
+        let stats = { total: 0, ativos: 0, banidos: 0, novos: 0 };
+        opsDaClasse.forEach(op => {
+            const chipsOp = chips.filter(c => c.operador_id === op.id);
+            stats.total += chipsOp.length;
+            stats.ativos += chipsOp.filter(c => c.status === 'ativo').length;
+            stats.banidos += chipsOp.filter(c => c.status === 'banido').length;
+            stats.novos += chipsOp.filter(c => c.status === 'novo').length;
+        });
+        const isOpen = classesExpandidas[classe.id] !== false;
+        const corClasse = classe.cor || '#7777a0';
+        return `
+            <div class="class-card" style="border-left: 4px solid ${corClasse}">
+                <div class="class-header" onclick="toggleClasse('${classe.id}')">
+                    <div class="class-header-left">
+                        <span class="class-icon">${classe.icone || '📁'}</span>
+                        <span class="class-name" style="color:${corClasse}">${classe.nome}</span>
+                        <div class="class-stats">
+                            <span class="class-stat"><strong>${stats.total}</strong> chips</span>
+                            <span class="class-stat" style="color:var(--accent)">▲ ${stats.ativos}</span>
+                            <span class="class-stat" style="color:var(--red)">▼ ${stats.banidos}</span>
+                            <span class="class-stat" style="color:var(--blue)">● ${stats.novos}</span>
+                            <span class="class-stat">👥 ${opsDaClasse.length}</span>
+                        </div>
+                    </div>
+                    <div class="class-actions" onclick="event.stopPropagation()">
+                        <button class="btn-sm btn-edit" onclick="editarClasse('${classe.id}')">✏️</button>
+                        <button class="btn-sm btn-del" onclick="confirmarExcluirClasse('${classe.id}')">🗑️</button>
+                    </div>
+                </div>
+                <div class="class-content ${isOpen ? 'open' : ''}" id="class-content-${classe.id}">
+                    ${opsDaClasse.length ? `<div class="op-mini-grid">` + opsDaClasse.map(op => {
+                        const opChips = chips.filter(c => c.operador_id === op.id);
+                        const opAtivos = opChips.filter(c => c.status === 'ativo').length;
+                        const opBanidos = opChips.filter(c => c.status === 'banido').length;
+                        const opNovos = opChips.filter(c => c.status === 'novo').length;
+                        const iniciais = op.nome.split(' ').map(n => n[0]).join('').slice(0,2).toUpperCase();
+                        return `<div class="op-card-mini"><div class="op-head"><div class="op-info"><div class="op-avatar" style="background:${corClasse}30;color:${corClasse}">${iniciais}</div><div><strong>${op.nome}</strong></div></div><span class="badge badge-ativo">ativo</span></div><div class="op-stats"><div class="op-stat"><div class="op-stat-label">Total</div><div class="op-stat-val">${opChips.length}</div></div><div class="op-stat"><div class="op-stat-label">Ativos</div><div class="op-stat-val" style="color:var(--accent)">${opAtivos}</div></div><div class="op-stat"><div class="op-stat-label">Banidos</div><div class="op-stat-val" style="color:var(--red)">${opBanidos}</div></div><div class="op-stat"><div class="op-stat-label">Novos</div><div class="op-stat-val" style="color:var(--blue)">${opNovos}</div></div></div><div style="display:flex;gap:6px"><button class="btn-sm btn-edit" onclick="editarOperador('${op.id}')">Editar</button><button class="btn-sm btn-del" onclick="confirmarExcluirOperador('${op.id}')">Excluir</button><button class="btn-sm btn-ghost" onclick="abrirModalMoverOperador('${op.id}')">Mover</button></div></div>`;
+                    }).join('') + `</div>` : `<div class="empty-class">📭 Nenhum operador<br><button class="btn-sm btn-ghost" onclick="abrirModalOpComClasse('${classe.id}')">+ Adicionar</button></div>`}
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function toggleClasse(id) { classesExpandidas[id] = !classesExpandidas[id]; const content = document.getElementById(`class-content-${id}`); if (content) content.classList.toggle('open'); }
+function expandirTodas() { classes.forEach(c => classesExpandidas[c.id] = true); renderizarClasses(); }
+function recolherTodas() { classes.forEach(c => classesExpandidas[c.id] = false); renderizarClasses(); }
+
+function abrirModalClasse() { editandoClasseId = null; document.getElementById('modal-classe-title').innerText = 'Nova Classe'; document.getElementById('classe-nome').value = ''; document.getElementById('classe-icon').value = '📁'; document.getElementById('classe-cor').value = '#00e5a0'; document.getElementById('modal-classe').classList.add('open'); }
+function editarClasse(id) { const classe = classes.find(c => c.id === id); if (!classe) return; editandoClasseId = id; document.getElementById('modal-classe-title').innerText = 'Editar Classe'; document.getElementById('classe-nome').value = classe.nome; document.getElementById('classe-icon').value = classe.icone || '📁'; document.getElementById('classe-cor').value = classe.cor || '#00e5a0'; document.getElementById('modal-classe').classList.add('open'); }
+function salvarClasse() { const nome = document.getElementById('classe-nome').value.trim(); if (!nome) { toast('Informe o nome', 'err'); return; } const icone = document.getElementById('classe-icon').value; const cor = document.getElementById('classe-cor').value; if (editandoClasseId) { const index = classes.findIndex(c => c.id === editandoClasseId); if (index !== -1) classes[index] = { ...classes[index], nome, icone, cor }; toast('Classe atualizada', 'ok'); } else { classes.push({ id: Date.now().toString(), nome, icone, cor }); toast('Classe criada', 'ok'); } fecharModal('modal-classe'); salvarLocalStorage(); carregarDados(); }
+function confirmarExcluirClasse(id) { const classe = classes.find(c => c.id === id); const opsNaClasse = operadores.filter(op => op.classe_id === id); let mensagem = `Tem certeza que deseja excluir a classe <strong>${classe?.nome}</strong>?`; if (opsNaClasse.length) mensagem += `<br><br>⚠️ Esta classe tem ${opsNaClasse.length} operador(es). Eles serão movidos para "Sem classe".`; abrirConfirmModal('Excluir Classe', mensagem, '🗑️', () => { operadores = operadores.map(op => op.classe_id === id ? { ...op, classe_id: null } : op); classes = classes.filter(c => c.id !== id); salvarLocalStorage(); carregarDados(); toast('Classe excluída', 'ok'); }); }
+
+function abrirModalOp() { editandoOpId = null; document.getElementById('modal-op-title').innerText = 'Novo Operador'; document.getElementById('op-nome').value = ''; document.getElementById('op-classe').value = ''; const modal = document.getElementById('modal-op'); if(modal) modal.classList.add('open'); }
+function abrirModalOpComClasse(classeId) { editandoOpId = null; document.getElementById('modal-op-title').innerText = 'Novo Operador'; document.getElementById('op-nome').value = ''; document.getElementById('op-classe').value = classeId; const modal = document.getElementById('modal-op'); if(modal) modal.classList.add('open'); }
+function editarOperador(id) { const op = operadores.find(o => o.id === id); if (!op) return; editandoOpId = id; document.getElementById('modal-op-title').innerText = 'Editar Operador'; document.getElementById('op-nome').value = op.nome; document.getElementById('op-classe').value = op.classe_id || ''; const modal = document.getElementById('modal-op'); if(modal) modal.classList.add('open'); }
+function salvarOperador() { const nome = document.getElementById('op-nome').value.trim(); if (!nome) { toast('Informe o nome', 'err'); return; } const classe_id = document.getElementById('op-classe').value || null; if (editandoOpId) { const index = operadores.findIndex(o => o.id === editandoOpId); if (index !== -1) operadores[index] = { ...operadores[index], nome, classe_id }; toast('Operador atualizado', 'ok'); } else { operadores.push({ id: Date.now().toString(), nome, classe_id }); toast('Operador criado', 'ok'); } fecharModal('modal-op'); salvarLocalStorage(); carregarDados(); }
+function confirmarExcluirOperador(id) { const op = operadores.find(o => o.id === id); const chipsDoOperador = chips.filter(c => c.operador_id === id); let mensagem = `Tem certeza que deseja excluir o operador <strong>${op?.nome}</strong>?`; if (chipsDoOperador.length) mensagem += `<br><br>⚠️ Este operador tem ${chipsDoOperador.length} chip(s) atribuído(s). Eles ficarão sem operador.`; abrirConfirmModal('Excluir Operador', mensagem, '🗑️', () => { operadores = operadores.filter(o => o.id !== id); chips = chips.map(c => c.operador_id === id ? { ...c, operador_id: null } : c); salvarLocalStorage(); carregarDados(); toast('Operador excluído', 'ok'); }); }
+
+function abrirModalMoverOperador(id) { const op = operadores.find(o => o.id === id); if (!op) return; const modalHtml = `<div class="modal-overlay" id="modal-mover" style="display:flex"><div class="modal"><div class="modal-header"><div class="modal-title">Mover Operador</div><button onclick="fecharModalMover()">✕</button></div><div class="form-group"><label class="form-label">Operador: <strong>${op.nome}</strong></label></div><div class="form-group"><label class="form-label">Selecionar Classe</label><select id="mover-classe-select"><option value="">-- Sem classe --</option>${classes.map(c => `<option value="${c.id}" ${op.classe_id === c.id ? 'selected' : ''}>${c.icone} ${c.nome}</option>`).join('')}</select></div><div class="form-actions"><button class="btn-cancel" onclick="fecharModalMover()">Cancelar</button><button class="btn-primary" onclick="confirmarMoverOperador('${id}')">Mover</button></div></div></div>`; const existingModal = document.getElementById('modal-mover'); if (existingModal) existingModal.remove(); document.body.insertAdjacentHTML('beforeend', modalHtml); }
+function fecharModalMover() { const modal = document.getElementById('modal-mover'); if (modal) modal.remove(); }
+function confirmarMoverOperador(id) { const select = document.getElementById('mover-classe-select'); const novaClasseId = select?.value || null; const index = operadores.findIndex(o => o.id === id); if (index !== -1) { operadores[index] = { ...operadores[index], classe_id: novaClasseId }; salvarLocalStorage(); carregarDados(); const classeNome = classes.find(c => c.id === novaClasseId)?.nome || 'nenhuma classe'; toast(`Operador movido para ${classeNome}`, 'ok'); } fecharModalMover(); }
+
+function popularSelects() { 
+    const opSelect = document.getElementById('chip-operador'); 
+    if (opSelect) { 
+        const atual = opSelect.value; 
+        opSelect.innerHTML = '<option value="">Nenhum operador</option>' + operadores.map(o => `<option value="${o.id}">${o.nome}</option>`).join(''); 
+        opSelect.value = atual; 
+    } 
+    const bulkOp = document.getElementById('bulk-operador'); 
+    if (bulkOp) bulkOp.innerHTML = '<option value="">Alterar Operador</option>' + operadores.map(o => `<option value="${o.id}">${o.nome}</option>`).join(''); 
+    const classeSelect = document.getElementById('op-classe'); 
+    if (classeSelect) { 
+        const atual = classeSelect.value; 
+        classeSelect.innerHTML = '<option value="">Sem classe</option>' + classes.map(c => `<option value="${c.id}">${c.icone} ${c.nome}</option>`).join(''); 
+        classeSelect.value = atual; 
+    } 
+}
+
+function exportarDados() { 
+    const linhas = [['OPERADOR', 'CHIP', 'SITUAÇÃO', 'CLASSE']]; 
+    chips.forEach(chip => { 
+        const op = operadores.find(o => o.id === chip.operador_id); 
+        const classe = op ? classes.find(c => c.id === op.classe_id) : null; 
+        linhas.push([op?.nome || '', chip.numero, chip.status === 'ativo' ? 'Ativo' : (chip.status === 'banido' ? 'Banido' : 'Novo'), classe?.nome || '']); 
+    }); 
+    const csv = linhas.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(';')).join('\n'); 
+    const blob = new Blob(["\uFEFF" + csv], { type: 'text/csv;charset=utf-8' }); 
+    const link = document.createElement('a'); 
+    link.href = URL.createObjectURL(blob); 
+    link.download = `chips_${new Date().toISOString().slice(0,19)}.csv`; 
+    link.click(); 
+    toast('Exportado!', 'ok'); 
+}
+
+function baixarModelo() { 
+    const headers = ['OPERADOR', 'CHIP', 'SITUAÇÃO', 'CLASSE']; 
+    const exemplos = [['Exemplo_operador', '(11) 99999-9999', 'Novo', 'CRM']]; 
+    const csv = [headers.join(';'), ...exemplos.map(row => row.map(c => `"${c}"`).join(';'))].join('\n'); 
+    const blob = new Blob(["\uFEFF" + csv], { type: 'text/csv' }); 
+    const link = document.createElement('a'); 
+    link.href = URL.createObjectURL(blob); 
+    link.download = 'modelo_chips.csv'; 
+    link.click(); 
+    toast('Modelo baixado!', 'ok'); 
+}
+
+const dropzone = document.getElementById('dropzone'); 
+const fileInput = document.getElementById('import-file'); 
+if (dropzone && fileInput) { 
+    dropzone.addEventListener('click', () => fileInput.click()); 
+    dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.classList.add('drag-over'); }); 
+    dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag-over')); 
+    dropzone.addEventListener('drop', (e) => { e.preventDefault(); dropzone.classList.remove('drag-over'); if (e.dataTransfer.files.length) { fileInput.files = e.dataTransfer.files; previewArquivo(e.dataTransfer.files[0]); } }); 
+    fileInput.addEventListener('change', (e) => { if (e.target.files.length) previewArquivo(e.target.files[0]); }); 
+}
+
+function previewArquivo(file) { 
+    const reader = new FileReader(); 
+    reader.onload = (ev) => { 
+        const preview = document.getElementById('import-preview'); 
+        const conteudo = ev.target.result; 
+        arquivoSeparador = conteudo.includes(';') ? ';' : ','; 
+        const linhas = conteudo.split(/\r?\n/).filter(l => l.trim()); 
+        if (linhas.length < 2) { 
+            preview.innerHTML = '<span style="color:var(--red)">Arquivo vazio</span>'; 
+            preview.style.display = 'block'; 
+            return; 
+        } 
+        const headers = linhas[0].split(arquivoSeparador).map(h => h.replace(/^"|"$/g, '').trim().toUpperCase()); 
+        const valid = headers.includes('OPERADOR') && headers.includes('CHIP') && headers.includes('SITUAÇÃO'); 
+        if (!valid) { 
+            preview.innerHTML = '<span style="color:var(--red)">Colunas: OPERADOR; CHIP; SITUAÇÃO; CLASSE</span>'; 
+            preview.style.display = 'block'; 
+            return; 
+        } 
+        const previewRows = linhas.slice(1, 6).map(l => l.split(arquivoSeparador).map(c => c.replace(/^"|"$/g, '').trim())); 
+        let html = '<table style="width:100%;border-collapse:collapse"><tr><th>OPERADOR</th><th>CHIP</th><th>SITUAÇÃO</th><th>CLASSE</th></tr>'; 
+        previewRows.forEach(r => { if (r.length >= 3) html += `<tr><td>${r[0]||''}</td><td>${r[1]||''}</td><td>${r[2]||''}</td><td>${r[3]||''}</td></tr>`; }); 
+        html += '</table><span style="color:var(--accent)">✔️ Pronto para importar</span>'; 
+        preview.innerHTML = html; 
+        preview.style.display = 'block'; 
+        arquivoLinhas = linhas; 
+    }; 
+    reader.readAsText(file, 'UTF-8'); 
+}
+
+async function processarImportacao() { 
+    if (!arquivoLinhas) { toast('Nenhum arquivo carregado', 'err'); return; } 
+    const headers = arquivoLinhas[0].split(arquivoSeparador).map(h => h.replace(/^"|"$/g, '').trim().toUpperCase()); 
+    const idxOp = headers.indexOf('OPERADOR'); 
+    const idxChip = headers.indexOf('CHIP'); 
+    const idxStatus = headers.indexOf('SITUAÇÃO'); 
+    const idxClasse = headers.indexOf('CLASSE'); 
+    let sucessos = 0, erros = 0, atualizados = 0; 
+    const chipsProcessados = new Map(); 
+    for (let i = 1; i < arquivoLinhas.length; i++) { 
+        if (!arquivoLinhas[i].trim()) continue; 
+        const cols = arquivoLinhas[i].split(arquivoSeparador).map(c => c.replace(/^"|"$/g, '').trim()); 
+        const nomeOp = cols[idxOp] || ''; 
+        let numeroRaw = cols[idxChip] || ''; 
+        const situacao = (cols[idxStatus] || '').toLowerCase(); 
+        const nomeClasse = idxClasse !== -1 ? (cols[idxClasse] || '').trim() : ''; 
+        numeroRaw = numeroRaw.toString().replace(/[^\d]/g, ''); 
+        if (numeroRaw.length === 12 && numeroRaw.startsWith('55')) numeroRaw = numeroRaw.substring(2); 
+        else if (numeroRaw.length > 11) numeroRaw = numeroRaw.slice(-11); 
+        if (numeroRaw.length < 10 || numeroRaw.length > 11) { erros++; continue; } 
+        const numero = formatarTelefone(numeroRaw); 
+        const statusMap = { 'ativo':'ativo', 'banido':'banido', 'novo':'novo', 'atividade':'ativo', 'active':'ativo' }; 
+        const status = statusMap[situacao] || 'novo'; 
+        let classe_id = null; 
+        if (nomeClasse) { 
+            let existente = classes.find(c => c.nome.toLowerCase() === nomeClasse.toLowerCase()); 
+            if (existente) classe_id = existente.id; 
+            else { 
+                classe_id = Date.now().toString() + Math.random(); 
+                classes.push({ id: classe_id, nome: nomeClasse, icone: '📁', cor: '#00e5a0' }); 
+            } 
+        } 
+        let operador_id = null; 
+        if (nomeOp) { 
+            let existente = operadores.find(o => o.nome.toLowerCase() === nomeOp.toLowerCase()); 
+            if (existente) operador_id = existente.id; 
+            else { 
+                operador_id = Date.now().toString() + Math.random(); 
+                operadores.push({ id: operador_id, nome: nomeOp, classe_id }); 
+            } 
+        } 
+        const chipExistente = chips.find(c => c.numero.replace(/\D/g, '') === numeroRaw); 
+        if (chipExistente) { 
+            if (chipExistente.status !== status) { 
+                const chipIndex = chips.findIndex(c => c.id === chipExistente.id); 
+                if (chipIndex !== -1) chips[chipIndex] = { ...chips[chipIndex], status }; 
+                atualizados++; 
+            } 
+        } else if (!chipsProcessados.has(numeroRaw)) { 
+            chips.push({ id: Date.now().toString() + Math.random() + i, numero, operador_id, status, motivo_ban: null, criado_em: new Date().toISOString() }); 
+            chipsProcessados.set(numeroRaw, true); 
+            sucessos++; 
+        } 
+    } 
+    salvarLocalStorage(); 
+    carregarDados(); 
+    document.getElementById('import-preview').innerHTML = `✅ Importação concluída!<br>📱 Novos chips: ${sucessos}<br>🔄 Status atualizados: ${atualizados}<br>❌ Erros: ${erros}`; 
+    toast(`${sucessos} novos chips, ${atualizados} atualizados`, sucessos || atualizados ? 'ok' : 'err'); 
+    arquivoLinhas = null; 
+}
+
+let acaoConfirmada = null;
+function abrirConfirmModal(titulo, mensagem, icone, acao) { 
+    document.getElementById('confirm-title').textContent = titulo; 
+    document.getElementById('confirm-message').innerHTML = mensagem; 
+    document.getElementById('confirm-icon').textContent = icone || '⚠️'; 
+    acaoConfirmada = acao; 
+    document.getElementById('confirm-modal').classList.add('open'); 
+}
+function fecharConfirmModal() { document.getElementById('confirm-modal').classList.remove('open'); acaoConfirmada = null; }
+function executarAcaoConfirmada() { if (acaoConfirmada) { acaoConfirmada(); } fecharConfirmModal(); }
+function fecharModal(id) { document.getElementById(id).classList.remove('open'); }
+function toast(msg, tipo) { const el = document.getElementById('toast'); el.textContent = msg; el.className = `show ${tipo || ''}`; setTimeout(() => el.className = '', 3000); }
+function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
+function toggleTheme() { const currentTheme = document.documentElement.getAttribute('data-theme'); if (currentTheme === 'light') document.documentElement.setAttribute('data-theme', 'dark'); else document.documentElement.setAttribute('data-theme', 'light'); localStorage.setItem('receptivo_theme', document.documentElement.getAttribute('data-theme') || 'dark'); }
+
+// Event listeners
+document.querySelectorAll('.nav-btn').forEach(btn => { btn.addEventListener('click', () => { const page = btn.getAttribute('data-page'); document.querySelectorAll('.page').forEach(p => p.classList.remove('active')); document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active')); document.getElementById(`page-${page}`).classList.add('active'); btn.classList.add('active'); if (window.innerWidth <= 768) document.getElementById('sidebar').classList.remove('open'); }); });
+document.querySelectorAll('.modal-overlay').forEach(modal => { modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.remove('open'); }); });
+document.getElementById('login-btn').addEventListener('click', fazerLogin);
+
+const savedTheme = localStorage.getItem('receptivo_theme');
+if (savedTheme === 'light') document.documentElement.setAttribute('data-theme', 'light');
+
+// Inicialização
+carregarUsuarios();
+carregarHistoricoCentral();
+initSupabase();
+verificarLogin();
 </script>
 </body>
 </html>
