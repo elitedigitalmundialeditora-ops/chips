@@ -1,9 +1,11 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>ChipMGR | Gestão de Chips WhatsApp</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<meta name="theme-color" content="#0b0b10"/>
+<title>Receptivo | Gestão de Chips WhatsApp</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
@@ -13,6 +15,8 @@
   padding: 0;
   box-sizing: border-box;
 }
+
+/* Temas */
 :root {
   --bg: #0b0b10;
   --bg2: #13131c;
@@ -28,7 +32,20 @@
   --font: 'Syne', sans-serif;
   --mono: 'DM Mono', monospace;
   --radius: 10px;
+  --shadow: 0 4px 20px rgba(0,0,0,0.3);
 }
+
+[data-theme="light"] {
+  --bg: #f0f2f5;
+  --bg2: #ffffff;
+  --bg3: #f8f9fa;
+  --bg4: #e9ecef;
+  --border: #dee2e6;
+  --text: #212529;
+  --text2: #6c757d;
+  --shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+
 body {
   background: var(--bg);
   color: var(--text);
@@ -36,7 +53,45 @@ body {
   display: flex;
   overflow: hidden;
   height: 100vh;
+  transition: background 0.3s, color 0.3s;
 }
+
+/* Login Screen */
+#login-screen {
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(135deg, #0b0b10 0%, #1a1a2e 100%);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+[data-theme="light"] #login-screen {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+.login-card {
+  background: var(--bg2);
+  border-radius: 20px;
+  padding: 40px;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: var(--shadow);
+  text-align: center;
+}
+.login-logo {
+  font-family: var(--font);
+  font-size: 32px;
+  font-weight: 800;
+  margin-bottom: 30px;
+}
+.login-logo span { color: var(--accent); }
+.login-error {
+  color: var(--red);
+  font-size: 12px;
+  margin-top: 10px;
+  display: none;
+}
+
 #sidebar {
   width: 240px;
   background: var(--bg2);
@@ -45,6 +100,7 @@ body {
   flex-direction: column;
   flex-shrink: 0;
   height: 100vh;
+  transition: transform 0.3s ease;
 }
 .logo {
   padding: 26px 20px 18px;
@@ -111,27 +167,66 @@ nav {
 }
 .page {
   display: none;
-  padding: 32px;
+  padding: 20px;
   animation: fadeIn 0.25s ease;
 }
-.page.active {
-  display: block;
+@media (max-width: 768px) {
+  .page { padding: 16px; }
+  #sidebar { position: fixed; left: -240px; z-index: 1000; transition: left 0.3s; }
+  #sidebar.open { left: 0; }
+  .menu-toggle { display: block; position: fixed; top: 16px; left: 16px; z-index: 1001; background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; cursor: pointer; }
+  .cards-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 12px !important; }
+  .charts-row { grid-template-columns: 1fr !important; }
+  .export-import-grid { grid-template-columns: 1fr !important; }
+  .op-mini-grid { grid-template-columns: 1fr !important; }
+  .page-header { flex-direction: column; align-items: flex-start; gap: 12px; }
 }
+@media (min-width: 769px) {
+  .menu-toggle { display: none; }
+}
+.page.active { display: block; }
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 .page-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.header-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.user-info {
+  background: var(--bg3);
+  border-radius: 8px;
+  padding: 5px 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.user-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 20px;
+  background: var(--accent);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #000;
+  font-size: 12px;
+  font-weight: 800;
+}
+.theme-toggle {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 18px;
 }
 .page-title {
   font-family: var(--font);
@@ -154,7 +249,9 @@ nav {
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 20px;
+  transition: transform 0.2s;
 }
+.stat-card:hover { transform: translateY(-2px); }
 .stat-label {
   font-family: var(--font);
   font-size: 11px;
@@ -168,6 +265,11 @@ nav {
   font-size: 38px;
   line-height: 1;
   margin-top: 8px;
+}
+.stat-change {
+  font-size: 11px;
+  margin-top: 8px;
+  color: var(--text2);
 }
 .table-wrap {
   background: var(--bg2);
@@ -191,9 +293,7 @@ th {
   color: var(--text2);
   text-transform: uppercase;
 }
-tr:hover td {
-  background: var(--bg3);
-}
+tr:hover td { background: var(--bg3); }
 .badge {
   display: inline-flex;
   padding: 3px 10px;
@@ -202,21 +302,9 @@ tr:hover td {
   font-weight: 700;
   text-transform: uppercase;
 }
-.badge-ativo {
-  background: #00e5a018;
-  color: var(--accent);
-  border: 1px solid #00e5a030;
-}
-.badge-banido {
-  background: #ff4d6d18;
-  color: var(--red);
-  border: 1px solid #ff4d6d30;
-}
-.badge-novo {
-  background: #4d9eff18;
-  color: var(--blue);
-  border: 1px solid #4d9eff30;
-}
+.badge-ativo { background: #00e5a018; color: var(--accent); border: 1px solid #00e5a030; }
+.badge-banido { background: #ff4d6d18; color: var(--red); border: 1px solid #ff4d6d30; }
+.badge-novo { background: #4d9eff18; color: var(--blue); border: 1px solid #4d9eff30; }
 button {
   cursor: pointer;
   border: none;
@@ -224,34 +312,15 @@ button {
   font-family: var(--font);
   transition: all 0.15s;
 }
-.btn-primary {
-  background: var(--accent);
-  color: #000;
-  padding: 10px 20px;
-  font-weight: 700;
-  font-size: 14px;
-}
-.btn-sm {
-  padding: 6px 14px;
-  font-size: 12px;
-  font-weight: 700;
-}
-.btn-edit {
-  background: var(--bg3);
-  color: var(--text);
-  border: 1px solid var(--border);
-}
-.btn-del {
-  background: #ff4d6d18;
-  color: var(--red);
-  border: 1px solid #ff4d6d30;
-}
-.btn-ghost {
-  background: transparent;
-  border: 1px solid var(--border);
-  color: var(--text2);
-  padding: 8px 16px;
-}
+.btn-primary { background: var(--accent); color: #000; padding: 10px 20px; font-weight: 700; font-size: 14px; }
+.btn-sm { padding: 6px 14px; font-size: 12px; font-weight: 700; }
+.btn-edit { background: var(--bg3); color: var(--text); border: 1px solid var(--border); }
+.btn-del { background: #ff4d6d18; color: var(--red); border: 1px solid #ff4d6d30; }
+.btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--text2); padding: 8px 16px; }
+.btn-cancel { background: var(--bg3); color: var(--text2); border: 1px solid var(--border); }
+.checkbox-col { width: 40px; }
+.bulk-actions { background: var(--bg3); padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; display: none; gap: 12px; align-items: center; flex-wrap: wrap; }
+.bulk-actions.show { display: flex; }
 .filters {
   display: flex;
   gap: 10px;
@@ -263,16 +332,8 @@ button {
   flex: 1;
   max-width: 300px;
 }
-.search-wrap input {
-  padding-left: 34px;
-  width: 100%;
-}
-.search-icon {
-  position: absolute;
-  left: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-}
+.search-wrap input { padding-left: 34px; width: 100%; }
+.search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); }
 input, select {
   font-family: var(--mono);
   background: var(--bg3);
@@ -291,23 +352,17 @@ input, select {
   color: var(--text2);
   font-weight: 700;
 }
-.filter-btn.active {
-  background: var(--accent);
-  color: #000;
-  border-color: var(--accent);
-}
+.filter-btn.active { background: var(--accent); color: #000; border-color: var(--accent); }
 .modal-overlay {
   display: none;
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.75);
+  background: rgba(0,0,0,0.85);
   z-index: 1000;
   align-items: center;
   justify-content: center;
 }
-.modal-overlay.open {
-  display: flex;
-}
+.modal-overlay.open { display: flex; }
 .modal {
   background: var(--bg2);
   border: 1px solid var(--border);
@@ -322,14 +377,8 @@ input, select {
   align-items: center;
   margin-bottom: 22px;
 }
-.modal-title {
-  font-family: var(--font);
-  font-weight: 800;
-  font-size: 18px;
-}
-.form-group {
-  margin-bottom: 14px;
-}
+.modal-title { font-family: var(--font); font-weight: 800; font-size: 18px; }
+.form-group { margin-bottom: 14px; }
 .form-label {
   display: block;
   font-size: 11px;
@@ -338,12 +387,7 @@ input, select {
   text-transform: uppercase;
   margin-bottom: 6px;
 }
-.form-actions {
-  display: flex;
-  gap: 10px;
-  justify-content: flex-end;
-  margin-top: 20px;
-}
+.form-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
 .class-card {
   background: var(--bg2);
   border: 1px solid var(--border);
@@ -357,42 +401,22 @@ input, select {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 .class-header-left {
   display: flex;
   align-items: center;
   gap: 12px;
+  flex-wrap: wrap;
 }
-.class-icon {
-  font-size: 24px;
-}
-.class-name {
-  font-family: var(--font);
-  font-weight: 800;
-  font-size: 18px;
-}
-.class-stats {
-  display: flex;
-  gap: 16px;
-  margin-left: 20px;
-}
-.class-stat {
-  font-size: 12px;
-  color: var(--text2);
-}
-.class-content {
-  display: none;
-  padding: 20px;
-  border-top: 1px solid var(--border);
-}
-.class-content.open {
-  display: block;
-}
-.op-mini-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 16px;
-}
+.class-icon { font-size: 24px; }
+.class-name { font-family: var(--font); font-weight: 800; font-size: 18px; }
+.class-stats { display: flex; gap: 16px; flex-wrap: wrap; }
+.class-stat { font-size: 12px; color: var(--text2); }
+.class-content { display: none; padding: 20px; border-top: 1px solid var(--border); }
+.class-content.open { display: block; }
+.op-mini-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; }
 .op-card-mini {
   background: var(--bg3);
   border: 1px solid var(--border);
@@ -405,11 +429,7 @@ input, select {
   align-items: center;
   margin-bottom: 12px;
 }
-.op-info {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
+.op-info { display: flex; align-items: center; gap: 10px; }
 .op-avatar {
   width: 36px;
   height: 36px;
@@ -432,19 +452,9 @@ input, select {
   padding: 8px;
   text-align: center;
 }
-.op-stat-label {
-  font-size: 10px;
-  color: var(--text2);
-}
-.op-stat-val {
-  font-weight: 800;
-  font-size: 18px;
-}
-.export-import-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 24px;
-}
+.op-stat-label { font-size: 10px; color: var(--text2); }
+.op-stat-val { font-weight: 800; font-size: 18px; }
+.export-import-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
 .exim-card {
   background: var(--bg2);
   border: 1px solid var(--border);
@@ -460,9 +470,7 @@ input, select {
   background: var(--bg4);
   cursor: pointer;
 }
-.file-dropzone:hover {
-  border-color: var(--accent);
-}
+.file-dropzone:hover { border-color: var(--accent); }
 .import-preview {
   background: var(--bg3);
   border-radius: 10px;
@@ -485,55 +493,55 @@ input, select {
   opacity: 0;
   transition: all 0.3s ease;
 }
-#toast.show {
-  transform: translateY(0);
-  opacity: 1;
+#toast.show { transform: translateY(0); opacity: 1; }
+#toast.ok { border-color: var(--accent); color: var(--accent); }
+#toast.err { border-color: var(--red); color: var(--red); }
+.history-log {
+  max-height: 300px;
+  overflow-y: auto;
+  font-size: 12px;
 }
-#toast.ok {
-  border-color: var(--accent);
-  color: var(--accent);
+.history-item {
+  padding: 12px;
+  border-bottom: 1px solid var(--border);
+  font-family: var(--mono);
+  line-height: 1.5;
 }
-#toast.err {
-  border-color: var(--red);
-  color: var(--red);
+.history-date {
+  font-size: 11px;
+  color: var(--text2);
+  margin-bottom: 4px;
 }
-.charts-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
-  margin-bottom: 24px;
+.history-user {
+  font-weight: 700;
+  display: inline-block;
+  background: var(--bg3);
+  padding: 2px 8px;
+  border-radius: 12px;
+  margin-left: 8px;
 }
+.history-action {
+  font-weight: 800;
+  margin: 6px 0 2px 0;
+}
+.history-detail {
+  font-size: 11px;
+  color: var(--text2);
+  margin-left: 20px;
+}
+.charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px; }
 .chart-card {
   background: var(--bg2);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 22px;
 }
-.pie-wrap {
-  display: flex;
-  align-items: center;
-  gap: 24px;
-}
-.pie-wrap canvas {
-  width: 160px !important;
-  height: 160px !important;
-  flex-shrink: 0;
-}
-.pie-legend {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-.legend-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.legend-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 3px;
-}
+.chart-title { font-family: var(--font); font-weight: 700; font-size: 14px; margin-bottom: 16px; }
+.pie-wrap { display: flex; align-items: center; gap: 24px; flex-wrap: wrap; }
+.pie-wrap canvas { width: 160px !important; height: 160px !important; flex-shrink: 0; }
+.pie-legend { display: flex; flex-direction: column; gap: 10px; }
+.legend-item { display: flex; align-items: center; gap: 8px; }
+.legend-dot { width: 10px; height: 10px; border-radius: 3px; }
 .ranking-card {
   background: var(--bg2);
   border: 1px solid var(--border);
@@ -547,31 +555,67 @@ input, select {
   padding: 9px 0;
   border-bottom: 1px solid var(--border);
 }
-.rank-num {
-  font-weight: 800;
-  font-size: 22px;
-  min-width: 28px;
+.rank-num { font-weight: 800; font-size: 22px; min-width: 28px; }
+.rank-name { flex: 1; }
+.empty-class { text-align: center; padding: 40px; color: var(--text2); }
+.classes-header { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+.confirm-modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.85);
+  z-index: 2001;
+  align-items: center;
+  justify-content: center;
 }
-.rank-name {
-  flex: 1;
-}
-.empty-class {
+.confirm-modal-overlay.open { display: flex; }
+.confirm-modal {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  width: 100%;
+  max-width: 400px;
+  padding: 28px;
   text-align: center;
-  padding: 40px;
-  color: var(--text2);
 }
-.classes-header {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 20px;
+.confirm-modal-icon { font-size: 48px; margin-bottom: 16px; }
+.confirm-modal-title { font-family: var(--font); font-weight: 800; font-size: 20px; margin-bottom: 12px; }
+.confirm-modal-message { color: var(--text2); margin-bottom: 24px; line-height: 1.5; }
+.confirm-modal-actions { display: flex; gap: 12px; justify-content: center; }
+.delete-checkbox { width: 18px; height: 18px; cursor: pointer; }
+.user-table-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  display: inline-block;
+  margin-right: 8px;
+}
+.password-toggle {
+  cursor: pointer;
+  margin-left: 8px;
 }
 </style>
 </head>
 <body>
 
+<!-- Tela de Login -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">RECEP<span>TIVO</span></div>
+    <div class="form-group">
+      <input type="text" id="login-user" placeholder="Usuário" style="text-align:center">
+    </div>
+    <div class="form-group">
+      <input type="password" id="login-pass" placeholder="Senha" style="text-align:center">
+    </div>
+    <button class="btn-primary" style="width:100%" onclick="fazerLogin()">Entrar</button>
+    <div class="login-error" id="login-error">Usuário ou senha incorretos</div>
+  </div>
+</div>
+
 <div id="sidebar">
   <div class="logo">
-    <div class="logo-text">CHIP<span>MGR</span></div>
+    <div class="logo-text">RECEP<span>TIVO</span></div>
     <div class="logo-sub">Gestão de chips WhatsApp</div>
   </div>
   <nav>
@@ -579,24 +623,32 @@ input, select {
     <button class="nav-btn" data-page="chips">📱 Chips</button>
     <button class="nav-btn" data-page="operadores">👥 Operadores</button>
     <button class="nav-btn" data-page="exportar">📦 Import/Export</button>
+    <button class="nav-btn" data-page="usuarios" id="nav-usuarios" style="display: none;">👤 Usuários</button>
+    <button class="nav-btn" data-page="historico" id="nav-historico" style="display: none;">📜 Histórico</button>
   </nav>
   <div class="sidebar-foot"><span class="dot"></span>Modo Local</div>
 </div>
 
 <div id="main">
+  <div class="menu-toggle" onclick="toggleSidebar()">☰</div>
+  
   <div class="page active" id="page-dashboard">
     <div class="page-header">
       <div>
         <div class="page-title">Dashboard</div>
         <div class="page-sub">Visão geral do sistema</div>
       </div>
-      <button class="btn-ghost" onclick="carregarDados()">Atualizar</button>
+      <div class="header-actions">
+        <div class="user-info" id="user-info-header"><span class="user-avatar" id="user-avatar">U</span><span id="user-name-display"></span></div>
+        <button class="theme-toggle" onclick="toggleTheme()">🌓</button>
+        <button class="btn-ghost" onclick="carregarDados()">Atualizar</button>
+      </div>
     </div>
     <div class="cards-grid">
-      <div class="stat-card"><div class="stat-label">Total de Chips</div><div class="stat-value" id="d-total">0</div></div>
-      <div class="stat-card"><div class="stat-label">Ativos</div><div class="stat-value" id="d-ativos" style="color:var(--accent)">0</div></div>
-      <div class="stat-card"><div class="stat-label">Banidos</div><div class="stat-value" id="d-banidos" style="color:var(--red)">0</div></div>
-      <div class="stat-card"><div class="stat-label">Novos</div><div class="stat-value" id="d-novos" style="color:var(--blue)">0</div></div>
+      <div class="stat-card"><div class="stat-label">Total de Chips</div><div class="stat-value" id="d-total">0</div><div class="stat-change">📈 Todos os chips</div></div>
+      <div class="stat-card"><div class="stat-label">Ativos</div><div class="stat-value" id="d-ativos" style="color:var(--accent)">0</div><div class="stat-change">✅ Em operação</div></div>
+      <div class="stat-card"><div class="stat-label">Banidos</div><div class="stat-value" id="d-banidos" style="color:var(--red)">0</div><div class="stat-change">⚠️ Bloqueados</div></div>
+      <div class="stat-card"><div class="stat-label">Novos</div><div class="stat-value" id="d-novos" style="color:var(--blue)">0</div><div class="stat-change">🆕 Aguardando</div></div>
     </div>
     <div class="charts-row">
       <div class="chart-card">
@@ -605,19 +657,39 @@ input, select {
       </div>
       <div class="chart-card">
         <div class="chart-title">Chips por Classe</div>
-        <div style="position:relative;height:160px;width:100%"><canvas id="bar-chart"></canvas></div>
+        <div style="position:relative;height:200px"><canvas id="bar-chart"></canvas></div>
       </div>
     </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
-      <div class="ranking-card"><div class="chart-title">Ranking — Mais Ativos</div><div id="rank-ativos"></div></div>
-      <div class="ranking-card"><div class="chart-title">Ranking — Mais Banidos</div><div id="rank-banidos"></div></div>
+    <div class="charts-row">
+      <div class="ranking-card"><div class="chart-title">🏆 Ranking — Mais Ativos</div><div id="rank-ativos"></div></div>
+      <div class="ranking-card"><div class="chart-title">📉 Ranking — Mais Banidos</div><div id="rank-banidos"></div></div>
+    </div>
+    <div class="ranking-card">
+      <div class="chart-title">📊 Taxa de Aprovação por Operador</div>
+      <div id="taxa-aprovacao"></div>
     </div>
   </div>
 
   <div class="page" id="page-chips">
     <div class="page-header">
       <div><div class="page-title">Chips</div><div class="page-sub" id="chips-count">carregando...</div></div>
-      <button class="btn-primary" onclick="abrirModalChip()">+ Adicionar Chip</button>
+      <div class="header-actions">
+        <button class="btn-primary" onclick="abrirModalChip()">+ Adicionar Chip</button>
+      </div>
+    </div>
+    <div class="bulk-actions" id="bulk-actions">
+      <span>📌 <span id="selected-count">0</span> chips selecionados</span>
+      <select id="bulk-status" style="width:auto">
+        <option value="">Alterar Status</option>
+        <option value="ativo">Ativo</option>
+        <option value="banido">Banido</option>
+        <option value="novo">Novo</option>
+      </select>
+      <select id="bulk-operador" style="width:auto">
+        <option value="">Alterar Operador</option>
+      </select>
+      <button class="btn-primary btn-sm" onclick="aplicarEdicaoEmMassa()">Aplicar</button>
+      <button class="btn-ghost btn-sm" onclick="limparSelecao()">Limpar</button>
     </div>
     <div class="filters">
       <div class="search-wrap"><span class="search-icon">🔍</span><input id="chip-search" placeholder="Buscar..." oninput="renderizarChips()"></div>
@@ -628,8 +700,10 @@ input, select {
     </div>
     <div class="table-wrap">
       <table>
-        <thead><tr><th>Número</th><th>Operador</th><th>Classe</th><th>Status</th><th>Motivo</th><th>Ações</th></tr></thead>
-        <tbody id="chips-tbody"><tr><td colspan="6">Carregando...</td></tr></tbody>
+        <thead>
+          <tr><th class="checkbox-col"><input type="checkbox" id="select-all-chips" onchange="selecionarTodosChips()"></th><th>Número</th><th>Operador</th><th>Classe</th><th>Status</th><th>Motivo</th><th>Ações</th></tr>
+        </thead>
+        <tbody id="chips-tbody"></tbody>
       </table>
     </div>
   </div>
@@ -637,8 +711,10 @@ input, select {
   <div class="page" id="page-operadores">
     <div class="page-header">
       <div><div class="page-title">Operadores</div><div class="page-sub" id="operadores-count">Organize por classe</div></div>
-      <div><button class="btn-primary" onclick="abrirModalClasse()">+ Nova Classe</button>
-      <button class="btn-primary" style="margin-left:10px" onclick="abrirModalOp()">+ Novo Operador</button></div>
+      <div class="header-actions">
+        <button class="btn-primary" onclick="abrirModalClasse()">+ Nova Classe</button>
+        <button class="btn-primary" onclick="abrirModalOp()">+ Novo Operador</button>
+      </div>
     </div>
     <div class="classes-header">
       <button class="btn-ghost" onclick="expandirTodas()">📂 Expandir todas</button>
@@ -665,43 +741,240 @@ input, select {
       </div>
     </div>
   </div>
-</div>
 
-<div class="modal-overlay" id="modal-chip">
-  <div class="modal">
-    <div class="modal-header"><div class="modal-title" id="modal-chip-title">Novo Chip</div><button onclick="fecharModal('modal-chip')">✕</button></div>
-    <div class="form-group"><label class="form-label">Número</label><input id="chip-numero" placeholder="(11) 99999-9999"></div>
-    <div class="form-group"><label class="form-label">Operador</label><select id="chip-operador"></select></div>
-    <div class="form-group"><label class="form-label">Status</label><select id="chip-status" onchange="toggleMotivoBan()"><option value="novo">Novo</option><option value="ativo">Ativo</option><option value="banido">Banido</option></select></div>
-    <div class="form-group" id="motivo-group" style="display:none"><label class="form-label">Motivo do Ban</label><input id="chip-motivo"></div>
-    <div class="form-actions"><button class="btn-ghost" onclick="fecharModal('modal-chip')">Cancelar</button><button class="btn-primary" onclick="salvarChip()">Salvar</button></div>
+  <!-- Página de Usuários (Apenas Gerente) -->
+  <div class="page" id="page-usuarios">
+    <div class="page-header">
+      <div><div class="page-title">Usuários do Sistema</div><div class="page-sub">Gerencie quem pode acessar</div></div>
+      <div class="header-actions">
+        <button class="btn-primary" onclick="abrirModalUsuario()">+ Novo Usuário</button>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Usuário</th><th>Senha</th><th>Cor</th><th>Ações</th></tr></thead>
+        <tbody id="usuarios-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Página de Histórico (Apenas Gerente) -->
+  <div class="page" id="page-historico">
+    <div class="page-header">
+      <div><div class="page-title">Histórico</div><div class="page-sub">Logs de todas as ações</div></div>
+      <div class="header-actions">
+        <button class="btn-ghost" onclick="carregarDados(); renderizarHistoricoCentral();">Atualizar</button>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <div class="history-log" id="central-history-log" style="max-height: 70vh;"></div>
+    </div>
   </div>
 </div>
 
-<div class="modal-overlay" id="modal-op">
-  <div class="modal">
-    <div class="modal-header"><div class="modal-title" id="modal-op-title">Novo Operador</div><button onclick="fecharModal('modal-op')">✕</button></div>
-    <div class="form-group"><label class="form-label">Nome</label><input id="op-nome"></div>
-    <div class="form-group"><label class="form-label">Email</label><input id="op-email"></div>
-    <div class="form-group"><label class="form-label">Classe</label><select id="op-classe"></select></div>
-    <div class="form-group"><input type="checkbox" id="op-ativo" checked> <label>Ativo</label></div>
-    <div class="form-actions"><button class="btn-ghost" onclick="fecharModal('modal-op')">Cancelar</button><button class="btn-primary" onclick="salvarOperador()">Salvar</button></div>
-  </div>
-</div>
+<!-- Modais -->
+<div class="modal-overlay" id="modal-chip"><div class="modal"><div class="modal-header"><div class="modal-title" id="modal-chip-title">Novo Chip</div><button onclick="fecharModal('modal-chip')">✕</button></div><div class="form-group"><label class="form-label">Número</label><input id="chip-numero" placeholder="(11) 99999-9999"></div><div class="form-group"><label class="form-label">Operador</label><select id="chip-operador"></select></div><div class="form-group"><label class="form-label">Status</label><select id="chip-status" onchange="toggleMotivoBan()"><option value="novo">Novo</option><option value="ativo">Ativo</option><option value="banido">Banido</option></select></div><div class="form-group" id="motivo-group" style="display:none"><label class="form-label">Motivo do Ban</label><input id="chip-motivo"></div><div class="form-actions"><button class="btn-cancel" onclick="fecharModal('modal-chip')">Cancelar</button><button class="btn-primary" onclick="salvarChip()">Salvar</button></div></div></div>
 
-<div class="modal-overlay" id="modal-classe">
-  <div class="modal">
-    <div class="modal-header"><div class="modal-title" id="modal-classe-title">Nova Classe</div><button onclick="fecharModal('modal-classe')">✕</button></div>
-    <div class="form-group"><label class="form-label">Nome da Classe</label><input id="classe-nome"></div>
-    <div class="form-group"><label class="form-label">Ícone</label><select id="classe-icon"><option value="📁">📁 Pasta</option><option value="🚀">🚀 CRM</option><option value="🎯">🎯 Digital</option><option value="🏠">🏠 Home</option><option value="🌱">🌱 Novatos</option><option value="👶">👶 Menores</option><option value="⭐">⭐ Elite</option></select></div>
-    <div class="form-actions"><button class="btn-ghost" onclick="fecharModal('modal-classe')">Cancelar</button><button class="btn-primary" onclick="salvarClasse()">Salvar</button></div>
-  </div>
-</div>
+<div class="modal-overlay" id="modal-op"><div class="modal"><div class="modal-header"><div class="modal-title" id="modal-op-title">Novo Operador</div><button onclick="fecharModal('modal-op')">✕</button></div><div class="form-group"><label class="form-label">Nome</label><input id="op-nome"></div><div class="form-group"><label class="form-label">Classe</label><select id="op-classe"></select></div><div class="form-actions"><button class="btn-cancel" onclick="fecharModal('modal-op')">Cancelar</button><button class="btn-primary" onclick="salvarOperador()">Salvar</button></div></div></div>
+
+<div class="modal-overlay" id="modal-classe"><div class="modal"><div class="modal-header"><div class="modal-title" id="modal-classe-title">Nova Classe</div><button onclick="fecharModal('modal-classe')">✕</button></div><div class="form-group"><label class="form-label">Nome da Classe</label><input id="classe-nome"></div><div class="form-group"><label class="form-label">Ícone</label><select id="classe-icon"><option value="📁">📁 Pasta</option><option value="🚀">🚀 CRM</option><option value="🎯">🎯 Digital</option><option value="🏠">🏠 Home</option><option value="🌱">🌱 Novatos</option><option value="👶">👶 Menor</option><option value="⭐">⭐ Elite</option><option value="💎">💎 Diamante</option><option value="🔥">🔥 Top</option></select></div><div class="form-group"><label class="form-label">Cor da Classe</label><input type="color" id="classe-cor" value="#00e5a0"></div><div class="form-actions"><button class="btn-cancel" onclick="fecharModal('modal-classe')">Cancelar</button><button class="btn-primary" onclick="salvarClasse()">Salvar</button></div></div></div>
+
+<div class="modal-overlay" id="modal-history"><div class="modal"><div class="modal-header"><div class="modal-title">Histórico do Chip</div><button onclick="fecharModal('modal-history')">✕</button></div><div id="history-content" class="history-log"></div></div></div>
+
+<!-- Modal Usuário -->
+<div class="modal-overlay" id="modal-usuario"><div class="modal"><div class="modal-header"><div class="modal-title" id="modal-usuario-title">Novo Usuário</div><button onclick="fecharModal('modal-usuario')">✕</button></div><div class="form-group"><label class="form-label">Login</label><input id="usuario-login" placeholder="ex: joao_silva"></div><div class="form-group"><label class="form-label">Senha</label><input id="usuario-senha" type="password" placeholder="******"></div><div class="form-group"><label class="form-label">Cor do Usuário (Avatar)</label><input type="color" id="usuario-cor" value="#00e5a0"></div><div class="form-actions"><button class="btn-cancel" onclick="fecharModal('modal-usuario')">Cancelar</button><button class="btn-primary" onclick="salvarUsuario()">Salvar</button></div></div></div>
+
+<div class="confirm-modal-overlay" id="confirm-modal"><div class="confirm-modal"><div class="confirm-modal-icon" id="confirm-icon">⚠️</div><div class="confirm-modal-title" id="confirm-title">Confirmar</div><div class="confirm-modal-message" id="confirm-message"></div><div class="confirm-modal-actions"><button class="btn-cancel" onclick="fecharConfirmModal()">Cancelar</button><button class="btn-primary" id="confirm-btn" onclick="executarAcaoConfirmada()">Confirmar</button></div></div></div>
 
 <div id="toast"></div>
 
 <script>
-// ==================== DADOS INICIAIS ====================
+// ==================== AUTENTICAÇÃO E USUÁRIOS ====================
+let usuarioLogado = null;
+let usuarioLogadoObj = null;
+const USUARIO_MASTER = { login: 'beatriz_rodrigues', senha: 'beatriz123', cor: '#9d4dff', isMaster: true };
+
+let usuariosSistema = [];
+
+function carregarUsuarios() {
+  const saved = localStorage.getItem('receptivo_usuarios');
+  if (saved) {
+    usuariosSistema = JSON.parse(saved);
+  } else {
+    usuariosSistema = [USUARIO_MASTER];
+  }
+  salvarUsuarios();
+}
+function salvarUsuarios() { localStorage.setItem('receptivo_usuarios', JSON.stringify(usuariosSistema)); }
+
+function fazerLogin() {
+  const login = document.getElementById('login-user').value;
+  const senha = document.getElementById('login-pass').value;
+  
+  const usuarioEncontrado = usuariosSistema.find(u => u.login === login && u.senha === senha);
+  if (usuarioEncontrado) {
+    usuarioLogado = login;
+    usuarioLogadoObj = usuarioEncontrado;
+    localStorage.setItem('receptivo_logado', login);
+    document.getElementById('login-screen').style.display = 'none';
+    
+    // Atualizar UI do usuário
+    const avatarEl = document.getElementById('user-avatar');
+    const nameEl = document.getElementById('user-name-display');
+    if(avatarEl) avatarEl.style.backgroundColor = usuarioLogadoObj.cor;
+    if(nameEl) nameEl.innerText = login;
+    
+    // Mostrar ou esconder abas de admin
+    const isAdmin = (login === USUARIO_MASTER.login);
+    const navUsuarios = document.getElementById('nav-usuarios');
+    const navHistorico = document.getElementById('nav-historico');
+    if(navUsuarios) navUsuarios.style.display = isAdmin ? 'flex' : 'none';
+    if(navHistorico) navHistorico.style.display = isAdmin ? 'flex' : 'none';
+    
+    carregarDados();
+    if(isAdmin) renderizarUsuarios();
+    renderizarHistoricoCentral();
+  } else {
+    document.getElementById('login-error').style.display = 'block';
+  }
+}
+
+function verificarLogin() {
+  const loggedUser = localStorage.getItem('receptivo_logado');
+  if (loggedUser) {
+    const user = usuariosSistema.find(u => u.login === loggedUser);
+    if(user) {
+      usuarioLogado = loggedUser;
+      usuarioLogadoObj = user;
+      document.getElementById('login-screen').style.display = 'none';
+      const avatarEl = document.getElementById('user-avatar');
+      const nameEl = document.getElementById('user-name-display');
+      if(avatarEl) avatarEl.style.backgroundColor = user.cor;
+      if(nameEl) nameEl.innerText = user.login;
+      
+      const isAdmin = (user.login === USUARIO_MASTER.login);
+      const navUsuarios = document.getElementById('nav-usuarios');
+      const navHistorico = document.getElementById('nav-historico');
+      if(navUsuarios) navUsuarios.style.display = isAdmin ? 'flex' : 'none';
+      if(navHistorico) navHistorico.style.display = isAdmin ? 'flex' : 'none';
+      
+      carregarDados();
+      if(isAdmin) renderizarUsuarios();
+      renderizarHistoricoCentral();
+      return;
+    }
+  }
+  localStorage.removeItem('receptivo_logado');
+}
+// ==================== GERENCIAMENTO DE USUÁRIOS ====================
+function renderizarUsuarios() {
+  const tbody = document.getElementById('usuarios-tbody');
+  if(!tbody) return;
+  tbody.innerHTML = usuariosSistema.map(user => `
+    <tr>
+      <td><div style="display:flex;align-items:center;gap:8px"><span style="display:inline-block;width:24px;height:24px;border-radius:50%;background:${user.cor};"></span> ${user.login}</div></td>
+      <td><span id="senha-vis-${user.login}">********</span> <button class="btn-ghost btn-sm" onclick="toggleSenhaVisibilidade('${user.login}', '${user.senha}')">👁️</button></td>
+      <td><input type="color" value="${user.cor}" onchange="atualizarCorUsuario('${user.login}', this.value)"></td>
+      <td>${user.login !== USUARIO_MASTER.login ? `<button class="btn-sm btn-del" onclick="excluirUsuario('${user.login}')">Excluir</button>` : '<span class="badge">Master</span>'}</td>
+    </tr>
+  `).join('');
+}
+
+function toggleSenhaVisibilidade(login, senhaReal) {
+  const span = document.getElementById(`senha-vis-${login}`);
+  if(span.innerText === '********') span.innerText = senhaReal;
+  else span.innerText = '********';
+}
+
+function atualizarCorUsuario(login, novaCor) {
+  const user = usuariosSistema.find(u => u.login === login);
+  if(user) {
+    user.cor = novaCor;
+    salvarUsuarios();
+    if(usuarioLogado === login) {
+      usuarioLogadoObj.cor = novaCor;
+      const avatarEl = document.getElementById('user-avatar');
+      if(avatarEl) avatarEl.style.backgroundColor = novaCor;
+    }
+    renderizarUsuarios();
+    toast(`Cor de ${login} atualizada`, 'ok');
+  }
+}
+
+function excluirUsuario(login) {
+  abrirConfirmModal('Excluir Usuário', `Deseja realmente excluir o usuário ${login}?`, '👤', () => {
+    usuariosSistema = usuariosSistema.filter(u => u.login !== login);
+    salvarUsuarios();
+    renderizarUsuarios();
+    toast('Usuário excluído', 'ok');
+  });
+}
+
+function abrirModalUsuario() {
+  if(usuarioLogado !== USUARIO_MASTER.login) return toast('Apenas o gerente pode criar usuários', 'err');
+  document.getElementById('modal-usuario-title').innerText = 'Novo Usuário';
+  document.getElementById('usuario-login').value = '';
+  document.getElementById('usuario-senha').value = '';
+  document.getElementById('usuario-cor').value = '#00e5a0';
+  document.getElementById('modal-usuario').classList.add('open');
+}
+
+function salvarUsuario() {
+  const login = document.getElementById('usuario-login').value.trim();
+  const senha = document.getElementById('usuario-senha').value.trim();
+  const cor = document.getElementById('usuario-cor').value;
+  if(!login || !senha) { toast('Preencha login e senha', 'err'); return; }
+  if(usuariosSistema.find(u => u.login === login)) { toast('Login já existe', 'err'); return; }
+  usuariosSistema.push({ login, senha, cor, isMaster: false });
+  salvarUsuarios();
+  renderizarUsuarios();
+  fecharModal('modal-usuario');
+  toast(`Usuário ${login} criado`, 'ok');
+}
+
+// ==================== HISTÓRICO CENTRAL ====================
+let historicoAlteracoes = [];
+
+function adicionarHistoricoCentral(resumoAcao, detalhes) {
+  historicoAlteracoes.unshift({
+    id: Date.now(),
+    usuario: usuarioLogado,
+    resumo: resumoAcao,
+    detalhes: detalhes,
+    data: new Date().toISOString()
+  });
+  if (historicoAlteracoes.length > 1000) historicoAlteracoes.pop();
+  salvarHistoricoCentral();
+  renderizarHistoricoCentral();
+}
+
+function salvarHistoricoCentral() { localStorage.setItem('receptivo_historico_central', JSON.stringify(historicoAlteracoes)); }
+function carregarHistoricoCentral() {
+  const saved = localStorage.getItem('receptivo_historico_central');
+  if(saved) historicoAlteracoes = JSON.parse(saved);
+  else historicoAlteracoes = [];
+}
+
+function renderizarHistoricoCentral() {
+  const container = document.getElementById('central-history-log');
+  if(!container) return;
+  if(historicoAlteracoes.length === 0) { container.innerHTML = '<div class="empty-class">Nenhuma ação registrada</div>'; return; }
+  container.innerHTML = historicoAlteracoes.map(h => {
+    const dataObj = new Date(h.data);
+    const dataStr = dataObj.toLocaleDateString('pt-BR');
+    const horaStr = dataObj.toLocaleTimeString('pt-BR');
+    const userColor = usuariosSistema.find(u=>u.login===h.usuario)?.cor || '#888';
+    return `
+      <div class="history-item">
+        <div class="history-date">📅 ${dataStr}, ${horaStr} | <span style="background:${userColor}20; padding:2px 8px; border-radius:12px;">👤 ${h.usuario}</span></div>
+        <div class="history-action">📌 ${h.resumo}</div>
+        <div class="history-detail">${h.detalhes}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ==================== DADOS PRINCIPAIS ====================
 let chips = [];
 let operadores = [];
 let classes = [];
@@ -712,26 +985,36 @@ let editandoClasseId = null;
 let pieChart = null;
 let barChart = null;
 let classesExpandidas = {};
+let chipsSelecionados = new Set();
+let arquivoLinhas = null;
+let arquivoSeparador = null;
 
-// Carregar dados do localStorage
+const coresPadrao = {
+  'CRM': '#4d9eff',
+  'Digital': '#00e5a0',
+  'Home': '#ffd60a',
+  'Novatos': '#ff9f4d',
+  'Menor': '#ff6b9d',
+  'Elite': '#9d4dff'
+};
+
 function carregarDados() {
-  const savedClasses = localStorage.getItem('chipmgr_classes');
-  const savedOps = localStorage.getItem('chipmgr_operadores');
-  const savedChips = localStorage.getItem('chipmgr_chips');
+  const savedClasses = localStorage.getItem('receptivo_classes');
+  const savedOps = localStorage.getItem('receptivo_operadores');
+  const savedChips = localStorage.getItem('receptivo_chips');
   
   classes = savedClasses ? JSON.parse(savedClasses) : [
-    { id: '1', nome: 'CRM', icone: '🚀' },
-    { id: '2', nome: 'Digital', icone: '🎯' },
-    { id: '3', nome: 'Home', icone: '🏠' },
-    { id: '4', nome: 'Novatos', icone: '🌱' },
-    { id: '5', nome: 'Menores', icone: '👶' },
-    { id: '6', nome: 'Elite', icone: '⭐' }
+    { id: '1', nome: 'CRM', icone: '🚀', cor: '#4d9eff' },
+    { id: '2', nome: 'Digital', icone: '🎯', cor: '#00e5a0' },
+    { id: '3', nome: 'Home', icone: '🏠', cor: '#ffd60a' },
+    { id: '4', nome: 'Novatos', icone: '🌱', cor: '#ff9f4d' },
+    { id: '5', nome: 'Menor', icone: '👶', cor: '#ff6b9d' },
+    { id: '6', nome: 'Elite', icone: '⭐', cor: '#9d4dff' }
   ];
   
   operadores = savedOps ? JSON.parse(savedOps) : [];
   chips = savedChips ? JSON.parse(savedChips) : [];
   
-  // Inicializar expansão das classes
   classes.forEach(c => { if(classesExpandidas[c.id] === undefined) classesExpandidas[c.id] = true; });
   
   atualizarDashboard();
@@ -742,16 +1025,34 @@ function carregarDados() {
 }
 
 function salvarLocalStorage() {
-  localStorage.setItem('chipmgr_classes', JSON.stringify(classes));
-  localStorage.setItem('chipmgr_operadores', JSON.stringify(operadores));
-  localStorage.setItem('chipmgr_chips', JSON.stringify(chips));
+  localStorage.setItem('receptivo_classes', JSON.stringify(classes));
+  localStorage.setItem('receptivo_operadores', JSON.stringify(operadores));
+  localStorage.setItem('receptivo_chips', JSON.stringify(chips));
 }
 
-function formatarTelefone(numero) {
-  let digits = numero.toString().replace(/\D/g, '');
-  if (digits.length === 11) return `(${digits.substring(0,2)}) ${digits.substring(2,7)}-${digits.substring(7,11)}`;
-  if (digits.length === 10) return `(${digits.substring(0,2)}) ${digits.substring(2,6)}-${digits.substring(6,10)}`;
-  return numero;
+function adicionarHistorico(chipId, acao, detalhes) {
+  // Histórico individual do chip
+  const individualHistory = JSON.parse(localStorage.getItem('receptivo_historico') || '[]');
+  individualHistory.unshift({
+    id: Date.now(),
+    chipId: chipId,
+    usuario: usuarioLogado,
+    acao: acao,
+    detalhes: detalhes,
+    data: new Date().toISOString()
+  });
+  if (individualHistory.length > 500) individualHistory.pop();
+  localStorage.setItem('receptivo_historico', JSON.stringify(individualHistory));
+  
+  // Histórico Central
+  adicionarHistoricoCentral(acao, detalhes);
+}
+
+function verHistorico(id) {
+  const individualHistory = JSON.parse(localStorage.getItem('receptivo_historico') || '[]');
+  const historico = individualHistory.filter(h => h.chipId === id);
+  document.getElementById('history-content').innerHTML = historico.length ? historico.map(h => `<div class="history-item"><div class="history-date">📅 ${new Date(h.data).toLocaleString()}</div><div><strong>👤 ${h.usuario}</strong></div><div>📌 ${h.acao}</div><div class="history-detail">${h.detalhes}</div></div>`).join('') : '<div class="empty-class">Nenhum histórico registrado</div>';
+  document.getElementById('modal-history').classList.add('open');
 }
 
 // ==================== DASHBOARD ====================
@@ -766,14 +1067,13 @@ function atualizarDashboard() {
   document.getElementById('d-banidos').textContent = banidos;
   document.getElementById('d-novos').textContent = novos;
   
-  // Gráfico de pizza
-  if (pieChart) pieChart.destroy();
   const ctx = document.getElementById('pie-chart');
   if (ctx) {
+    if (pieChart) pieChart.destroy();
     pieChart = new Chart(ctx, {
       type: 'doughnut',
-      data: { labels: ['Ativos', 'Banidos', 'Novos'], datasets: [{ data: [ativos, banidos, novos], backgroundColor: ['#00e5a0', '#ff4d6d', '#4d9eff'] }] },
-      options: { responsive: true, maintainAspectRatio: true, cutout: '60%', plugins: { legend: { display: false } }, animation: { duration: 0 } }
+      data: { labels: ['Ativos', 'Banidos', 'Novos'], datasets: [{ data: [ativos, banidos, novos], backgroundColor: ['#00e5a0', '#ff4d6d', '#4d9eff'], borderWidth: 0 }] },
+      options: { responsive: true, maintainAspectRatio: true, cutout: '60%', plugins: { legend: { display: false } }, animation: { duration: 300 } }
     });
   }
   
@@ -783,66 +1083,121 @@ function atualizarDashboard() {
     ['Novos', novos, '#4d9eff']
   ].map(([l, v, c]) => `<div class="legend-item"><div class="legend-dot" style="background:${c}"></div><span>${l}</span><span style="margin-left:auto">${v}</span></div>`).join('');
   
-  // Gráfico de barras por classe
   const porClasse = {};
-  operadores.forEach(op => {
-    if (op.classe_id) {
+  chips.forEach(chip => {
+    const op = operadores.find(o => o.id === chip.operador_id);
+    if (op && op.classe_id) {
       const classe = classes.find(c => c.id === op.classe_id);
       const nome = classe?.nome || 'Sem classe';
-      if (!porClasse[nome]) porClasse[nome] = 0;
-      porClasse[nome] += chips.filter(c => c.operador_id === op.id).length;
+      porClasse[nome] = (porClasse[nome] || 0) + 1;
     }
   });
-  const dadosClasse = Object.entries(porClasse).sort((a,b) => b[1] - a[1]).slice(0,7);
   
-  if (barChart) barChart.destroy();
+  const dadosClasse = Object.entries(porClasse).sort((a,b) => b[1] - a[1]).slice(0,7);
   const barCtx = document.getElementById('bar-chart');
   if (barCtx && dadosClasse.length) {
+    if (barChart) barChart.destroy();
+    const coresBarras = dadosClasse.map(d => {
+      const classe = classes.find(c => c.nome === d[0]);
+      return classe?.cor || '#00e5a0';
+    });
     barChart = new Chart(barCtx, {
       type: 'bar',
-      data: { labels: dadosClasse.map(d => d[0].length > 12 ? d[0].slice(0,12)+'…' : d[0]), datasets: [{ data: dadosClasse.map(d => d[1]), backgroundColor: '#00e5a040', borderColor: '#00e5a0', borderWidth: 2 }] },
-      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: '#7777a0' } }, y: { ticks: { color: '#7777a0' }, beginAtZero: true } }, animation: { duration: 0 } }
+      data: { labels: dadosClasse.map(d => d[0]), datasets: [{ data: dadosClasse.map(d => d[1]), backgroundColor: coresBarras, borderRadius: 8 }] },
+      options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } }, animation: { duration: 300 } }
     });
   }
   
-  // Rankings
-  const rankingAtivos = [...operadores].sort((a,b) => chips.filter(c => c.operador_id === b.id && c.status === 'ativo').length - chips.filter(c => c.operador_id === a.id && c.status === 'ativo').length).slice(0,6);
-  const rankingBanidos = [...operadores].sort((a,b) => chips.filter(c => c.operador_id === b.id && c.status === 'banido').length - chips.filter(c => c.operador_id === a.id && c.status === 'banido').length).slice(0,6);
+  const rankingAtivos = [...operadores].map(op => ({ ...op, ativos: chips.filter(c => c.operador_id === op.id && c.status === 'ativo').length })).filter(op => op.ativos > 0).sort((a,b) => b.ativos - a.ativos).slice(0,6);
+  const rankingBanidos = [...operadores].map(op => ({ ...op, banidos: chips.filter(c => c.operador_id === op.id && c.status === 'banido').length })).filter(op => op.banidos > 0).sort((a,b) => b.banidos - a.banidos).slice(0,6);
   
-  document.getElementById('rank-ativos').innerHTML = rankingAtivos.map((o,i) => `<div class="ranking-row"><span class="rank-num" style="color:${i===0?'#00e5a0':'var(--border)'}">${i+1}</span><span class="rank-name">${o.nome}</span><span style="color:#00e5a0">${chips.filter(c=>c.operador_id===o.id && c.status==='ativo').length}</span></div>`).join('') || '<div class="empty-class">Sem dados</div>';
-  document.getElementById('rank-banidos').innerHTML = rankingBanidos.map((o,i) => `<div class="ranking-row"><span class="rank-num" style="color:${i===0?'#ff4d6d':'var(--border)'}">${i+1}</span><span class="rank-name">${o.nome}</span><span style="color:#ff4d6d">${chips.filter(c=>c.operador_id===o.id && c.status==='banido').length}</span></div>`).join('') || '<div class="empty-class">Sem dados</div>';
+  document.getElementById('rank-ativos').innerHTML = rankingAtivos.length ? rankingAtivos.map((o,i) => `<div class="ranking-row"><span class="rank-num" style="color:${i===0?'#00e5a0':'var(--border)'}">${i+1}</span><span class="rank-name">${o.nome}</span><span style="color:#00e5a0">${o.ativos}</span></div>`).join('') : '<div class="empty-class">Sem dados</div>';
+  document.getElementById('rank-banidos').innerHTML = rankingBanidos.length ? rankingBanidos.map((o,i) => `<div class="ranking-row"><span class="rank-num" style="color:${i===0?'#ff4d6d':'var(--border)'}">${i+1}</span><span class="rank-name">${o.nome}</span><span style="color:#ff4d6d">${o.banidos}</span></div>`).join('') : '<div class="empty-class">Sem dados</div>';
+  
+  const taxas = [...operadores].map(op => {
+    const totalChips = chips.filter(c => c.operador_id === op.id).length;
+    const ativosChips = chips.filter(c => c.operador_id === op.id && c.status === 'ativo').length;
+    const taxa = totalChips > 0 ? ((ativosChips / totalChips) * 100).toFixed(1) : 0;
+    return { ...op, taxa, totalChips };
+  }).filter(op => op.totalChips > 0).sort((a,b) => b.taxa - a.taxa).slice(0,6);
+  
+  document.getElementById('taxa-aprovacao').innerHTML = taxas.length ? taxas.map((o,i) => `<div class="ranking-row"><span class="rank-num">${i+1}</span><span class="rank-name">${o.nome}</span><span style="color:${o.taxa >= 70 ? '#00e5a0' : o.taxa >= 40 ? '#ffd60a' : '#ff4d6d'}">${o.taxa}%</span></div>`).join('') : '<div class="empty-class">Sem dados</div>';
 }
 
 // ==================== CHIPS ====================
+let selecionadosParaEdicao = new Set();
 function renderizarChips() {
   const busca = document.getElementById('chip-search')?.value.toLowerCase() || '';
   const filtrados = chips.filter(c => (filtroChip === 'todos' || c.status === filtroChip) && (!busca || c.numero.includes(busca) || (operadores.find(o=>o.id===c.operador_id)?.nome || '').toLowerCase().includes(busca)));
   
   document.getElementById('chips-count').textContent = `${chips.length} chips (${chips.filter(c=>c.status==='novo').length} novos)`;
   const tbody = document.getElementById('chips-tbody');
-  if (!filtrados.length) { tbody.innerHTML = '<tr><td colspan="6">Nenhum chip encontrado</td></tr>'; return; }
+  if (!filtrados.length) { tbody.innerHTML = '<tr><td colspan="7">Nenhum chip encontrado</td></tr>'; return; }
   
   tbody.innerHTML = filtrados.map(c => {
     const op = operadores.find(o => o.id === c.operador_id);
     const classe = op ? classes.find(cl => cl.id === op.classe_id) : null;
+    const corClasse = classe?.cor || '#7777a0';
     return `<tr>
+      <td class="checkbox-col"><input type="checkbox" class="chip-checkbox" value="${c.id}" ${selecionadosParaEdicao.has(c.id) ? 'checked' : ''} onchange="toggleSelecionarChip('${c.id}')"></td>
       <td>${c.numero}</td>
       <td>${op?.nome || '—'}</td>
-      <td>${classe ? `${classe.icone} ${classe.nome}` : '📁 Sem classe'}</td>
-      <td><span class="badge badge-${c.status}">${c.status}</span></td>
+      <td><span style="display:inline-flex;align-items:center;gap:4px"><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:${corClasse}"></span> ${classe ? `${classe.icone} ${classe.nome}` : '📁 Sem classe'}</span></td>
+      <td><span class="badge badge-${c.status}">${c.status === 'ativo' ? 'Ativo' : (c.status === 'banido' ? 'Banido' : 'Novo')}</span></td>
       <td>${c.motivo_ban || '—'}</td>
-      <td><button class="btn-sm btn-edit" onclick="editarChip('${c.id}')">Editar</button> <button class="btn-sm btn-del" onclick="excluirChip('${c.id}')">Excluir</button></td>
+      <td><button class="btn-sm btn-edit" onclick="editarChip('${c.id}')">Editar</button> <button class="btn-sm btn-ghost" onclick="verHistorico('${c.id}')">Histórico</button> <button class="btn-sm btn-del" onclick="confirmarExcluirChip('${c.id}')">Excluir</button></td>
     </tr>`;
   }).join('');
+  
+  document.getElementById('selected-count').textContent = selecionadosParaEdicao.size;
+  document.getElementById('bulk-actions').classList.toggle('show', selecionadosParaEdicao.size > 0);
+  const selectAll = document.getElementById('select-all-chips');
+  if (selectAll) selectAll.checked = filtrados.length > 0 && filtrados.every(c => selecionadosParaEdicao.has(c.id));
 }
 
+function toggleSelecionarChip(id) {
+  if (selecionadosParaEdicao.has(id)) selecionadosParaEdicao.delete(id);
+  else selecionadosParaEdicao.add(id);
+  renderizarChips();
+}
+function selecionarTodosChips() {
+  const busca = document.getElementById('chip-search')?.value.toLowerCase() || '';
+  const filtrados = chips.filter(c => (filtroChip === 'todos' || c.status === filtroChip) && (!busca || c.numero.includes(busca) || (operadores.find(o=>o.id===c.operador_id)?.nome || '').toLowerCase().includes(busca)));
+  const selectAll = document.getElementById('select-all-chips');
+  if (selectAll.checked) filtrados.forEach(c => selecionadosParaEdicao.add(c.id));
+  else filtrados.forEach(c => selecionadosParaEdicao.delete(c.id));
+  renderizarChips();
+}
+function limparSelecao() { selecionadosParaEdicao.clear(); renderizarChips(); }
+function aplicarEdicaoEmMassa() {
+  const novoStatus = document.getElementById('bulk-status').value;
+  const novoOperadorId = document.getElementById('bulk-operador').value;
+  if (!novoStatus && !novoOperadorId) { toast('Selecione uma ação para aplicar', 'err'); return; }
+  let alterados = 0;
+  selecionadosParaEdicao.forEach(id => {
+    const chipIndex = chips.findIndex(c => c.id === id);
+    if (chipIndex !== -1) {
+      const chipOriginal = { ...chips[chipIndex] };
+      if (novoStatus) chips[chipIndex].status = novoStatus;
+      if (novoOperadorId) chips[chipIndex].operador_id = novoOperadorId || null;
+      if (chipOriginal.status !== chips[chipIndex].status || chipOriginal.operador_id !== chips[chipIndex].operador_id) {
+        adicionarHistorico(id, 'Edição em massa', `Alterado: ${novoStatus ? `status para ${novoStatus}` : ''} ${novoOperadorId ? `operador para ${operadores.find(o=>o.id===novoOperadorId)?.nome || 'nenhum'}` : ''}`);
+        alterados++;
+      }
+    }
+  });
+  salvarLocalStorage();
+  carregarDados();
+  limparSelecao();
+  toast(`${alterados} chips atualizados`, 'ok');
+}
 function setFiltroChip(filtro, btn) {
   filtroChip = filtro;
   document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
+  limparSelecao();
   renderizarChips();
 }
-
 function abrirModalChip() {
   editandoChipId = null;
   document.getElementById('modal-chip-title').innerText = 'Novo Chip';
@@ -853,7 +1208,6 @@ function abrirModalChip() {
   document.getElementById('motivo-group').style.display = 'none';
   document.getElementById('modal-chip').classList.add('open');
 }
-
 function editarChip(id) {
   const chip = chips.find(c => c.id === id);
   if (!chip) return;
@@ -866,11 +1220,15 @@ function editarChip(id) {
   document.getElementById('motivo-group').style.display = chip.status === 'banido' ? 'block' : 'none';
   document.getElementById('modal-chip').classList.add('open');
 }
-
 function toggleMotivoBan() {
   document.getElementById('motivo-group').style.display = document.getElementById('chip-status').value === 'banido' ? 'block' : 'none';
 }
-
+function formatarTelefone(numero) {
+  let digits = numero.toString().replace(/\D/g, '');
+  if (digits.length === 11) return `(${digits.substring(0,2)}) ${digits.substring(2,7)}-${digits.substring(7,11)}`;
+  if (digits.length === 10) return `(${digits.substring(0,2)}) ${digits.substring(2,6)}-${digits.substring(6,10)}`;
+  return numero;
+}
 function salvarChip() {
   const numero = formatarTelefone(document.getElementById('chip-numero').value.trim());
   if (!numero) { toast('Informe o número', 'err'); return; }
@@ -880,538 +1238,128 @@ function salvarChip() {
   
   if (editandoChipId) {
     const index = chips.findIndex(c => c.id === editandoChipId);
-    if (index !== -1) chips[index] = { ...chips[index], numero, operador_id, status, motivo_ban };
+    if (index !== -1) {
+      const chipOriginal = { ...chips[index] };
+      chips[index] = { ...chips[index], numero, operador_id, status, motivo_ban };
+      if (chipOriginal.status !== status) adicionarHistorico(editandoChipId, 'Status alterado', `Status: ${chipOriginal.status} → ${status}`);
+      if (chipOriginal.operador_id !== operador_id) adicionarHistorico(editandoChipId, 'Operador alterado', `Operador: ${operadores.find(o=>o.id===chipOriginal.operador_id)?.nome || 'nenhum'} → ${operadores.find(o=>o.id===operador_id)?.nome || 'nenhum'}`);
+    }
     toast('Chip atualizado', 'ok');
   } else {
-    chips.unshift({ id: Date.now().toString(), numero, operador_id, status, motivo_ban, criado_em: new Date().toISOString() });
+    const newId = Date.now().toString();
+    chips.unshift({ id: newId, numero, operador_id, status, motivo_ban, criado_em: new Date().toISOString() });
+    adicionarHistorico(newId, 'Chip criado', `Chip ${numero} criado`);
     toast('Chip adicionado', 'ok');
   }
   fecharModal('modal-chip');
   salvarLocalStorage();
   carregarDados();
 }
-
-function excluirChip(id) {
-  if (!confirm('Excluir este chip?')) return;
-  chips = chips.filter(c => c.id !== id);
-  salvarLocalStorage();
-  carregarDados();
-  toast('Chip excluído', 'ok');
+function confirmarExcluirChip(id) {
+  const chip = chips.find(c => c.id === id);
+  abrirConfirmModal('Excluir Chip', `Tem certeza que deseja excluir o chip <strong>${chip?.numero}</strong>?`, '🗑️', () => {
+    chips = chips.filter(c => c.id !== id);
+    adicionarHistorico(id, 'Chip excluído', `Chip ${chip.numero} excluído`);
+    salvarLocalStorage();
+    carregarDados();
+    toast('Chip excluído', 'ok');
+  });
 }
 
 // ==================== OPERADORES E CLASSES ====================
-
-// Função isolada para montar card de cada operador via DOM puro — sem template literal aninhado
-function _buildOpCard(op) {
-  var opId     = op.id;
-  var opNome   = op.nome;
-  var opEmail  = op.email || 'sem email';
-  var opAtivo  = op.ativo;
-
-  // Calcula chips DESTE operador usando o id capturado localmente
-  var total   = 0, ativos = 0, banidos = 0, novos = 0;
-  for (var i = 0; i < chips.length; i++) {
-    if (chips[i].operador_id === opId) {
-      total++;
-      if (chips[i].status === 'ativo')   ativos++;
-      else if (chips[i].status === 'banido') banidos++;
-      else if (chips[i].status === 'novo')   novos++;
-    }
-  }
-
-  var iniciais = opNome.split(' ').map(function(n){ return n ? n[0] : ''; }).join('').slice(0,2).toUpperCase();
-
-  var card = document.createElement('div');
-  card.className = 'op-card-mini';
-
-  // -- Cabeçalho do card --
-  var head = document.createElement('div');
-  head.className = 'op-head';
-
-  var info = document.createElement('div');
-  info.className = 'op-info';
-
-  var avatar = document.createElement('div');
-  avatar.className = 'op-avatar';
-  avatar.textContent = iniciais;
-
-  var nameWrap = document.createElement('div');
-  var strong = document.createElement('strong');
-  strong.textContent = opNome;
-  var br = document.createElement('br');
-  var small = document.createElement('small');
-  small.textContent = opEmail;
-  nameWrap.appendChild(strong);
-  nameWrap.appendChild(br);
-  nameWrap.appendChild(small);
-
-  info.appendChild(avatar);
-  info.appendChild(nameWrap);
-
-  var badge = document.createElement('span');
-  badge.className = 'badge ' + (opAtivo ? 'badge-ativo' : 'badge-inativo');
-  badge.textContent = opAtivo ? 'ativo' : 'inativo';
-
-  head.appendChild(info);
-  head.appendChild(badge);
-  card.appendChild(head);
-
-  // -- Stats --
-  var statsDiv = document.createElement('div');
-  statsDiv.className = 'op-stats';
-
-  [
-    ['Total',   total,   null],
-    ['Ativos',  ativos,  'var(--accent)'],
-    ['Banidos', banidos, 'var(--red)'],
-    ['Novos',   novos,   'var(--blue)']
-  ].forEach(function(item) {
-    var label = item[0], valor = item[1], cor = item[2];
-    var stat = document.createElement('div');
-    stat.className = 'op-stat';
-    var lbl = document.createElement('div');
-    lbl.className = 'op-stat-label';
-    lbl.textContent = label;
-    var val = document.createElement('div');
-    val.className = 'op-stat-val';
-    val.textContent = valor;
-    if (cor) val.style.color = cor;
-    stat.appendChild(lbl);
-    stat.appendChild(val);
-    statsDiv.appendChild(stat);
-  });
-  card.appendChild(statsDiv);
-
-  // -- Botões (closure com IIFE para garantir id correto) --
-  var btns = document.createElement('div');
-  btns.style.cssText = 'display:flex;gap:6px';
-
-  function makeBtnClick(fn, id) {
-    return function() { fn(id); };
-  }
-
-  var bEdit = document.createElement('button');
-  bEdit.className = 'btn-sm btn-edit';
-  bEdit.textContent = 'Editar';
-  bEdit.addEventListener('click', makeBtnClick(editarOperador, opId));
-
-  var bDel = document.createElement('button');
-  bDel.className = 'btn-sm btn-del';
-  bDel.textContent = 'Excluir';
-  bDel.addEventListener('click', makeBtnClick(excluirOperador, opId));
-
-  var bMov = document.createElement('button');
-  bMov.className = 'btn-sm btn-ghost';
-  bMov.textContent = 'Mover';
-  bMov.addEventListener('click', makeBtnClick(moverOperador, opId));
-
-  btns.appendChild(bEdit);
-  btns.appendChild(bDel);
-  btns.appendChild(bMov);
-  card.appendChild(btns);
-
-  return card;
-}
-
 function renderizarClasses() {
-  var container = document.getElementById('classes-container');
+  const container = document.getElementById('classes-container');
   if (!container) return;
-  if (!classes.length) {
-    container.innerHTML = '<div class="empty-class">Nenhuma classe. Clique em "+ Nova Classe"</div>';
-    return;
-  }
-
-  document.getElementById('operadores-count').textContent =
-    operadores.length + ' operadores em ' + classes.length + ' classes';
-
-  container.innerHTML = '';
-
-  classes.forEach(function(classe) {
-    var classeId = classe.id;
-    var opsDaClasse = operadores.filter(function(op){ return op.classe_id === classeId; });
-
-    // Stats da classe (totais)
-    var st = { total: 0, ativos: 0, banidos: 0, novos: 0 };
-    opsDaClasse.forEach(function(op) {
-      chips.forEach(function(c) {
-        if (c.operador_id === op.id) {
-          st.total++;
-          if (c.status === 'ativo')   st.ativos++;
-          else if (c.status === 'banido') st.banidos++;
-          else if (c.status === 'novo')   st.novos++;
-        }
-      });
+  if (!classes.length) { container.innerHTML = '<div class="empty-class">Nenhuma classe. Clique em "+ Nova Classe"</div>'; return; }
+  document.getElementById('operadores-count').textContent = `${operadores.length} operadores em ${classes.length} classes`;
+  container.innerHTML = classes.map(classe => {
+    const opsDaClasse = operadores.filter(op => op.classe_id === classe.id);
+    let stats = { total: 0, ativos: 0, banidos: 0, novos: 0 };
+    opsDaClasse.forEach(op => {
+      const chipsOp = chips.filter(c => c.operador_id === op.id);
+      stats.total += chipsOp.length;
+      stats.ativos += chipsOp.filter(c => c.status === 'ativo').length;
+      stats.banidos += chipsOp.filter(c => c.status === 'banido').length;
+      stats.novos += chipsOp.filter(c => c.status === 'novo').length;
     });
-
-    var isOpen = classesExpandidas[classeId] !== false;
-
-    // Monta estrutura da classe sem nenhum dado de operador inline
-    var classCard = document.createElement('div');
-    classCard.className = 'class-card';
-
-    var hdr = document.createElement('div');
-    hdr.className = 'class-header';
-    hdr.addEventListener('click', (function(cid){ return function(){ toggleClasse(cid); }; })(classeId));
-
-    hdr.innerHTML =
-      '<div class="class-header-left">' +
-        '<span class="class-icon">' + (classe.icone || '📁') + '</span>' +
-        '<span class="class-name">' + classe.nome + '</span>' +
-        '<div class="class-stats">' +
-          '<span class="class-stat"><strong>' + st.total + '</strong> chips</span>' +
-          '<span class="class-stat" style="color:var(--accent)">▲ ' + st.ativos + '</span>' +
-          '<span class="class-stat" style="color:var(--red)">▼ ' + st.banidos + '</span>' +
-          '<span class="class-stat" style="color:var(--blue)">● ' + st.novos + '</span>' +
-          '<span class="class-stat">👥 ' + opsDaClasse.length + '</span>' +
-        '</div>' +
-      '</div>';
-
-    var actions = document.createElement('div');
-    actions.className = 'class-actions';
-    actions.addEventListener('click', function(e){ e.stopPropagation(); });
-
-    var btnEditClasse = document.createElement('button');
-    btnEditClasse.className = 'btn-sm btn-edit';
-    btnEditClasse.textContent = '✏️';
-    btnEditClasse.addEventListener('click', (function(cid){ return function(){ editarClasse(cid); }; })(classeId));
-
-    var btnDelClasse = document.createElement('button');
-    btnDelClasse.className = 'btn-sm btn-del';
-    btnDelClasse.textContent = '🗑️';
-    btnDelClasse.addEventListener('click', (function(cid){ return function(){ excluirClasse(cid); }; })(classeId));
-
-    actions.appendChild(btnEditClasse);
-    actions.appendChild(btnDelClasse);
-    hdr.appendChild(actions);
-    classCard.appendChild(hdr);
-
-    var content = document.createElement('div');
-    content.className = 'class-content' + (isOpen ? ' open' : '');
-    content.id = 'class-content-' + classeId;
-
-    if (opsDaClasse.length) {
-      var grid = document.createElement('div');
-      grid.className = 'op-mini-grid';
-      opsDaClasse.forEach(function(op) {
-        grid.appendChild(_buildOpCard(op));
-      });
-      content.appendChild(grid);
-    } else {
-      var empty = document.createElement('div');
-      empty.className = 'empty-class';
-      empty.innerHTML = '📭 Nenhum operador<br>';
-      var btnAdd = document.createElement('button');
-      btnAdd.className = 'btn-sm btn-ghost';
-      btnAdd.textContent = '+ Adicionar';
-      btnAdd.addEventListener('click', (function(cid){ return function(){ abrirModalOpComClasse(cid); }; })(classeId));
-      empty.appendChild(btnAdd);
-      content.appendChild(empty);
-    }
-
-    classCard.appendChild(content);
-    container.appendChild(classCard);
-  });
+    const isOpen = classesExpandidas[classe.id] !== false;
+    const corClasse = classe.cor || '#7777a0';
+    return `
+      <div class="class-card" style="border-left: 4px solid ${corClasse}">
+        <div class="class-header" onclick="toggleClasse('${classe.id}')">
+          <div class="class-header-left">
+            <span class="class-icon">${classe.icone || '📁'}</span>
+            <span class="class-name" style="color:${corClasse}">${classe.nome}</span>
+            <div class="class-stats">
+              <span class="class-stat"><strong>${stats.total}</strong> chips</span>
+              <span class="class-stat" style="color:var(--accent)">▲ ${stats.ativos}</span>
+              <span class="class-stat" style="color:var(--red)">▼ ${stats.banidos}</span>
+              <span class="class-stat" style="color:var(--blue)">● ${stats.novos}</span>
+              <span class="class-stat">👥 ${opsDaClasse.length}</span>
+            </div>
+          </div>
+          <div class="class-actions" onclick="event.stopPropagation()">
+            <button class="btn-sm btn-edit" onclick="editarClasse('${classe.id}')">✏️</button>
+            <button class="btn-sm btn-del" onclick="confirmarExcluirClasse('${classe.id}')">🗑️</button>
+          </div>
+        </div>
+        <div class="class-content ${isOpen ? 'open' : ''}" id="class-content-${classe.id}">
+          ${opsDaClasse.length ? `<div class="op-mini-grid">` + opsDaClasse.map(op => {
+            const opChips = chips.filter(c => c.operador_id === op.id);
+            const opAtivos = opChips.filter(c => c.status === 'ativo').length;
+            const opBanidos = opChips.filter(c => c.status === 'banido').length;
+            const opNovos = opChips.filter(c => c.status === 'novo').length;
+            const iniciais = op.nome.split(' ').map(n => n[0]).join('').slice(0,2).toUpperCase();
+            return `<div class="op-card-mini"><div class="op-head"><div class="op-info"><div class="op-avatar" style="background:${corClasse}30;color:${corClasse}">${iniciais}</div><div><strong>${op.nome}</strong></div></div><span class="badge badge-ativo">ativo</span></div><div class="op-stats"><div class="op-stat"><div class="op-stat-label">Total</div><div class="op-stat-val">${opChips.length}</div></div><div class="op-stat"><div class="op-stat-label">Ativos</div><div class="op-stat-val" style="color:var(--accent)">${opAtivos}</div></div><div class="op-stat"><div class="op-stat-label">Banidos</div><div class="op-stat-val" style="color:var(--red)">${opBanidos}</div></div><div class="op-stat"><div class="op-stat-label">Novos</div><div class="op-stat-val" style="color:var(--blue)">${opNovos}</div></div></div><div style="display:flex;gap:6px"><button class="btn-sm btn-edit" onclick="editarOperador('${op.id}')">Editar</button><button class="btn-sm btn-del" onclick="confirmarExcluirOperador('${op.id}')">Excluir</button><button class="btn-sm btn-ghost" onclick="abrirModalMoverOperador('${op.id}')">Mover</button></div></div>`;
+          }).join('') + `</div>` : `<div class="empty-class">📭 Nenhum operador<br><button class="btn-sm btn-ghost" onclick="abrirModalOpComClasse('${classe.id}')">+ Adicionar</button></div>`}
+        </div>
+      </div>
+    `;
+  }).join('');
 }
-
-function toggleClasse(id) {
-  classesExpandidas[id] = !classesExpandidas[id];
-  const content = document.getElementById(`class-content-${id}`);
-  if (content) content.classList.toggle('open');
-}
-
+function toggleClasse(id) { classesExpandidas[id] = !classesExpandidas[id]; const content = document.getElementById(`class-content-${id}`); if (content) content.classList.toggle('open'); }
 function expandirTodas() { classes.forEach(c => classesExpandidas[c.id] = true); renderizarClasses(); }
 function recolherTodas() { classes.forEach(c => classesExpandidas[c.id] = false); renderizarClasses(); }
-
-function abrirModalClasse() {
-  editandoClasseId = null;
-  document.getElementById('modal-classe-title').innerText = 'Nova Classe';
-  document.getElementById('classe-nome').value = '';
-  document.getElementById('classe-icon').value = '📁';
-  document.getElementById('modal-classe').classList.add('open');
-}
-
-function editarClasse(id) {
-  const classe = classes.find(c => c.id === id);
-  if (!classe) return;
-  editandoClasseId = id;
-  document.getElementById('modal-classe-title').innerText = 'Editar Classe';
-  document.getElementById('classe-nome').value = classe.nome;
-  document.getElementById('classe-icon').value = classe.icone || '📁';
-  document.getElementById('modal-classe').classList.add('open');
-}
-
-function salvarClasse() {
-  const nome = document.getElementById('classe-nome').value.trim();
-  if (!nome) { toast('Informe o nome', 'err'); return; }
-  const icone = document.getElementById('classe-icon').value;
-  
-  if (editandoClasseId) {
-    const index = classes.findIndex(c => c.id === editandoClasseId);
-    if (index !== -1) classes[index] = { ...classes[index], nome, icone };
-    toast('Classe atualizada', 'ok');
-  } else {
-    classes.push({ id: Date.now().toString(), nome, icone });
-    toast('Classe criada', 'ok');
-  }
-  fecharModal('modal-classe');
-  salvarLocalStorage();
-  carregarDados();
-}
-
-function excluirClasse(id) {
-  const opsNaClasse = operadores.filter(op => op.classe_id === id);
-  if (opsNaClasse.length && !confirm(`Esta classe tem ${opsNaClasse.length} operadores. Excluir mesmo?`)) return;
-  operadores = operadores.map(op => op.classe_id === id ? { ...op, classe_id: null } : op);
-  classes = classes.filter(c => c.id !== id);
-  salvarLocalStorage();
-  carregarDados();
-  toast('Classe excluída', 'ok');
-}
-
-function abrirModalOp() {
-  editandoOpId = null;
-  document.getElementById('modal-op-title').innerText = 'Novo Operador';
-  document.getElementById('op-nome').value = '';
-  document.getElementById('op-email').value = '';
-  document.getElementById('op-classe').value = '';
-  document.getElementById('op-ativo').checked = true;
-  document.getElementById('modal-op').classList.add('open');
-}
-
-function abrirModalOpComClasse(classeId) {
-  editandoOpId = null;
-  document.getElementById('modal-op-title').innerText = 'Novo Operador';
-  document.getElementById('op-nome').value = '';
-  document.getElementById('op-email').value = '';
-  document.getElementById('op-classe').value = classeId;
-  document.getElementById('op-ativo').checked = true;
-  document.getElementById('modal-op').classList.add('open');
-}
-
-function editarOperador(id) {
-  const op = operadores.find(o => o.id === id);
-  if (!op) return;
-  editandoOpId = id;
-  document.getElementById('modal-op-title').innerText = 'Editar Operador';
-  document.getElementById('op-nome').value = op.nome;
-  document.getElementById('op-email').value = op.email || '';
-  document.getElementById('op-classe').value = op.classe_id || '';
-  document.getElementById('op-ativo').checked = op.ativo;
-  document.getElementById('modal-op').classList.add('open');
-}
-
-function salvarOperador() {
-  const nome = document.getElementById('op-nome').value.trim();
-  if (!nome) { toast('Informe o nome', 'err'); return; }
-  const email = document.getElementById('op-email').value.trim() || null;
-  const classe_id = document.getElementById('op-classe').value || null;
-  const ativo = document.getElementById('op-ativo').checked;
-  
-  if (editandoOpId) {
-    const index = operadores.findIndex(o => o.id === editandoOpId);
-    if (index !== -1) operadores[index] = { ...operadores[index], nome, email, classe_id, ativo };
-    toast('Operador atualizado', 'ok');
-  } else {
-    operadores.push({ id: Date.now().toString(), nome, email, classe_id, ativo });
-    toast('Operador criado', 'ok');
-  }
-  fecharModal('modal-op');
-  salvarLocalStorage();
-  carregarDados();
-}
-
-function excluirOperador(id) {
-  if (!confirm('Excluir operador? Os chips ficarão sem operador.')) return;
-  operadores = operadores.filter(o => o.id !== id);
-  chips = chips.map(c => c.operador_id === id ? { ...c, operador_id: null } : c);
-  salvarLocalStorage();
-  carregarDados();
-  toast('Operador excluído', 'ok');
-}
-
-function moverOperador(id) {
-  const op = operadores.find(o => o.id === id);
-  if (!op) return;
-  const lista = classes.map((c, idx) => `${idx+1} - ${c.icone} ${c.nome}`).join('\n');
-  const resposta = prompt(`Mover "${op.nome}" para qual classe?\n\n${lista}\n\nDigite o número ou deixe em branco:`);
-  if (resposta === null) return;
-  if (resposta === "") {
-    const index = operadores.findIndex(o => o.id === id);
-    if (index !== -1) operadores[index] = { ...operadores[index], classe_id: null };
-    toast('Classe removida', 'ok');
-  } else {
-    const idx = parseInt(resposta) - 1;
-    if (!isNaN(idx) && classes[idx]) {
-      const index = operadores.findIndex(o => o.id === id);
-      if (index !== -1) operadores[index] = { ...operadores[index], classe_id: classes[idx].id };
-      toast(`Movido para ${classes[idx].nome}`, 'ok');
-    } else { toast('Número inválido', 'err'); return; }
-  }
-  salvarLocalStorage();
-  carregarDados();
-}
-
-// ==================== SELECTS ====================
-function popularSelects() {
-  const opSelect = document.getElementById('chip-operador');
-  if (opSelect) {
-    const atual = opSelect.value;
-    opSelect.innerHTML = '<option value="">Nenhum operador</option>' + operadores.filter(o => o.ativo).map(o => `<option value="${o.id}">${o.nome}</option>`).join('');
-    opSelect.value = atual;
-  }
-  const classeSelect = document.getElementById('op-classe');
-  if (classeSelect) {
-    const atual = classeSelect.value;
-    classeSelect.innerHTML = '<option value="">Sem classe</option>' + classes.map(c => `<option value="${c.id}">${c.icone} ${c.nome}</option>`).join('');
-    classeSelect.value = atual;
-  }
-}
+function abrirModalClasse() { editandoClasseId = null; document.getElementById('modal-classe-title').innerText = 'Nova Classe'; document.getElementById('classe-nome').value = ''; document.getElementById('classe-icon').value = '📁'; document.getElementById('classe-cor').value = '#00e5a0'; document.getElementById('modal-classe').classList.add('open'); }
+function editarClasse(id) { const classe = classes.find(c => c.id === id); if (!classe) return; editandoClasseId = id; document.getElementById('modal-classe-title').innerText = 'Editar Classe'; document.getElementById('classe-nome').value = classe.nome; document.getElementById('classe-icon').value = classe.icone || '📁'; document.getElementById('classe-cor').value = classe.cor || '#00e5a0'; document.getElementById('modal-classe').classList.add('open'); }
+function salvarClasse() { const nome = document.getElementById('classe-nome').value.trim(); if (!nome) { toast('Informe o nome', 'err'); return; } const icone = document.getElementById('classe-icon').value; const cor = document.getElementById('classe-cor').value; if (editandoClasseId) { const index = classes.findIndex(c => c.id === editandoClasseId); if (index !== -1) classes[index] = { ...classes[index], nome, icone, cor }; toast('Classe atualizada', 'ok'); } else { classes.push({ id: Date.now().toString(), nome, icone, cor }); toast('Classe criada', 'ok'); } fecharModal('modal-classe'); salvarLocalStorage(); carregarDados(); }
+function confirmarExcluirClasse(id) { const classe = classes.find(c => c.id === id); const opsNaClasse = operadores.filter(op => op.classe_id === id); let mensagem = `Tem certeza que deseja excluir a classe <strong>${classe?.nome}</strong>?`; if (opsNaClasse.length) mensagem += `<br><br>⚠️ Esta classe tem ${opsNaClasse.length} operador(es). Eles serão movidos para "Sem classe".`; abrirConfirmModal('Excluir Classe', mensagem, '🗑️', () => { operadores = operadores.map(op => op.classe_id === id ? { ...op, classe_id: null } : op); classes = classes.filter(c => c.id !== id); salvarLocalStorage(); carregarDados(); toast('Classe excluída', 'ok'); }); }
+function abrirModalOp() { editandoOpId = null; document.getElementById('modal-op-title').innerText = 'Novo Operador'; document.getElementById('op-nome').value = ''; document.getElementById('op-classe').value = ''; document.getElementById('modal-op').classList.add('open'); }
+function abrirModalOpComClasse(classeId) { editandoOpId = null; document.getElementById('modal-op-title').innerText = 'Novo Operador'; document.getElementById('op-nome').value = ''; document.getElementById('op-classe').value = classeId; document.getElementById('modal-op').classList.add('open'); }
+function editarOperador(id) { const op = operadores.find(o => o.id === id); if (!op) return; editandoOpId = id; document.getElementById('modal-op-title').innerText = 'Editar Operador'; document.getElementById('op-nome').value = op.nome; document.getElementById('op-classe').value = op.classe_id || ''; document.getElementById('modal-op').classList.add('open'); }
+function salvarOperador() { const nome = document.getElementById('op-nome').value.trim(); if (!nome) { toast('Informe o nome', 'err'); return; } const classe_id = document.getElementById('op-classe').value || null; if (editandoOpId) { const index = operadores.findIndex(o => o.id === editandoOpId); if (index !== -1) operadores[index] = { ...operadores[index], nome, classe_id }; toast('Operador atualizado', 'ok'); } else { operadores.push({ id: Date.now().toString(), nome, classe_id }); toast('Operador criado', 'ok'); } fecharModal('modal-op'); salvarLocalStorage(); carregarDados(); }
+function confirmarExcluirOperador(id) { const op = operadores.find(o => o.id === id); const chipsDoOperador = chips.filter(c => c.operador_id === id); let mensagem = `Tem certeza que deseja excluir o operador <strong>${op?.nome}</strong>?`; if (chipsDoOperador.length) mensagem += `<br><br>⚠️ Este operador tem ${chipsDoOperador.length} chip(s) atribuído(s). Eles ficarão sem operador.`; abrirConfirmModal('Excluir Operador', mensagem, '🗑️', () => { operadores = operadores.filter(o => o.id !== id); chips = chips.map(c => c.operador_id === id ? { ...c, operador_id: null } : c); salvarLocalStorage(); carregarDados(); toast('Operador excluído', 'ok'); }); }
+function abrirModalMoverOperador(id) { const op = operadores.find(o => o.id === id); if (!op) return; const modalHtml = `<div class="modal-overlay" id="modal-mover" style="display:flex"><div class="modal"><div class="modal-header"><div class="modal-title">Mover Operador</div><button onclick="fecharModalMover()">✕</button></div><div class="form-group"><label class="form-label">Operador: <strong>${op.nome}</strong></label></div><div class="form-group"><label class="form-label">Selecionar Classe</label><select id="mover-classe-select"><option value="">-- Sem classe --</option>${classes.map(c => `<option value="${c.id}" ${op.classe_id === c.id ? 'selected' : ''}>${c.icone} ${c.nome}</option>`).join('')}</select></div><div class="form-actions"><button class="btn-cancel" onclick="fecharModalMover()">Cancelar</button><button class="btn-primary" onclick="confirmarMoverOperador('${id}')">Mover</button></div></div></div>`; const existingModal = document.getElementById('modal-mover'); if (existingModal) existingModal.remove(); document.body.insertAdjacentHTML('beforeend', modalHtml); }
+function fecharModalMover() { const modal = document.getElementById('modal-mover'); if (modal) modal.remove(); }
+function confirmarMoverOperador(id) { const select = document.getElementById('mover-classe-select'); const novaClasseId = select?.value || null; const index = operadores.findIndex(o => o.id === id); if (index !== -1) { operadores[index] = { ...operadores[index], classe_id: novaClasseId }; salvarLocalStorage(); carregarDados(); const classeNome = classes.find(c => c.id === novaClasseId)?.nome || 'nenhuma classe'; toast(`Operador movido para ${classeNome}`, 'ok'); } fecharModalMover(); }
+function popularSelects() { const opSelect = document.getElementById('chip-operador'); if (opSelect) { const atual = opSelect.value; opSelect.innerHTML = '<option value="">Nenhum operador</option>' + operadores.map(o => `<option value="${o.id}">${o.nome}</option>`).join(''); opSelect.value = atual; } const bulkOp = document.getElementById('bulk-operador'); if (bulkOp) bulkOp.innerHTML = '<option value="">Alterar Operador</option>' + operadores.map(o => `<option value="${o.id}">${o.nome}</option>`).join(''); const classeSelect = document.getElementById('op-classe'); if (classeSelect) { const atual = classeSelect.value; classeSelect.innerHTML = '<option value="">Sem classe</option>' + classes.map(c => `<option value="${c.id}">${c.icone} ${c.nome}</option>`).join(''); classeSelect.value = atual; } }
 
 // ==================== EXPORT/IMPORT ====================
-function exportarDados() {
-  const linhas = [['OPERADOR', 'CHIP', 'SITUAÇÃO', 'CLASSE']];
-  chips.forEach(chip => {
-    const op = operadores.find(o => o.id === chip.operador_id);
-    const classe = op ? classes.find(c => c.id === op.classe_id) : null;
-    linhas.push([op?.nome || '', chip.numero, chip.status === 'ativo' ? 'Ativo' : (chip.status === 'banido' ? 'Banido' : 'Novo'), classe?.nome || '']);
-  });
-  const csv = linhas.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(';')).join('\n');
-  const blob = new Blob(["\uFEFF" + csv], { type: 'text/csv;charset=utf-8' });
-  const link = document.createElement('a');
-  link.href = URL.createObjectURL(blob);
-  link.download = `chips_${new Date().toISOString().slice(0,19)}.csv`;
-  link.click();
-  toast('Exportado!', 'ok');
-}
-
-function baixarModelo() {
-  const headers = ['OPERADOR', 'CHIP', 'SITUAÇÃO', 'CLASSE'];
-  const exemplos = [['Exemplo_operador', '(11) 99999-9999', 'Novo', 'CRM']];
-  const csv = [headers.join(';'), ...exemplos.map(row => row.map(c => `"${c}"`).join(';'))].join('\n');
-  const blob = new Blob(["\uFEFF" + csv], { type: 'text/csv' });
-  const link = document.createElement('a');
-  link.href = URL.createObjectURL(blob);
-  link.download = 'modelo_chips.csv';
-  link.click();
-  toast('Modelo baixado!', 'ok');
-}
-
-const dropzone = document.getElementById('dropzone');
-const fileInput = document.getElementById('import-file');
-if (dropzone && fileInput) {
-  dropzone.addEventListener('click', () => fileInput.click());
-  dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.classList.add('drag-over'); });
-  dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag-over'));
-  dropzone.addEventListener('drop', (e) => {
-    e.preventDefault();
-    dropzone.classList.remove('drag-over');
-    if (e.dataTransfer.files.length) {
-      fileInput.files = e.dataTransfer.files;
-      previewArquivo(e.dataTransfer.files[0]);
-    }
-  });
-  fileInput.addEventListener('change', (e) => { if (e.target.files.length) previewArquivo(e.target.files[0]); });
-}
-
-let arquivoLinhas = null;
-let arquivoSeparador = null;
-
-function previewArquivo(file) {
-  const reader = new FileReader();
-  reader.onload = (ev) => {
-    const preview = document.getElementById('import-preview');
-    const conteudo = ev.target.result;
-    arquivoSeparador = conteudo.includes(';') ? ';' : ',';
-    const linhas = conteudo.split(/\r?\n/).filter(l => l.trim());
-    if (linhas.length < 2) { preview.innerHTML = '<span style="color:var(--red)">Arquivo vazio</span>'; preview.style.display = 'block'; return; }
-    const headers = linhas[0].split(arquivoSeparador).map(h => h.replace(/^"|"$/g, '').trim().toUpperCase());
-    const valid = headers.includes('OPERADOR') && headers.includes('CHIP') && headers.includes('SITUAÇÃO');
-    if (!valid) { preview.innerHTML = '<span style="color:var(--red)">Colunas: OPERADOR; CHIP; SITUAÇÃO; CLASSE</span>'; preview.style.display = 'block'; return; }
-    const previewRows = linhas.slice(1, 6).map(l => l.split(arquivoSeparador).map(c => c.replace(/^"|"$/g, '').trim()));
-    let html = '<table style="width:100%;border-collapse:collapse"><tr><th>OPERADOR</th><th>CHIP</th><th>SITUAÇÃO</th><th>CLASSE</th></tr>';
-    previewRows.forEach(r => { if (r.length >= 3) html += `<tr><td>${r[0]||''}</td><td>${r[1]||''}</td><td>${r[2]||''}</td><td>${r[3]||''}</td></tr>`; });
-    html += '</table><span style="color:var(--accent)">✔️ Pronto para importar</span>';
-    preview.innerHTML = html;
-    preview.style.display = 'block';
-    arquivoLinhas = linhas;
-  };
-  reader.readAsText(file, 'UTF-8');
-}
-
-async function processarImportacao() {
-  if (!arquivoLinhas) { toast('Nenhum arquivo carregado', 'err'); return; }
-  const headers = arquivoLinhas[0].split(arquivoSeparador).map(h => h.replace(/^"|"$/g, '').trim().toUpperCase());
-  const idxOp = headers.indexOf('OPERADOR');
-  const idxChip = headers.indexOf('CHIP');
-  const idxStatus = headers.indexOf('SITUAÇÃO');
-  const idxClasse = headers.indexOf('CLASSE');
-  let sucessos = 0, erros = 0;
-  
-  for (let i = 1; i < arquivoLinhas.length; i++) {
-    if (!arquivoLinhas[i].trim()) continue;
-    const cols = arquivoLinhas[i].split(arquivoSeparador).map(c => c.replace(/^"|"$/g, '').trim());
-    const nomeOp = cols[idxOp] || '';
-    const numeroRaw = cols[idxChip] || '';
-    const numero = formatarTelefone(numeroRaw);
-    const situacao = (cols[idxStatus] || '').toLowerCase();
-    const nomeClasse = idxClasse !== -1 ? (cols[idxClasse] || '').trim() : '';
-    const statusMap = { 'ativo':'ativo', 'banido':'banido', 'novo':'novo', 'atividade':'ativo', 'active':'ativo' };
-    const status = statusMap[situacao] || 'novo';
-    if (!numero) { erros++; continue; }
-    
-    let classe_id = null;
-    if (nomeClasse) {
-      let existente = classes.find(c => c.nome.toLowerCase() === nomeClasse.toLowerCase());
-      if (existente) classe_id = existente.id;
-      else { classe_id = Date.now().toString(); classes.push({ id: classe_id, nome: nomeClasse, icone: '📁' }); }
-    }
-    let operador_id = null;
-    if (nomeOp) {
-      let existente = operadores.find(o => o.nome.toLowerCase() === nomeOp.toLowerCase());
-      if (existente) operador_id = existente.id;
-      else { operador_id = Date.now().toString(); operadores.push({ id: operador_id, nome: nomeOp, email: null, classe_id, ativo: true }); }
-    }
-    const existente = chips.find(c => c.numero === numero);
-    if (existente) { existente.operador_id = operador_id; existente.status = status; existente.motivo_ban = null; }
-    else { chips.push({ id: Date.now().toString(), numero, operador_id, status, motivo_ban: null, criado_em: new Date().toISOString() }); }
-    sucessos++;
-  }
-  salvarLocalStorage();
-  carregarDados();
-  document.getElementById('import-preview').innerHTML = `✅ Importados: ${sucessos} chips, ${erros} erros.`;
-  toast(`${sucessos} chips importados`, sucessos ? 'ok' : 'err');
-  arquivoLinhas = null;
-}
+function exportarDados() { const linhas = [['OPERADOR', 'CHIP', 'SITUAÇÃO', 'CLASSE']]; chips.forEach(chip => { const op = operadores.find(o => o.id === chip.operador_id); const classe = op ? classes.find(c => c.id === op.classe_id) : null; linhas.push([op?.nome || '', chip.numero, chip.status === 'ativo' ? 'Ativo' : (chip.status === 'banido' ? 'Banido' : 'Novo'), classe?.nome || '']); }); const csv = linhas.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(';')).join('\n'); const blob = new Blob(["\uFEFF" + csv], { type: 'text/csv;charset=utf-8' }); const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = `chips_${new Date().toISOString().slice(0,19)}.csv`; link.click(); toast('Exportado!', 'ok'); }
+function baixarModelo() { const headers = ['OPERADOR', 'CHIP', 'SITUAÇÃO', 'CLASSE']; const exemplos = [['Exemplo_operador', '(11) 99999-9999', 'Novo', 'CRM']]; const csv = [headers.join(';'), ...exemplos.map(row => row.map(c => `"${c}"`).join(';'))].join('\n'); const blob = new Blob(["\uFEFF" + csv], { type: 'text/csv' }); const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = 'modelo_chips.csv'; link.click(); toast('Modelo baixado!', 'ok'); }
+const dropzone = document.getElementById('dropzone'); const fileInput = document.getElementById('import-file'); if (dropzone && fileInput) { dropzone.addEventListener('click', () => fileInput.click()); dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.classList.add('drag-over'); }); dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag-over')); dropzone.addEventListener('drop', (e) => { e.preventDefault(); dropzone.classList.remove('drag-over'); if (e.dataTransfer.files.length) { fileInput.files = e.dataTransfer.files; previewArquivo(e.dataTransfer.files[0]); } }); fileInput.addEventListener('change', (e) => { if (e.target.files.length) previewArquivo(e.target.files[0]); }); }
+function previewArquivo(file) { const reader = new FileReader(); reader.onload = (ev) => { const preview = document.getElementById('import-preview'); const conteudo = ev.target.result; arquivoSeparador = conteudo.includes(';') ? ';' : ','; const linhas = conteudo.split(/\r?\n/).filter(l => l.trim()); if (linhas.length < 2) { preview.innerHTML = '<span style="color:var(--red)">Arquivo vazio</span>'; preview.style.display = 'block'; return; } const headers = linhas[0].split(arquivoSeparador).map(h => h.replace(/^"|"$/g, '').trim().toUpperCase()); const valid = headers.includes('OPERADOR') && headers.includes('CHIP') && headers.includes('SITUAÇÃO'); if (!valid) { preview.innerHTML = '<span style="color:var(--red)">Colunas: OPERADOR; CHIP; SITUAÇÃO; CLASSE</span>'; preview.style.display = 'block'; return; } const previewRows = linhas.slice(1, 6).map(l => l.split(arquivoSeparador).map(c => c.replace(/^"|"$/g, '').trim())); let html = '<table style="width:100%;border-collapse:collapse"><tr><th>OPERADOR</th><th>CHIP</th><th>SITUAÇÃO</th><th>CLASSE</th></tr>'; previewRows.forEach(r => { if (r.length >= 3) html += `<tr><td>${r[0]||''}</td><td>${r[1]||''}</td><td>${r[2]||''}</td><td>${r[3]||''}</td></tr>`; }); html += '</table><span style="color:var(--accent)">✔️ Pronto para importar</span>'; preview.innerHTML = html; preview.style.display = 'block'; arquivoLinhas = linhas; }; reader.readAsText(file, 'UTF-8'); }
+async function processarImportacao() { if (!arquivoLinhas) { toast('Nenhum arquivo carregado', 'err'); return; } const headers = arquivoLinhas[0].split(arquivoSeparador).map(h => h.replace(/^"|"$/g, '').trim().toUpperCase()); const idxOp = headers.indexOf('OPERADOR'); const idxChip = headers.indexOf('CHIP'); const idxStatus = headers.indexOf('SITUAÇÃO'); const idxClasse = headers.indexOf('CLASSE'); let sucessos = 0, erros = 0, atualizados = 0; const chipsProcessados = new Map(); for (let i = 1; i < arquivoLinhas.length; i++) { if (!arquivoLinhas[i].trim()) continue; const cols = arquivoLinhas[i].split(arquivoSeparador).map(c => c.replace(/^"|"$/g, '').trim()); const nomeOp = cols[idxOp] || ''; let numeroRaw = cols[idxChip] || ''; const situacao = (cols[idxStatus] || '').toLowerCase(); const nomeClasse = idxClasse !== -1 ? (cols[idxClasse] || '').trim() : ''; numeroRaw = numeroRaw.toString().replace(/[^\d]/g, ''); if (numeroRaw.length === 12 && numeroRaw.startsWith('55')) numeroRaw = numeroRaw.substring(2); else if (numeroRaw.length > 11) numeroRaw = numeroRaw.slice(-11); if (numeroRaw.length < 10 || numeroRaw.length > 11) { erros++; continue; } const numero = formatarTelefone(numeroRaw); const statusMap = { 'ativo':'ativo', 'banido':'banido', 'novo':'novo', 'atividade':'ativo', 'active':'ativo' }; const status = statusMap[situacao] || 'novo'; let classe_id = null; if (nomeClasse) { let existente = classes.find(c => c.nome.toLowerCase() === nomeClasse.toLowerCase()); if (existente) classe_id = existente.id; else { classe_id = Date.now().toString() + Math.random(); classes.push({ id: classe_id, nome: nomeClasse, icone: '📁', cor: '#00e5a0' }); } } let operador_id = null; if (nomeOp) { let existente = operadores.find(o => o.nome.toLowerCase() === nomeOp.toLowerCase()); if (existente) operador_id = existente.id; else { operador_id = Date.now().toString() + Math.random(); operadores.push({ id: operador_id, nome: nomeOp, classe_id }); } } const chipExistente = chips.find(c => c.numero.replace(/\D/g, '') === numeroRaw); if (chipExistente) { if (chipExistente.status !== status) { const chipIndex = chips.findIndex(c => c.id === chipExistente.id); if (chipIndex !== -1) chips[chipIndex] = { ...chips[chipIndex], status }; atualizados++; } } else if (!chipsProcessados.has(numeroRaw)) { chips.push({ id: Date.now().toString() + Math.random() + i, numero, operador_id, status, motivo_ban: null, criado_em: new Date().toISOString() }); chipsProcessados.set(numeroRaw, true); sucessos++; } } salvarLocalStorage(); carregarDados(); document.getElementById('import-preview').innerHTML = `✅ Importação concluída!<br>📱 Novos chips: ${sucessos}<br>🔄 Status atualizados: ${atualizados}<br>❌ Erros: ${erros}`; toast(`${sucessos} novos chips, ${atualizados} atualizados`, sucessos || atualizados ? 'ok' : 'err'); arquivoLinhas = null; }
 
 // ==================== UTILIDADES ====================
-function fecharModal(id) {
-  document.getElementById(id).classList.remove('open');
-}
+let acaoConfirmada = null;
+function abrirConfirmModal(titulo, mensagem, icone, acao) { document.getElementById('confirm-title').textContent = titulo; document.getElementById('confirm-message').innerHTML = mensagem; document.getElementById('confirm-icon').textContent = icone || '⚠️'; acaoConfirmada = acao; document.getElementById('confirm-modal').classList.add('open'); }
+function fecharConfirmModal() { document.getElementById('confirm-modal').classList.remove('open'); acaoConfirmada = null; }
+function executarAcaoConfirmada() { if (acaoConfirmada) { acaoConfirmada(); } fecharConfirmModal(); }
+function fecharModal(id) { document.getElementById(id).classList.remove('open'); }
+function toast(msg, tipo) { const el = document.getElementById('toast'); el.textContent = msg; el.className = `show ${tipo || ''}`; setTimeout(() => el.className = '', 3000); }
+function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
+function toggleTheme() { const currentTheme = document.documentElement.getAttribute('data-theme'); if (currentTheme === 'light') document.documentElement.setAttribute('data-theme', 'dark'); else document.documentElement.setAttribute('data-theme', 'light'); localStorage.setItem('receptivo_theme', document.documentElement.getAttribute('data-theme') || 'dark'); }
 
-function toast(msg, tipo) {
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.className = `show ${tipo || ''}`;
-  setTimeout(() => el.className = '', 3000);
-}
+document.querySelectorAll('.nav-btn').forEach(btn => { btn.addEventListener('click', () => { const page = btn.getAttribute('data-page'); document.querySelectorAll('.page').forEach(p => p.classList.remove('active')); document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active')); document.getElementById(`page-${page}`).classList.add('active'); btn.classList.add('active'); if (window.innerWidth <= 768) document.getElementById('sidebar').classList.remove('open'); }); });
+document.querySelectorAll('.modal-overlay').forEach(modal => { modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.remove('open'); }); });
 
-// Navegação
-document.querySelectorAll('.nav-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    const page = btn.getAttribute('data-page');
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-    document.getElementById(`page-${page}`).classList.add('active');
-    btn.classList.add('active');
-  });
-});
-
-document.querySelectorAll('.modal-overlay').forEach(modal => {
-  modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.remove('open'); });
-});
-
-// Inicializar
-carregarDados();
+const savedTheme = localStorage.getItem('receptivo_theme');
+if (savedTheme === 'light') document.documentElement.setAttribute('data-theme', 'light');
+carregarUsuarios();
+carregarHistoricoCentral();
+verificarLogin();
 </script>
 </body>
 </html>
+```
