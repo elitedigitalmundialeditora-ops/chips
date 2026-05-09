@@ -609,7 +609,7 @@ input, select {
     <div class="form-group">
       <input type="password" id="login-pass" placeholder="Senha" style="text-align:center">
     </div>
-    <button class="btn-primary" style="width:100%" onclick="fazerLogin()">Entrar</button>
+    <button class="btn-primary" style="width:100%" id="login-btn">Entrar</button>
     <div class="login-error" id="login-error">Usuário ou senha incorretos</div>
     <div class="login-loading" id="login-loading">Conectando ao Supabase...</div>
   </div>
@@ -791,13 +791,12 @@ input, select {
 
 <script>
 // ==================== SUPABASE CONFIGURAÇÃO ====================
-// ✅ CREDENCIAIS CORRIGIDAS
 const SUPABASE_URL = 'https://fyeqxmokaiovnjfmoior.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_3bthuT44LXmjRVYAFw9peQ_6ityZ0cL';
 
-let supabase = null;
+// Variáveis globais
+let supabaseClient = null;
 let supabaseConnected = false;
-
 let usuarioLogado = null;
 let usuarioLogadoObj = null;
 const USUARIO_MASTER = { login: 'beatriz_rodrigues', senha: 'beatriz123', cor: '#9d4dff', isMaster: true };
@@ -818,10 +817,11 @@ let arquivoLinhas = null;
 let arquivoSeparador = null;
 let historicoAlteracoes = [];
 
+// ==================== INICIALIZAÇÃO ====================
 async function initSupabase() {
     try {
-        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        const { data, error } = await supabase.from('classes').select('count', { count: 'exact', head: true });
+        supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const { error } = await supabaseClient.from('classes').select('count', { count: 'exact', head: true });
         if (error) throw error;
         supabaseConnected = true;
         document.getElementById('sync-status').innerHTML = '✅ Conectado';
@@ -843,16 +843,16 @@ async function initSupabase() {
 async function carregarDadosDoSupabase() {
     if (!supabaseConnected) return;
     try {
-        const { data: classesData } = await supabase.from('classes').select('*');
+        const { data: classesData } = await supabaseClient.from('classes').select('*');
         if (classesData && classesData.length) classes = classesData;
         
-        const { data: operadoresData } = await supabase.from('operadores').select('*');
+        const { data: operadoresData } = await supabaseClient.from('operadores').select('*');
         if (operadoresData && operadoresData.length) operadores = operadoresData;
         
-        const { data: chipsData } = await supabase.from('chips').select('*');
+        const { data: chipsData } = await supabaseClient.from('chips').select('*');
         if (chipsData && chipsData.length) chips = chipsData;
         
-        const { data: usuariosData } = await supabase.from('usuarios_sistema').select('*');
+        const { data: usuariosData } = await supabaseClient.from('usuarios_sistema').select('*');
         if (usuariosData && usuariosData.length) {
             usuariosSistema = usuariosData.map(u => ({
                 login: u.login,
@@ -862,7 +862,7 @@ async function carregarDadosDoSupabase() {
             }));
         }
         
-        const { data: historicoData } = await supabase
+        const { data: historicoData } = await supabaseClient
             .from('historico_central')
             .select('*')
             .order('data', { ascending: false })
@@ -880,7 +880,7 @@ async function syncToSupabase(tabela, dados) {
     if (!supabaseConnected) return;
     try {
         for (const item of dados) {
-            await supabase.from(tabela).upsert(item, { onConflict: 'id' });
+            await supabaseClient.from(tabela).upsert(item, { onConflict: 'id' });
         }
     } catch (error) {
         console.error(`Erro ao sync ${tabela}:`, error);
@@ -928,7 +928,7 @@ async function adicionarHistoricoCentralSupabase(resumoAcao, detalhes) {
     if (historicoAlteracoes.length > 1000) historicoAlteracoes.pop();
     salvarHistoricoCentral();
     renderizarHistoricoCentral();
-    if (supabaseConnected) await supabase.from('historico_central').insert(novoHistorico);
+    if (supabaseConnected) await supabaseClient.from('historico_central').insert(novoHistorico);
 }
 
 async function adicionarHistoricoChipSupabase(chipId, acao, detalhes) {
@@ -940,7 +940,7 @@ async function adicionarHistoricoChipSupabase(chipId, acao, detalhes) {
         detalhes: detalhes,
         data: new Date().toISOString()
     };
-    if (supabaseConnected) await supabase.from('historico_chips').insert(novoHistorico);
+    if (supabaseConnected) await supabaseClient.from('historico_chips').insert(novoHistorico);
     const individualHistory = JSON.parse(localStorage.getItem('receptivo_historico') || '[]');
     individualHistory.unshift({
         id: Date.now(),
@@ -995,31 +995,40 @@ function adicionarHistorico(chipId, acao, detalhes) {
     adicionarHistoricoChipSupabase(chipId, acao, detalhes);
 }
 
+// ==================== LOGIN ====================
 async function fazerLogin() {
     const login = document.getElementById('login-user').value;
     const senha = document.getElementById('login-pass').value;
     const loadingEl = document.getElementById('login-loading');
+    const errorEl = document.getElementById('login-error');
+    
     loadingEl.style.display = 'block';
+    errorEl.style.display = 'none';
+    
     await initSupabase();
+    
     const usuarioEncontrado = usuariosSistema.find(u => u.login === login && u.senha === senha);
     if (usuarioEncontrado) {
         usuarioLogado = login;
         usuarioLogadoObj = usuarioEncontrado;
         localStorage.setItem('receptivo_logado', login);
         document.getElementById('login-screen').style.display = 'none';
+        
         const avatarEl = document.getElementById('user-avatar');
         const nameEl = document.getElementById('user-name-display');
         if(avatarEl) avatarEl.style.backgroundColor = usuarioLogadoObj.cor;
         if(nameEl) nameEl.innerText = login;
+        
         const isAdmin = (login === USUARIO_MASTER.login);
         const navUsuarios = document.getElementById('nav-usuarios');
         const navHistorico = document.getElementById('nav-historico');
         if(navUsuarios) navUsuarios.style.display = isAdmin ? 'flex' : 'none';
         if(navHistorico) navHistorico.style.display = isAdmin ? 'flex' : 'none';
+        
         if(isAdmin) renderizarUsuarios();
         renderizarHistoricoCentral();
     } else {
-        document.getElementById('login-error').style.display = 'block';
+        errorEl.style.display = 'block';
     }
     loadingEl.style.display = 'none';
 }
@@ -1036,11 +1045,13 @@ function verificarLogin() {
             const nameEl = document.getElementById('user-name-display');
             if(avatarEl) avatarEl.style.backgroundColor = user.cor;
             if(nameEl) nameEl.innerText = user.login;
+            
             const isAdmin = (user.login === USUARIO_MASTER.login);
             const navUsuarios = document.getElementById('nav-usuarios');
             const navHistorico = document.getElementById('nav-historico');
             if(navUsuarios) navUsuarios.style.display = isAdmin ? 'flex' : 'none';
             if(navHistorico) navHistorico.style.display = isAdmin ? 'flex' : 'none';
+            
             carregarDados();
             if(isAdmin) renderizarUsuarios();
             renderizarHistoricoCentral();
@@ -1238,7 +1249,7 @@ function renderizarChips() {
     
     document.getElementById('chips-count').textContent = `${chips.length} chips (${chips.filter(c=>c.status==='novo').length} novos)`;
     const tbody = document.getElementById('chips-tbody');
-    if (!filtrados.length) { tbody.innerHTML = '</td><td colspan="7">Nenhum chip encontrado</td></tr>'; return; }
+    if (!filtrados.length) { tbody.innerHTML = '<tr><td colspan="7">Nenhum chip encontrado</td></tr>'; return; }
     
     tbody.innerHTML = filtrados.map(c => {
         const op = operadores.find(o => o.id === c.operador_id);
@@ -1534,7 +1545,7 @@ function previewArquivo(file) {
             return; 
         } 
         const previewRows = linhas.slice(1, 6).map(l => l.split(arquivoSeparador).map(c => c.replace(/^"|"$/g, '').trim())); 
-        let html = '<table style="width:100%;border-collapse:collapse"><table><th>OPERADOR</th><th>CHIP</th><th>SITUAÇÃO</th><th>CLASSE</th>一行'; 
+        let html = '<table style="width:100%;border-collapse:collapse"><tr><th>OPERADOR</th><th>CHIP</th><th>SITUAÇÃO</th><th>CLASSE</th></tr>'; 
         previewRows.forEach(r => { if (r.length >= 3) html += `<tr><td>${r[0]||''}</td><td>${r[1]||''}</td><td>${r[2]||''}</td><td>${r[3]||''}</td></tr>`; }); 
         html += '</table><span style="color:var(--accent)">✔️ Pronto para importar</span>'; 
         preview.innerHTML = html; 
@@ -1620,12 +1631,15 @@ function toast(msg, tipo) { const el = document.getElementById('toast'); el.text
 function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
 function toggleTheme() { const currentTheme = document.documentElement.getAttribute('data-theme'); if (currentTheme === 'light') document.documentElement.setAttribute('data-theme', 'dark'); else document.documentElement.setAttribute('data-theme', 'light'); localStorage.setItem('receptivo_theme', document.documentElement.getAttribute('data-theme') || 'dark'); }
 
+// Event listeners
 document.querySelectorAll('.nav-btn').forEach(btn => { btn.addEventListener('click', () => { const page = btn.getAttribute('data-page'); document.querySelectorAll('.page').forEach(p => p.classList.remove('active')); document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active')); document.getElementById(`page-${page}`).classList.add('active'); btn.classList.add('active'); if (window.innerWidth <= 768) document.getElementById('sidebar').classList.remove('open'); }); });
 document.querySelectorAll('.modal-overlay').forEach(modal => { modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.remove('open'); }); });
+document.getElementById('login-btn').addEventListener('click', fazerLogin);
 
 const savedTheme = localStorage.getItem('receptivo_theme');
 if (savedTheme === 'light') document.documentElement.setAttribute('data-theme', 'light');
 
+// Inicialização
 carregarUsuarios();
 carregarHistoricoCentral();
 initSupabase();
