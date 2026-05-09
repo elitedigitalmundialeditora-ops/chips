@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -9,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 * {
   margin: 0;
@@ -89,6 +89,12 @@ body {
   color: var(--red);
   font-size: 12px;
   margin-top: 10px;
+  display: none;
+}
+.login-loading {
+  margin-top: 10px;
+  font-size: 12px;
+  color: var(--text2);
   display: none;
 }
 
@@ -594,6 +600,16 @@ input, select {
   cursor: pointer;
   margin-left: 8px;
 }
+.sync-status {
+  font-size: 10px;
+  color: var(--text2);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.sync-status.syncing { color: var(--blue); }
+.sync-status.synced { color: var(--accent); }
+.sync-status.error { color: var(--red); }
 </style>
 </head>
 <body>
@@ -610,6 +626,7 @@ input, select {
     </div>
     <button class="btn-primary" style="width:100%" onclick="fazerLogin()">Entrar</button>
     <div class="login-error" id="login-error">Usuário ou senha incorretos</div>
+    <div class="login-loading" id="login-loading">Conectando ao Supabase...</div>
   </div>
 </div>
 
@@ -626,7 +643,10 @@ input, select {
     <button class="nav-btn" data-page="usuarios" id="nav-usuarios" style="display: none;">👤 Usuários</button>
     <button class="nav-btn" data-page="historico" id="nav-historico" style="display: none;">📜 Histórico</button>
   </nav>
-  <div class="sidebar-foot"><span class="dot"></span>Modo Local</div>
+  <div class="sidebar-foot">
+    <span class="dot"></span>Cloud Sync
+    <div class="sync-status" id="sync-status">✅ Sincronizado</div>
+  </div>
 </div>
 
 <div id="main">
@@ -641,7 +661,7 @@ input, select {
       <div class="header-actions">
         <div class="user-info" id="user-info-header"><span class="user-avatar" id="user-avatar">U</span><span id="user-name-display"></span></div>
         <button class="theme-toggle" onclick="toggleTheme()">🌓</button>
-        <button class="btn-ghost" onclick="carregarDados()">Atualizar</button>
+        <button class="btn-ghost" onclick="syncAllData()">🔄 Sincronizar</button>
       </div>
     </div>
     <div class="cards-grid">
@@ -789,192 +809,20 @@ input, select {
 <div id="toast"></div>
 
 <script>
+// ==================== SUPABASE CONFIGURAÇÃO ====================
+// ⚠️ SUBSTITUA PELAS SUAS CREDENCIAIS DO SUPABASE ⚠️
+const SUPABASE_URL = 'https://fyeqxmokaiovnjfmoior.supabase.co/rest/v1/';  // COLOQUE SUA URL AQUI
+const SUPABASE_ANON_KEY = 'sb_publishable_3bthuT44LXmjRVYAFw9peQ_6ityZ0cL';          // COLOQUE SUA ANON KEY AQUI
+
+let supabase = null;
+let supabaseConnected = false;
+
 // ==================== AUTENTICAÇÃO E USUÁRIOS ====================
 let usuarioLogado = null;
 let usuarioLogadoObj = null;
 const USUARIO_MASTER = { login: 'beatriz_rodrigues', senha: 'beatriz123', cor: '#9d4dff', isMaster: true };
 
 let usuariosSistema = [];
-
-function carregarUsuarios() {
-  const saved = localStorage.getItem('receptivo_usuarios');
-  if (saved) {
-    usuariosSistema = JSON.parse(saved);
-  } else {
-    usuariosSistema = [USUARIO_MASTER];
-  }
-  salvarUsuarios();
-}
-function salvarUsuarios() { localStorage.setItem('receptivo_usuarios', JSON.stringify(usuariosSistema)); }
-
-function fazerLogin() {
-  const login = document.getElementById('login-user').value;
-  const senha = document.getElementById('login-pass').value;
-  
-  const usuarioEncontrado = usuariosSistema.find(u => u.login === login && u.senha === senha);
-  if (usuarioEncontrado) {
-    usuarioLogado = login;
-    usuarioLogadoObj = usuarioEncontrado;
-    localStorage.setItem('receptivo_logado', login);
-    document.getElementById('login-screen').style.display = 'none';
-    
-    // Atualizar UI do usuário
-    const avatarEl = document.getElementById('user-avatar');
-    const nameEl = document.getElementById('user-name-display');
-    if(avatarEl) avatarEl.style.backgroundColor = usuarioLogadoObj.cor;
-    if(nameEl) nameEl.innerText = login;
-    
-    // Mostrar ou esconder abas de admin
-    const isAdmin = (login === USUARIO_MASTER.login);
-    const navUsuarios = document.getElementById('nav-usuarios');
-    const navHistorico = document.getElementById('nav-historico');
-    if(navUsuarios) navUsuarios.style.display = isAdmin ? 'flex' : 'none';
-    if(navHistorico) navHistorico.style.display = isAdmin ? 'flex' : 'none';
-    
-    carregarDados();
-    if(isAdmin) renderizarUsuarios();
-    renderizarHistoricoCentral();
-  } else {
-    document.getElementById('login-error').style.display = 'block';
-  }
-}
-
-function verificarLogin() {
-  const loggedUser = localStorage.getItem('receptivo_logado');
-  if (loggedUser) {
-    const user = usuariosSistema.find(u => u.login === loggedUser);
-    if(user) {
-      usuarioLogado = loggedUser;
-      usuarioLogadoObj = user;
-      document.getElementById('login-screen').style.display = 'none';
-      const avatarEl = document.getElementById('user-avatar');
-      const nameEl = document.getElementById('user-name-display');
-      if(avatarEl) avatarEl.style.backgroundColor = user.cor;
-      if(nameEl) nameEl.innerText = user.login;
-      
-      const isAdmin = (user.login === USUARIO_MASTER.login);
-      const navUsuarios = document.getElementById('nav-usuarios');
-      const navHistorico = document.getElementById('nav-historico');
-      if(navUsuarios) navUsuarios.style.display = isAdmin ? 'flex' : 'none';
-      if(navHistorico) navHistorico.style.display = isAdmin ? 'flex' : 'none';
-      
-      carregarDados();
-      if(isAdmin) renderizarUsuarios();
-      renderizarHistoricoCentral();
-      return;
-    }
-  }
-  localStorage.removeItem('receptivo_logado');
-}
-// ==================== GERENCIAMENTO DE USUÁRIOS ====================
-function renderizarUsuarios() {
-  const tbody = document.getElementById('usuarios-tbody');
-  if(!tbody) return;
-  tbody.innerHTML = usuariosSistema.map(user => `
-    <tr>
-      <td><div style="display:flex;align-items:center;gap:8px"><span style="display:inline-block;width:24px;height:24px;border-radius:50%;background:${user.cor};"></span> ${user.login}</div></td>
-      <td><span id="senha-vis-${user.login}">********</span> <button class="btn-ghost btn-sm" onclick="toggleSenhaVisibilidade('${user.login}', '${user.senha}')">👁️</button></td>
-      <td><input type="color" value="${user.cor}" onchange="atualizarCorUsuario('${user.login}', this.value)"></td>
-      <td>${user.login !== USUARIO_MASTER.login ? `<button class="btn-sm btn-del" onclick="excluirUsuario('${user.login}')">Excluir</button>` : '<span class="badge">Master</span>'}</td>
-    </tr>
-  `).join('');
-}
-
-function toggleSenhaVisibilidade(login, senhaReal) {
-  const span = document.getElementById(`senha-vis-${login}`);
-  if(span.innerText === '********') span.innerText = senhaReal;
-  else span.innerText = '********';
-}
-
-function atualizarCorUsuario(login, novaCor) {
-  const user = usuariosSistema.find(u => u.login === login);
-  if(user) {
-    user.cor = novaCor;
-    salvarUsuarios();
-    if(usuarioLogado === login) {
-      usuarioLogadoObj.cor = novaCor;
-      const avatarEl = document.getElementById('user-avatar');
-      if(avatarEl) avatarEl.style.backgroundColor = novaCor;
-    }
-    renderizarUsuarios();
-    toast(`Cor de ${login} atualizada`, 'ok');
-  }
-}
-
-function excluirUsuario(login) {
-  abrirConfirmModal('Excluir Usuário', `Deseja realmente excluir o usuário ${login}?`, '👤', () => {
-    usuariosSistema = usuariosSistema.filter(u => u.login !== login);
-    salvarUsuarios();
-    renderizarUsuarios();
-    toast('Usuário excluído', 'ok');
-  });
-}
-
-function abrirModalUsuario() {
-  if(usuarioLogado !== USUARIO_MASTER.login) return toast('Apenas o gerente pode criar usuários', 'err');
-  document.getElementById('modal-usuario-title').innerText = 'Novo Usuário';
-  document.getElementById('usuario-login').value = '';
-  document.getElementById('usuario-senha').value = '';
-  document.getElementById('usuario-cor').value = '#00e5a0';
-  document.getElementById('modal-usuario').classList.add('open');
-}
-
-function salvarUsuario() {
-  const login = document.getElementById('usuario-login').value.trim();
-  const senha = document.getElementById('usuario-senha').value.trim();
-  const cor = document.getElementById('usuario-cor').value;
-  if(!login || !senha) { toast('Preencha login e senha', 'err'); return; }
-  if(usuariosSistema.find(u => u.login === login)) { toast('Login já existe', 'err'); return; }
-  usuariosSistema.push({ login, senha, cor, isMaster: false });
-  salvarUsuarios();
-  renderizarUsuarios();
-  fecharModal('modal-usuario');
-  toast(`Usuário ${login} criado`, 'ok');
-}
-
-// ==================== HISTÓRICO CENTRAL ====================
-let historicoAlteracoes = [];
-
-function adicionarHistoricoCentral(resumoAcao, detalhes) {
-  historicoAlteracoes.unshift({
-    id: Date.now(),
-    usuario: usuarioLogado,
-    resumo: resumoAcao,
-    detalhes: detalhes,
-    data: new Date().toISOString()
-  });
-  if (historicoAlteracoes.length > 1000) historicoAlteracoes.pop();
-  salvarHistoricoCentral();
-  renderizarHistoricoCentral();
-}
-
-function salvarHistoricoCentral() { localStorage.setItem('receptivo_historico_central', JSON.stringify(historicoAlteracoes)); }
-function carregarHistoricoCentral() {
-  const saved = localStorage.getItem('receptivo_historico_central');
-  if(saved) historicoAlteracoes = JSON.parse(saved);
-  else historicoAlteracoes = [];
-}
-
-function renderizarHistoricoCentral() {
-  const container = document.getElementById('central-history-log');
-  if(!container) return;
-  if(historicoAlteracoes.length === 0) { container.innerHTML = '<div class="empty-class">Nenhuma ação registrada</div>'; return; }
-  container.innerHTML = historicoAlteracoes.map(h => {
-    const dataObj = new Date(h.data);
-    const dataStr = dataObj.toLocaleDateString('pt-BR');
-    const horaStr = dataObj.toLocaleTimeString('pt-BR');
-    const userColor = usuariosSistema.find(u=>u.login===h.usuario)?.cor || '#888';
-    return `
-      <div class="history-item">
-        <div class="history-date">📅 ${dataStr}, ${horaStr} | <span style="background:${userColor}20; padding:2px 8px; border-radius:12px;">👤 ${h.usuario}</span></div>
-        <div class="history-action">📌 ${h.resumo}</div>
-        <div class="history-detail">${h.detalhes}</div>
-      </div>
-    `;
-  }).join('');
-}
-
-// ==================== DADOS PRINCIPAIS ====================
 let chips = [];
 let operadores = [];
 let classes = [];
@@ -988,362 +836,897 @@ let classesExpandidas = {};
 let chipsSelecionados = new Set();
 let arquivoLinhas = null;
 let arquivoSeparador = null;
+let historicoAlteracoes = [];
 
-const coresPadrao = {
-  'CRM': '#4d9eff',
-  'Digital': '#00e5a0',
-  'Home': '#ffd60a',
-  'Novatos': '#ff9f4d',
-  'Menor': '#ff6b9d',
-  'Elite': '#9d4dff'
-};
-
-function carregarDados() {
-  const savedClasses = localStorage.getItem('receptivo_classes');
-  const savedOps = localStorage.getItem('receptivo_operadores');
-  const savedChips = localStorage.getItem('receptivo_chips');
-  
-  classes = savedClasses ? JSON.parse(savedClasses) : [
-    { id: '1', nome: 'CRM', icone: '🚀', cor: '#4d9eff' },
-    { id: '2', nome: 'Digital', icone: '🎯', cor: '#00e5a0' },
-    { id: '3', nome: 'Home', icone: '🏠', cor: '#ffd60a' },
-    { id: '4', nome: 'Novatos', icone: '🌱', cor: '#ff9f4d' },
-    { id: '5', nome: 'Menor', icone: '👶', cor: '#ff6b9d' },
-    { id: '6', nome: 'Elite', icone: '⭐', cor: '#9d4dff' }
-  ];
-  
-  operadores = savedOps ? JSON.parse(savedOps) : [];
-  chips = savedChips ? JSON.parse(savedChips) : [];
-  
-  classes.forEach(c => { if(classesExpandidas[c.id] === undefined) classesExpandidas[c.id] = true; });
-  
-  atualizarDashboard();
-  renderizarChips();
-  renderizarClasses();
-  popularSelects();
-  salvarLocalStorage();
+// Inicializar Supabase
+async function initSupabase() {
+    try {
+        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        // Testar conexão
+        const { data, error } = await supabase.from('classes').select('count', { count: 'exact', head: true });
+        if (error) throw error;
+        supabaseConnected = true;
+        document.getElementById('sync-status').innerHTML = '✅ Conectado';
+        document.getElementById('sync-status').className = 'sync-status synced';
+        console.log('✅ Supabase conectado com sucesso!');
+        return true;
+    } catch (error) {
+        console.error('❌ Erro ao conectar Supabase:', error);
+        supabaseConnected = false;
+        document.getElementById('sync-status').innerHTML = '⚠️ Offline (usando localStorage)';
+        document.getElementById('sync-status').className = 'sync-status error';
+        toast('Modo offline - usando apenas localStorage', 'err');
+        return false;
+    }
 }
 
+// Funções de sincronização
+async function syncAllData() {
+    if (!supabaseConnected) {
+        toast('Modo offline - não é possível sincronizar', 'err');
+        return;
+    }
+    
+    document.getElementById('sync-status').innerHTML = '🔄 Sincronizando...';
+    document.getElementById('sync-status').className = 'sync-status syncing';
+    
+    try {
+        await syncClasses();
+        await syncOperadores();
+        await syncChips();
+        await syncUsuarios();
+        await syncHistoricoCentral();
+        
+        document.getElementById('sync-status').innerHTML = '✅ Sincronizado';
+        document.getElementById('sync-status').className = 'sync-status synced';
+        toast('Dados sincronizados com sucesso!', 'ok');
+        carregarDados();
+    } catch (error) {
+        console.error('Erro na sincronização:', error);
+        document.getElementById('sync-status').innerHTML = '⚠️ Erro na sincronização';
+        document.getElementById('sync-status').className = 'sync-status error';
+        toast('Erro ao sincronizar dados', 'err');
+    }
+}
+
+async function syncClasses() {
+    // Enviar classes locais para o Supabase
+    for (const classe of classes) {
+        const { error } = await supabase
+            .from('classes')
+            .upsert({
+                id: classe.id,
+                nome: classe.nome,
+                icone: classe.icone,
+                cor: classe.cor,
+                created_at: classe.created_at || new Date().toISOString()
+            }, { onConflict: 'id' });
+        if (error) console.error('Erro ao sync classe:', error);
+    }
+    
+    // Buscar classes do Supabase
+    const { data, error } = await supabase.from('classes').select('*');
+    if (!error && data) {
+        classes = data;
+        salvarLocalStorage();
+    }
+}
+
+async function syncOperadores() {
+    for (const op of operadores) {
+        const { error } = await supabase
+            .from('operadores')
+            .upsert({
+                id: op.id,
+                nome: op.nome,
+                classe_id: op.classe_id,
+                created_at: op.created_at || new Date().toISOString()
+            }, { onConflict: 'id' });
+        if (error) console.error('Erro ao sync operador:', error);
+    }
+    
+    const { data, error } = await supabase.from('operadores').select('*');
+    if (!error && data) {
+        operadores = data;
+        salvarLocalStorage();
+    }
+}
+
+async function syncChips() {
+    for (const chip of chips) {
+        const { error } = await supabase
+            .from('chips')
+            .upsert({
+                id: chip.id,
+                numero: chip.numero,
+                operador_id: chip.operador_id,
+                status: chip.status,
+                motivo_ban: chip.motivo_ban,
+                criado_em: chip.criado_em || new Date().toISOString(),
+                updated_at: new Date().toISOString()
+            }, { onConflict: 'id' });
+        if (error) console.error('Erro ao sync chip:', error);
+    }
+    
+    const { data, error } = await supabase.from('chips').select('*');
+    if (!error && data) {
+        chips = data;
+        salvarLocalStorage();
+    }
+}
+
+async function syncUsuarios() {
+    for (const user of usuariosSistema) {
+        const { error } = await supabase
+            .from('usuarios_sistema')
+            .upsert({
+                login: user.login,
+                senha: user.senha,
+                cor: user.cor,
+                is_master: user.isMaster || false,
+                created_at: user.created_at || new Date().toISOString()
+            }, { onConflict: 'login' });
+        if (error) console.error('Erro ao sync usuario:', error);
+    }
+    
+    const { data, error } = await supabase.from('usuarios_sistema').select('*');
+    if (!error && data) {
+        usuariosSistema = data.map(u => ({
+            login: u.login,
+            senha: u.senha,
+            cor: u.cor,
+            isMaster: u.is_master
+        }));
+        if (!usuariosSistema.find(u => u.login === USUARIO_MASTER.login)) {
+            usuariosSistema.push(USUARIO_MASTER);
+        }
+        salvarUsuarios();
+    }
+}
+
+async function syncHistoricoCentral() {
+    for (const hist of historicoAlteracoes.slice(0, 100)) {
+        const { error } = await supabase
+            .from('historico_central')
+            .upsert({
+                id: hist.id,
+                usuario: hist.usuario,
+                resumo: hist.resumo,
+                detalhes: hist.detalhes,
+                data: hist.data
+            }, { onConflict: 'id' });
+        if (error) console.error('Erro ao sync historico:', error);
+    }
+    
+    const { data, error } = await supabase
+        .from('historico_central')
+        .select('*')
+        .order('data', { ascending: false })
+        .limit(500);
+    if (!error && data) {
+        historicoAlteracoes = data;
+        salvarHistoricoCentral();
+    }
+}
+
+async function adicionarHistoricoCentralSupabase(resumoAcao, detalhes) {
+    const novoHistorico = {
+        id: Date.now(),
+        usuario: usuarioLogado,
+        resumo: resumoAcao,
+        detalhes: detalhes,
+        data: new Date().toISOString()
+    };
+    
+    historicoAlteracoes.unshift(novoHistorico);
+    if (historicoAlteracoes.length > 1000) historicoAlteracoes.pop();
+    salvarHistoricoCentral();
+    renderizarHistoricoCentral();
+    
+    if (supabaseConnected) {
+        const { error } = await supabase
+            .from('historico_central')
+            .insert(novoHistorico);
+        if (error) console.error('Erro ao salvar histórico no Supabase:', error);
+    }
+}
+
+async function adicionarHistoricoChipSupabase(chipId, acao, detalhes) {
+    const novoHistorico = {
+        id: Date.now(),
+        chip_id: chipId,
+        usuario: usuarioLogado,
+        acao: acao,
+        detalhes: detalhes,
+        data: new Date().toISOString()
+    };
+    
+    if (supabaseConnected) {
+        const { error } = await supabase
+            .from('historico_chips')
+            .insert(novoHistorico);
+        if (error) console.error('Erro ao salvar histórico do chip:', error);
+    }
+    
+    // Salvar também localmente
+    const individualHistory = JSON.parse(localStorage.getItem('receptivo_historico') || '[]');
+    individualHistory.unshift({
+        id: Date.now(),
+        chipId: chipId,
+        usuario: usuarioLogado,
+        acao: acao,
+        detalhes: detalhes,
+        data: new Date().toISOString()
+    });
+    if (individualHistory.length > 500) individualHistory.pop();
+    localStorage.setItem('receptivo_historico', JSON.stringify(individualHistory));
+}
+
+// Funções auxiliares
 function salvarLocalStorage() {
-  localStorage.setItem('receptivo_classes', JSON.stringify(classes));
-  localStorage.setItem('receptivo_operadores', JSON.stringify(operadores));
-  localStorage.setItem('receptivo_chips', JSON.stringify(chips));
+    localStorage.setItem('receptivo_classes', JSON.stringify(classes));
+    localStorage.setItem('receptivo_operadores', JSON.stringify(operadores));
+    localStorage.setItem('receptivo_chips', JSON.stringify(chips));
+}
+
+function salvarUsuarios() {
+    localStorage.setItem('receptivo_usuarios', JSON.stringify(usuariosSistema));
+}
+
+function salvarHistoricoCentral() {
+    localStorage.setItem('receptivo_historico_central', JSON.stringify(historicoAlteracoes));
+}
+
+function carregarUsuarios() {
+    const saved = localStorage.getItem('receptivo_usuarios');
+    if (saved) {
+        usuariosSistema = JSON.parse(saved);
+    } else {
+        usuariosSistema = [USUARIO_MASTER];
+    }
+    salvarUsuarios();
+}
+
+function carregarHistoricoCentral() {
+    const saved = localStorage.getItem('receptivo_historico_central');
+    if (saved) {
+        historicoAlteracoes = JSON.parse(saved);
+    } else {
+        historicoAlteracoes = [];
+    }
+}
+
+function adicionarHistoricoCentral(resumoAcao, detalhes) {
+    adicionarHistoricoCentralSupabase(resumoAcao, detalhes);
 }
 
 function adicionarHistorico(chipId, acao, detalhes) {
-  // Histórico individual do chip
-  const individualHistory = JSON.parse(localStorage.getItem('receptivo_historico') || '[]');
-  individualHistory.unshift({
-    id: Date.now(),
-    chipId: chipId,
-    usuario: usuarioLogado,
-    acao: acao,
-    detalhes: detalhes,
-    data: new Date().toISOString()
-  });
-  if (individualHistory.length > 500) individualHistory.pop();
-  localStorage.setItem('receptivo_historico', JSON.stringify(individualHistory));
-  
-  // Histórico Central
-  adicionarHistoricoCentral(acao, detalhes);
+    adicionarHistoricoChipSupabase(chipId, acao, detalhes);
 }
 
-function verHistorico(id) {
-  const individualHistory = JSON.parse(localStorage.getItem('receptivo_historico') || '[]');
-  const historico = individualHistory.filter(h => h.chipId === id);
-  document.getElementById('history-content').innerHTML = historico.length ? historico.map(h => `<div class="history-item"><div class="history-date">📅 ${new Date(h.data).toLocaleString()}</div><div><strong>👤 ${h.usuario}</strong></div><div>📌 ${h.acao}</div><div class="history-detail">${h.detalhes}</div></div>`).join('') : '<div class="empty-class">Nenhum histórico registrado</div>';
-  document.getElementById('modal-history').classList.add('open');
-}
-
-// ==================== DASHBOARD ====================
-function atualizarDashboard() {
-  const total = chips.length;
-  const ativos = chips.filter(c => c.status === 'ativo').length;
-  const banidos = chips.filter(c => c.status === 'banido').length;
-  const novos = chips.filter(c => c.status === 'novo').length;
-  
-  document.getElementById('d-total').textContent = total;
-  document.getElementById('d-ativos').textContent = ativos;
-  document.getElementById('d-banidos').textContent = banidos;
-  document.getElementById('d-novos').textContent = novos;
-  
-  const ctx = document.getElementById('pie-chart');
-  if (ctx) {
-    if (pieChart) pieChart.destroy();
-    pieChart = new Chart(ctx, {
-      type: 'doughnut',
-      data: { labels: ['Ativos', 'Banidos', 'Novos'], datasets: [{ data: [ativos, banidos, novos], backgroundColor: ['#00e5a0', '#ff4d6d', '#4d9eff'], borderWidth: 0 }] },
-      options: { responsive: true, maintainAspectRatio: true, cutout: '60%', plugins: { legend: { display: false } }, animation: { duration: 300 } }
-    });
-  }
-  
-  document.getElementById('pie-legend').innerHTML = [
-    ['Ativos', ativos, '#00e5a0'],
-    ['Banidos', banidos, '#ff4d6d'],
-    ['Novos', novos, '#4d9eff']
-  ].map(([l, v, c]) => `<div class="legend-item"><div class="legend-dot" style="background:${c}"></div><span>${l}</span><span style="margin-left:auto">${v}</span></div>`).join('');
-  
-  const porClasse = {};
-  chips.forEach(chip => {
-    const op = operadores.find(o => o.id === chip.operador_id);
-    if (op && op.classe_id) {
-      const classe = classes.find(c => c.id === op.classe_id);
-      const nome = classe?.nome || 'Sem classe';
-      porClasse[nome] = (porClasse[nome] || 0) + 1;
+async function fazerLogin() {
+    const login = document.getElementById('login-user').value;
+    const senha = document.getElementById('login-pass').value;
+    
+    const loadingEl = document.getElementById('login-loading');
+    loadingEl.style.display = 'block';
+    
+    await initSupabase();
+    
+    const usuarioEncontrado = usuariosSistema.find(u => u.login === login && u.senha === senha);
+    if (usuarioEncontrado) {
+        usuarioLogado = login;
+        usuarioLogadoObj = usuarioEncontrado;
+        localStorage.setItem('receptivo_logado', login);
+        document.getElementById('login-screen').style.display = 'none';
+        
+        const avatarEl = document.getElementById('user-avatar');
+        const nameEl = document.getElementById('user-name-display');
+        if(avatarEl) avatarEl.style.backgroundColor = usuarioLogadoObj.cor;
+        if(nameEl) nameEl.innerText = login;
+        
+        const isAdmin = (login === USUARIO_MASTER.login);
+        const navUsuarios = document.getElementById('nav-usuarios');
+        const navHistorico = document.getElementById('nav-historico');
+        if(navUsuarios) navUsuarios.style.display = isAdmin ? 'flex' : 'none';
+        if(navHistorico) navHistorico.style.display = isAdmin ? 'flex' : 'none';
+        
+        carregarDados();
+        if(isAdmin) renderizarUsuarios();
+        renderizarHistoricoCentral();
+    } else {
+        document.getElementById('login-error').style.display = 'block';
     }
-  });
-  
-  const dadosClasse = Object.entries(porClasse).sort((a,b) => b[1] - a[1]).slice(0,7);
-  const barCtx = document.getElementById('bar-chart');
-  if (barCtx && dadosClasse.length) {
-    if (barChart) barChart.destroy();
-    const coresBarras = dadosClasse.map(d => {
-      const classe = classes.find(c => c.nome === d[0]);
-      return classe?.cor || '#00e5a0';
-    });
-    barChart = new Chart(barCtx, {
-      type: 'bar',
-      data: { labels: dadosClasse.map(d => d[0]), datasets: [{ data: dadosClasse.map(d => d[1]), backgroundColor: coresBarras, borderRadius: 8 }] },
-      options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } }, animation: { duration: 300 } }
-    });
-  }
-  
-  const rankingAtivos = [...operadores].map(op => ({ ...op, ativos: chips.filter(c => c.operador_id === op.id && c.status === 'ativo').length })).filter(op => op.ativos > 0).sort((a,b) => b.ativos - a.ativos).slice(0,6);
-  const rankingBanidos = [...operadores].map(op => ({ ...op, banidos: chips.filter(c => c.operador_id === op.id && c.status === 'banido').length })).filter(op => op.banidos > 0).sort((a,b) => b.banidos - a.banidos).slice(0,6);
-  
-  document.getElementById('rank-ativos').innerHTML = rankingAtivos.length ? rankingAtivos.map((o,i) => `<div class="ranking-row"><span class="rank-num" style="color:${i===0?'#00e5a0':'var(--border)'}">${i+1}</span><span class="rank-name">${o.nome}</span><span style="color:#00e5a0">${o.ativos}</span></div>`).join('') : '<div class="empty-class">Sem dados</div>';
-  document.getElementById('rank-banidos').innerHTML = rankingBanidos.length ? rankingBanidos.map((o,i) => `<div class="ranking-row"><span class="rank-num" style="color:${i===0?'#ff4d6d':'var(--border)'}">${i+1}</span><span class="rank-name">${o.nome}</span><span style="color:#ff4d6d">${o.banidos}</span></div>`).join('') : '<div class="empty-class">Sem dados</div>';
-  
-  const taxas = [...operadores].map(op => {
-    const totalChips = chips.filter(c => c.operador_id === op.id).length;
-    const ativosChips = chips.filter(c => c.operador_id === op.id && c.status === 'ativo').length;
-    const taxa = totalChips > 0 ? ((ativosChips / totalChips) * 100).toFixed(1) : 0;
-    return { ...op, taxa, totalChips };
-  }).filter(op => op.totalChips > 0).sort((a,b) => b.taxa - a.taxa).slice(0,6);
-  
-  document.getElementById('taxa-aprovacao').innerHTML = taxas.length ? taxas.map((o,i) => `<div class="ranking-row"><span class="rank-num">${i+1}</span><span class="rank-name">${o.nome}</span><span style="color:${o.taxa >= 70 ? '#00e5a0' : o.taxa >= 40 ? '#ffd60a' : '#ff4d6d'}">${o.taxa}%</span></div>`).join('') : '<div class="empty-class">Sem dados</div>';
+    loadingEl.style.display = 'none';
 }
 
-// ==================== CHIPS ====================
-let selecionadosParaEdicao = new Set();
+function verificarLogin() {
+    const loggedUser = localStorage.getItem('receptivo_logado');
+    if (loggedUser) {
+        const user = usuariosSistema.find(u => u.login === loggedUser);
+        if(user) {
+            usuarioLogado = loggedUser;
+            usuarioLogadoObj = user;
+            document.getElementById('login-screen').style.display = 'none';
+            const avatarEl = document.getElementById('user-avatar');
+            const nameEl = document.getElementById('user-name-display');
+            if(avatarEl) avatarEl.style.backgroundColor = user.cor;
+            if(nameEl) nameEl.innerText = user.login;
+            
+            const isAdmin = (user.login === USUARIO_MASTER.login);
+            const navUsuarios = document.getElementById('nav-usuarios');
+            const navHistorico = document.getElementById('nav-historico');
+            if(navUsuarios) navUsuarios.style.display = isAdmin ? 'flex' : 'none';
+            if(navHistorico) navHistorico.style.display = isAdmin ? 'flex' : 'none';
+            
+            carregarDados();
+            if(isAdmin) renderizarUsuarios();
+            renderizarHistoricoCentral();
+            return;
+        }
+    }
+    localStorage.removeItem('receptivo_logado');
+}
+
+function carregarDados() {
+    const savedClasses = localStorage.getItem('receptivo_classes');
+    const savedOps = localStorage.getItem('receptivo_operadores');
+    const savedChips = localStorage.getItem('receptivo_chips');
+    
+    classes = savedClasses ? JSON.parse(savedClasses) : [
+        { id: '1', nome: 'CRM', icone: '🚀', cor: '#4d9eff' },
+        { id: '2', nome: 'Digital', icone: '🎯', cor: '#00e5a0' },
+        { id: '3', nome: 'Home', icone: '🏠', cor: '#ffd60a' },
+        { id: '4', nome: 'Novatos', icone: '🌱', cor: '#ff9f4d' },
+        { id: '5', nome: 'Menor', icone: '👶', cor: '#ff6b9d' },
+        { id: '6', nome: 'Elite', icone: '⭐', cor: '#9d4dff' }
+    ];
+    
+    operadores = savedOps ? JSON.parse(savedOps) : [];
+    chips = savedChips ? JSON.parse(savedChips) : [];
+    
+    classes.forEach(c => { if(classesExpandidas[c.id] === undefined) classesExpandidas[c.id] = true; });
+    
+    atualizarDashboard();
+    renderizarChips();
+    renderizarClasses();
+    popularSelects();
+    salvarLocalStorage();
+}
+
+function renderizarUsuarios() {
+    const tbody = document.getElementById('usuarios-tbody');
+    if(!tbody) return;
+    tbody.innerHTML = usuariosSistema.map(user => `
+        <tr>
+            <td><div style="display:flex;align-items:center;gap:8px"><span style="display:inline-block;width:24px;height:24px;border-radius:50%;background:${user.cor};"></span> ${user.login}</div></td>
+            <td><span id="senha-vis-${user.login}">********</span> <button class="btn-ghost btn-sm" onclick="toggleSenhaVisibilidade('${user.login}', '${user.senha}')">👁️</button></td>
+            <td><input type="color" value="${user.cor}" onchange="atualizarCorUsuario('${user.login}', this.value)"></td>
+            <td>${user.login !== USUARIO_MASTER.login ? `<button class="btn-sm btn-del" onclick="excluirUsuario('${user.login}')">Excluir</button>` : '<span class="badge">Master</span>'}</td>
+        </tr>
+    `).join('');
+}
+
+function toggleSenhaVisibilidade(login, senhaReal) {
+    const span = document.getElementById(`senha-vis-${login}`);
+    if(span.innerText === '********') span.innerText = senhaReal;
+    else span.innerText = '********';
+}
+
+function atualizarCorUsuario(login, novaCor) {
+    const user = usuariosSistema.find(u => u.login === login);
+    if(user) {
+        user.cor = novaCor;
+        salvarUsuarios();
+        if(usuarioLogado === login) {
+            usuarioLogadoObj.cor = novaCor;
+            const avatarEl = document.getElementById('user-avatar');
+            if(avatarEl) avatarEl.style.backgroundColor = novaCor;
+        }
+        renderizarUsuarios();
+        toast(`Cor de ${login} atualizada`, 'ok');
+    }
+}
+
+function excluirUsuario(login) {
+    abrirConfirmModal('Excluir Usuário', `Deseja realmente excluir o usuário ${login}?`, '👤', () => {
+        usuariosSistema = usuariosSistema.filter(u => u.login !== login);
+        salvarUsuarios();
+        renderizarUsuarios();
+        toast('Usuário excluído', 'ok');
+    });
+}
+
+function abrirModalUsuario() {
+    if(usuarioLogado !== USUARIO_MASTER.login) return toast('Apenas o gerente pode criar usuários', 'err');
+    document.getElementById('modal-usuario-title').innerText = 'Novo Usuário';
+    document.getElementById('usuario-login').value = '';
+    document.getElementById('usuario-senha').value = '';
+    document.getElementById('usuario-cor').value = '#00e5a0';
+    document.getElementById('modal-usuario').classList.add('open');
+}
+
+function salvarUsuario() {
+    const login = document.getElementById('usuario-login').value.trim();
+    const senha = document.getElementById('usuario-senha').value.trim();
+    const cor = document.getElementById('usuario-cor').value;
+    if(!login || !senha) { toast('Preencha login e senha', 'err'); return; }
+    if(usuariosSistema.find(u => u.login === login)) { toast('Login já existe', 'err'); return; }
+    usuariosSistema.push({ login, senha, cor, isMaster: false });
+    salvarUsuarios();
+    renderizarUsuarios();
+    fecharModal('modal-usuario');
+    toast(`Usuário ${login} criado`, 'ok');
+}
+
+function renderizarHistoricoCentral() {
+    const container = document.getElementById('central-history-log');
+    if(!container) return;
+    if(historicoAlteracoes.length === 0) { container.innerHTML = '<div class="empty-class">Nenhuma ação registrada</div>'; return; }
+    container.innerHTML = historicoAlteracoes.slice(0, 200).map(h => {
+        const dataObj = new Date(h.data);
+        const dataStr = dataObj.toLocaleDateString('pt-BR');
+        const horaStr = dataObj.toLocaleTimeString('pt-BR');
+        const userColor = usuariosSistema.find(u=>u.login===h.usuario)?.cor || '#888';
+        return `
+            <div class="history-item">
+                <div class="history-date">📅 ${dataStr}, ${horaStr} | <span style="background:${userColor}20; padding:2px 8px; border-radius:12px;">👤 ${h.usuario}</span></div>
+                <div class="history-action">📌 ${h.resumo}</div>
+                <div class="history-detail">${h.detalhes}</div>
+            </div>
+        `;
+    }).join('');
+}
+
+function atualizarDashboard() {
+    const total = chips.length;
+    const ativos = chips.filter(c => c.status === 'ativo').length;
+    const banidos = chips.filter(c => c.status === 'banido').length;
+    const novos = chips.filter(c => c.status === 'novo').length;
+    
+    document.getElementById('d-total').textContent = total;
+    document.getElementById('d-ativos').textContent = ativos;
+    document.getElementById('d-banidos').textContent = banidos;
+    document.getElementById('d-novos').textContent = novos;
+    
+    const ctx = document.getElementById('pie-chart');
+    if (ctx) {
+        if (pieChart) pieChart.destroy();
+        pieChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: { labels: ['Ativos', 'Banidos', 'Novos'], datasets: [{ data: [ativos, banidos, novos], backgroundColor: ['#00e5a0', '#ff4d6d', '#4d9eff'], borderWidth: 0 }] },
+            options: { responsive: true, maintainAspectRatio: true, cutout: '60%', plugins: { legend: { display: false } }, animation: { duration: 300 } }
+        });
+    }
+    
+    document.getElementById('pie-legend').innerHTML = [
+        ['Ativos', ativos, '#00e5a0'],
+        ['Banidos', banidos, '#ff4d6d'],
+        ['Novos', novos, '#4d9eff']
+    ].map(([l, v, c]) => `<div class="legend-item"><div class="legend-dot" style="background:${c}"></div><span>${l}</span><span style="margin-left:auto">${v}</span></div>`).join('');
+    
+    const porClasse = {};
+    chips.forEach(chip => {
+        const op = operadores.find(o => o.id === chip.operador_id);
+        if (op && op.classe_id) {
+            const classe = classes.find(c => c.id === op.classe_id);
+            const nome = classe?.nome || 'Sem classe';
+            porClasse[nome] = (porClasse[nome] || 0) + 1;
+        }
+    });
+    
+    const dadosClasse = Object.entries(porClasse).sort((a,b) => b[1] - a[1]).slice(0,7);
+    const barCtx = document.getElementById('bar-chart');
+    if (barCtx && dadosClasse.length) {
+        if (barChart) barChart.destroy();
+        const coresBarras = dadosClasse.map(d => {
+            const classe = classes.find(c => c.nome === d[0]);
+            return classe?.cor || '#00e5a0';
+        });
+        barChart = new Chart(barCtx, {
+            type: 'bar',
+            data: { labels: dadosClasse.map(d => d[0]), datasets: [{ data: dadosClasse.map(d => d[1]), backgroundColor: coresBarras, borderRadius: 8 }] },
+            options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } }, animation: { duration: 300 } }
+        });
+    }
+    
+    const rankingAtivos = [...operadores].map(op => ({ ...op, ativos: chips.filter(c => c.operador_id === op.id && c.status === 'ativo').length })).filter(op => op.ativos > 0).sort((a,b) => b.ativos - a.ativos).slice(0,6);
+    const rankingBanidos = [...operadores].map(op => ({ ...op, banidos: chips.filter(c => c.operador_id === op.id && c.status === 'banido').length })).filter(op => op.banidos > 0).sort((a,b) => b.banidos - a.banidos).slice(0,6);
+    
+    document.getElementById('rank-ativos').innerHTML = rankingAtivos.length ? rankingAtivos.map((o,i) => `<div class="ranking-row"><span class="rank-num" style="color:${i===0?'#00e5a0':'var(--border)'}">${i+1}</span><span class="rank-name">${o.nome}</span><span style="color:#00e5a0">${o.ativos}</span></div>`).join('') : '<div class="empty-class">Sem dados</div>';
+    document.getElementById('rank-banidos').innerHTML = rankingBanidos.length ? rankingBanidos.map((o,i) => `<div class="ranking-row"><span class="rank-num" style="color:${i===0?'#ff4d6d':'var(--border)'}">${i+1}</span><span class="rank-name">${o.nome}</span><span style="color:#ff4d6d">${o.banidos}</span></div>`).join('') : '<div class="empty-class">Sem dados</div>';
+    
+    const taxas = [...operadores].map(op => {
+        const totalChips = chips.filter(c => c.operador_id === op.id).length;
+        const ativosChips = chips.filter(c => c.operador_id === op.id && c.status === 'ativo').length;
+        const taxa = totalChips > 0 ? ((ativosChips / totalChips) * 100).toFixed(1) : 0;
+        return { ...op, taxa, totalChips };
+    }).filter(op => op.totalChips > 0).sort((a,b) => b.taxa - a.taxa).slice(0,6);
+    
+    document.getElementById('taxa-aprovacao').innerHTML = taxas.length ? taxas.map((o,i) => `<div class="ranking-row"><span class="rank-num">${i+1}</span><span class="rank-name">${o.nome}</span><span style="color:${o.taxa >= 70 ? '#00e5a0' : o.taxa >= 40 ? '#ffd60a' : '#ff4d6d'}">${o.taxa}%</span></div>`).join('') : '<div class="empty-class">Sem dados</div>';
+}
+
 function renderizarChips() {
-  const busca = document.getElementById('chip-search')?.value.toLowerCase() || '';
-  const filtrados = chips.filter(c => (filtroChip === 'todos' || c.status === filtroChip) && (!busca || c.numero.includes(busca) || (operadores.find(o=>o.id===c.operador_id)?.nome || '').toLowerCase().includes(busca)));
-  
-  document.getElementById('chips-count').textContent = `${chips.length} chips (${chips.filter(c=>c.status==='novo').length} novos)`;
-  const tbody = document.getElementById('chips-tbody');
-  if (!filtrados.length) { tbody.innerHTML = '<tr><td colspan="7">Nenhum chip encontrado</td></tr>'; return; }
-  
-  tbody.innerHTML = filtrados.map(c => {
-    const op = operadores.find(o => o.id === c.operador_id);
-    const classe = op ? classes.find(cl => cl.id === op.classe_id) : null;
-    const corClasse = classe?.cor || '#7777a0';
-    return `<tr>
-      <td class="checkbox-col"><input type="checkbox" class="chip-checkbox" value="${c.id}" ${selecionadosParaEdicao.has(c.id) ? 'checked' : ''} onchange="toggleSelecionarChip('${c.id}')"></td>
-      <td>${c.numero}</td>
-      <td>${op?.nome || '—'}</td>
-      <td><span style="display:inline-flex;align-items:center;gap:4px"><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:${corClasse}"></span> ${classe ? `${classe.icone} ${classe.nome}` : '📁 Sem classe'}</span></td>
-      <td><span class="badge badge-${c.status}">${c.status === 'ativo' ? 'Ativo' : (c.status === 'banido' ? 'Banido' : 'Novo')}</span></td>
-      <td>${c.motivo_ban || '—'}</td>
-      <td><button class="btn-sm btn-edit" onclick="editarChip('${c.id}')">Editar</button> <button class="btn-sm btn-ghost" onclick="verHistorico('${c.id}')">Histórico</button> <button class="btn-sm btn-del" onclick="confirmarExcluirChip('${c.id}')">Excluir</button></td>
-    </tr>`;
-  }).join('');
-  
-  document.getElementById('selected-count').textContent = selecionadosParaEdicao.size;
-  document.getElementById('bulk-actions').classList.toggle('show', selecionadosParaEdicao.size > 0);
-  const selectAll = document.getElementById('select-all-chips');
-  if (selectAll) selectAll.checked = filtrados.length > 0 && filtrados.every(c => selecionadosParaEdicao.has(c.id));
+    const busca = document.getElementById('chip-search')?.value.toLowerCase() || '';
+    const filtrados = chips.filter(c => (filtroChip === 'todos' || c.status === filtroChip) && (!busca || c.numero.includes(busca) || (operadores.find(o=>o.id===c.operador_id)?.nome || '').toLowerCase().includes(busca)));
+    
+    document.getElementById('chips-count').textContent = `${chips.length} chips (${chips.filter(c=>c.status==='novo').length} novos)`;
+    const tbody = document.getElementById('chips-tbody');
+    if (!filtrados.length) { tbody.innerHTML = '<tr><td colspan="7">Nenhum chip encontrado</td></tr>'; return; }
+    
+    tbody.innerHTML = filtrados.map(c => {
+        const op = operadores.find(o => o.id === c.operador_id);
+        const classe = op ? classes.find(cl => cl.id === op.classe_id) : null;
+        const corClasse = classe?.cor || '#7777a0';
+        return `<tr>
+            <td class="checkbox-col"><input type="checkbox" class="chip-checkbox" value="${c.id}" ${chipsSelecionados.has(c.id) ? 'checked' : ''} onchange="toggleSelecionarChip('${c.id}')"></td>
+            <td>${c.numero}</td>
+            <td>${op?.nome || '—'}</td>
+            <td><span style="display:inline-flex;align-items:center;gap:4px"><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:${corClasse}"></span> ${classe ? `${classe.icone} ${classe.nome}` : '📁 Sem classe'}</span></td>
+            <td><span class="badge badge-${c.status}">${c.status === 'ativo' ? 'Ativo' : (c.status === 'banido' ? 'Banido' : 'Novo')}</span></td>
+            <td>${c.motivo_ban || '—'}</td>
+            <td><button class="btn-sm btn-edit" onclick="editarChip('${c.id}')">Editar</button> <button class="btn-sm btn-ghost" onclick="verHistorico('${c.id}')">Histórico</button> <button class="btn-sm btn-del" onclick="confirmarExcluirChip('${c.id}')">Excluir</button></td>
+        </tr>`;
+    }).join('');
+    
+    document.getElementById('selected-count').textContent = chipsSelecionados.size;
+    document.getElementById('bulk-actions').classList.toggle('show', chipsSelecionados.size > 0);
+    const selectAll = document.getElementById('select-all-chips');
+    if (selectAll) selectAll.checked = filtrados.length > 0 && filtrados.every(c => chipsSelecionados.has(c.id));
 }
 
 function toggleSelecionarChip(id) {
-  if (selecionadosParaEdicao.has(id)) selecionadosParaEdicao.delete(id);
-  else selecionadosParaEdicao.add(id);
-  renderizarChips();
-}
-function selecionarTodosChips() {
-  const busca = document.getElementById('chip-search')?.value.toLowerCase() || '';
-  const filtrados = chips.filter(c => (filtroChip === 'todos' || c.status === filtroChip) && (!busca || c.numero.includes(busca) || (operadores.find(o=>o.id===c.operador_id)?.nome || '').toLowerCase().includes(busca)));
-  const selectAll = document.getElementById('select-all-chips');
-  if (selectAll.checked) filtrados.forEach(c => selecionadosParaEdicao.add(c.id));
-  else filtrados.forEach(c => selecionadosParaEdicao.delete(c.id));
-  renderizarChips();
-}
-function limparSelecao() { selecionadosParaEdicao.clear(); renderizarChips(); }
-function aplicarEdicaoEmMassa() {
-  const novoStatus = document.getElementById('bulk-status').value;
-  const novoOperadorId = document.getElementById('bulk-operador').value;
-  if (!novoStatus && !novoOperadorId) { toast('Selecione uma ação para aplicar', 'err'); return; }
-  let alterados = 0;
-  selecionadosParaEdicao.forEach(id => {
-    const chipIndex = chips.findIndex(c => c.id === id);
-    if (chipIndex !== -1) {
-      const chipOriginal = { ...chips[chipIndex] };
-      if (novoStatus) chips[chipIndex].status = novoStatus;
-      if (novoOperadorId) chips[chipIndex].operador_id = novoOperadorId || null;
-      if (chipOriginal.status !== chips[chipIndex].status || chipOriginal.operador_id !== chips[chipIndex].operador_id) {
-        adicionarHistorico(id, 'Edição em massa', `Alterado: ${novoStatus ? `status para ${novoStatus}` : ''} ${novoOperadorId ? `operador para ${operadores.find(o=>o.id===novoOperadorId)?.nome || 'nenhum'}` : ''}`);
-        alterados++;
-      }
-    }
-  });
-  salvarLocalStorage();
-  carregarDados();
-  limparSelecao();
-  toast(`${alterados} chips atualizados`, 'ok');
-}
-function setFiltroChip(filtro, btn) {
-  filtroChip = filtro;
-  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  limparSelecao();
-  renderizarChips();
-}
-function abrirModalChip() {
-  editandoChipId = null;
-  document.getElementById('modal-chip-title').innerText = 'Novo Chip';
-  document.getElementById('chip-numero').value = '';
-  document.getElementById('chip-operador').value = '';
-  document.getElementById('chip-status').value = 'novo';
-  document.getElementById('chip-motivo').value = '';
-  document.getElementById('motivo-group').style.display = 'none';
-  document.getElementById('modal-chip').classList.add('open');
-}
-function editarChip(id) {
-  const chip = chips.find(c => c.id === id);
-  if (!chip) return;
-  editandoChipId = id;
-  document.getElementById('modal-chip-title').innerText = 'Editar Chip';
-  document.getElementById('chip-numero').value = chip.numero;
-  document.getElementById('chip-operador').value = chip.operador_id || '';
-  document.getElementById('chip-status').value = chip.status;
-  document.getElementById('chip-motivo').value = chip.motivo_ban || '';
-  document.getElementById('motivo-group').style.display = chip.status === 'banido' ? 'block' : 'none';
-  document.getElementById('modal-chip').classList.add('open');
-}
-function toggleMotivoBan() {
-  document.getElementById('motivo-group').style.display = document.getElementById('chip-status').value === 'banido' ? 'block' : 'none';
-}
-function formatarTelefone(numero) {
-  let digits = numero.toString().replace(/\D/g, '');
-  if (digits.length === 11) return `(${digits.substring(0,2)}) ${digits.substring(2,7)}-${digits.substring(7,11)}`;
-  if (digits.length === 10) return `(${digits.substring(0,2)}) ${digits.substring(2,6)}-${digits.substring(6,10)}`;
-  return numero;
-}
-function salvarChip() {
-  const numero = formatarTelefone(document.getElementById('chip-numero').value.trim());
-  if (!numero) { toast('Informe o número', 'err'); return; }
-  const operador_id = document.getElementById('chip-operador').value || null;
-  const status = document.getElementById('chip-status').value;
-  const motivo_ban = document.getElementById('chip-motivo').value.trim() || null;
-  
-  if (editandoChipId) {
-    const index = chips.findIndex(c => c.id === editandoChipId);
-    if (index !== -1) {
-      const chipOriginal = { ...chips[index] };
-      chips[index] = { ...chips[index], numero, operador_id, status, motivo_ban };
-      if (chipOriginal.status !== status) adicionarHistorico(editandoChipId, 'Status alterado', `Status: ${chipOriginal.status} → ${status}`);
-      if (chipOriginal.operador_id !== operador_id) adicionarHistorico(editandoChipId, 'Operador alterado', `Operador: ${operadores.find(o=>o.id===chipOriginal.operador_id)?.nome || 'nenhum'} → ${operadores.find(o=>o.id===operador_id)?.nome || 'nenhum'}`);
-    }
-    toast('Chip atualizado', 'ok');
-  } else {
-    const newId = Date.now().toString();
-    chips.unshift({ id: newId, numero, operador_id, status, motivo_ban, criado_em: new Date().toISOString() });
-    adicionarHistorico(newId, 'Chip criado', `Chip ${numero} criado`);
-    toast('Chip adicionado', 'ok');
-  }
-  fecharModal('modal-chip');
-  salvarLocalStorage();
-  carregarDados();
-}
-function confirmarExcluirChip(id) {
-  const chip = chips.find(c => c.id === id);
-  abrirConfirmModal('Excluir Chip', `Tem certeza que deseja excluir o chip <strong>${chip?.numero}</strong>?`, '🗑️', () => {
-    chips = chips.filter(c => c.id !== id);
-    adicionarHistorico(id, 'Chip excluído', `Chip ${chip.numero} excluído`);
-    salvarLocalStorage();
-    carregarDados();
-    toast('Chip excluído', 'ok');
-  });
+    if (chipsSelecionados.has(id)) chipsSelecionados.delete(id);
+    else chipsSelecionados.add(id);
+    renderizarChips();
 }
 
-// ==================== OPERADORES E CLASSES ====================
-function renderizarClasses() {
-  const container = document.getElementById('classes-container');
-  if (!container) return;
-  if (!classes.length) { container.innerHTML = '<div class="empty-class">Nenhuma classe. Clique em "+ Nova Classe"</div>'; return; }
-  document.getElementById('operadores-count').textContent = `${operadores.length} operadores em ${classes.length} classes`;
-  container.innerHTML = classes.map(classe => {
-    const opsDaClasse = operadores.filter(op => op.classe_id === classe.id);
-    let stats = { total: 0, ativos: 0, banidos: 0, novos: 0 };
-    opsDaClasse.forEach(op => {
-      const chipsOp = chips.filter(c => c.operador_id === op.id);
-      stats.total += chipsOp.length;
-      stats.ativos += chipsOp.filter(c => c.status === 'ativo').length;
-      stats.banidos += chipsOp.filter(c => c.status === 'banido').length;
-      stats.novos += chipsOp.filter(c => c.status === 'novo').length;
-    });
-    const isOpen = classesExpandidas[classe.id] !== false;
-    const corClasse = classe.cor || '#7777a0';
-    return `
-      <div class="class-card" style="border-left: 4px solid ${corClasse}">
-        <div class="class-header" onclick="toggleClasse('${classe.id}')">
-          <div class="class-header-left">
-            <span class="class-icon">${classe.icone || '📁'}</span>
-            <span class="class-name" style="color:${corClasse}">${classe.nome}</span>
-            <div class="class-stats">
-              <span class="class-stat"><strong>${stats.total}</strong> chips</span>
-              <span class="class-stat" style="color:var(--accent)">▲ ${stats.ativos}</span>
-              <span class="class-stat" style="color:var(--red)">▼ ${stats.banidos}</span>
-              <span class="class-stat" style="color:var(--blue)">● ${stats.novos}</span>
-              <span class="class-stat">👥 ${opsDaClasse.length}</span>
-            </div>
-          </div>
-          <div class="class-actions" onclick="event.stopPropagation()">
-            <button class="btn-sm btn-edit" onclick="editarClasse('${classe.id}')">✏️</button>
-            <button class="btn-sm btn-del" onclick="confirmarExcluirClasse('${classe.id}')">🗑️</button>
-          </div>
-        </div>
-        <div class="class-content ${isOpen ? 'open' : ''}" id="class-content-${classe.id}">
-          ${opsDaClasse.length ? `<div class="op-mini-grid">` + opsDaClasse.map(op => {
-            const opChips = chips.filter(c => c.operador_id === op.id);
-            const opAtivos = opChips.filter(c => c.status === 'ativo').length;
-            const opBanidos = opChips.filter(c => c.status === 'banido').length;
-            const opNovos = opChips.filter(c => c.status === 'novo').length;
-            const iniciais = op.nome.split(' ').map(n => n[0]).join('').slice(0,2).toUpperCase();
-            return `<div class="op-card-mini"><div class="op-head"><div class="op-info"><div class="op-avatar" style="background:${corClasse}30;color:${corClasse}">${iniciais}</div><div><strong>${op.nome}</strong></div></div><span class="badge badge-ativo">ativo</span></div><div class="op-stats"><div class="op-stat"><div class="op-stat-label">Total</div><div class="op-stat-val">${opChips.length}</div></div><div class="op-stat"><div class="op-stat-label">Ativos</div><div class="op-stat-val" style="color:var(--accent)">${opAtivos}</div></div><div class="op-stat"><div class="op-stat-label">Banidos</div><div class="op-stat-val" style="color:var(--red)">${opBanidos}</div></div><div class="op-stat"><div class="op-stat-label">Novos</div><div class="op-stat-val" style="color:var(--blue)">${opNovos}</div></div></div><div style="display:flex;gap:6px"><button class="btn-sm btn-edit" onclick="editarOperador('${op.id}')">Editar</button><button class="btn-sm btn-del" onclick="confirmarExcluirOperador('${op.id}')">Excluir</button><button class="btn-sm btn-ghost" onclick="abrirModalMoverOperador('${op.id}')">Mover</button></div></div>`;
-          }).join('') + `</div>` : `<div class="empty-class">📭 Nenhum operador<br><button class="btn-sm btn-ghost" onclick="abrirModalOpComClasse('${classe.id}')">+ Adicionar</button></div>`}
-        </div>
-      </div>
-    `;
-  }).join('');
+function selecionarTodosChips() {
+    const busca = document.getElementById('chip-search')?.value.toLowerCase() || '';
+    const filtrados = chips.filter(c => (filtroChip === 'todos' || c.status === filtroChip) && (!busca || c.numero.includes(busca) || (operadores.find(o=>o.id===c.operador_id)?.nome || '').toLowerCase().includes(busca)));
+    const selectAll = document.getElementById('select-all-chips');
+    if (selectAll.checked) filtrados.forEach(c => chipsSelecionados.add(c.id));
+    else filtrados.forEach(c => chipsSelecionados.delete(c.id));
+    renderizarChips();
 }
+
+function limparSelecao() { chipsSelecionados.clear(); renderizarChips(); }
+
+function aplicarEdicaoEmMassa() {
+    const novoStatus = document.getElementById('bulk-status').value;
+    const novoOperadorId = document.getElementById('bulk-operador').value;
+    if (!novoStatus && !novoOperadorId) { toast('Selecione uma ação para aplicar', 'err'); return; }
+    let alterados = 0;
+    chipsSelecionados.forEach(id => {
+        const chipIndex = chips.findIndex(c => c.id === id);
+        if (chipIndex !== -1) {
+            const chipOriginal = { ...chips[chipIndex] };
+            if (novoStatus) chips[chipIndex].status = novoStatus;
+            if (novoOperadorId) chips[chipIndex].operador_id = novoOperadorId || null;
+            if (chipOriginal.status !== chips[chipIndex].status || chipOriginal.operador_id !== chips[chipIndex].operador_id) {
+                adicionarHistorico(id, 'Edição em massa', `Alterado: ${novoStatus ? `status para ${novoStatus}` : ''} ${novoOperadorId ? `operador para ${operadores.find(o=>o.id===novoOperadorId)?.nome || 'nenhum'}` : ''}`);
+                alterados++;
+            }
+        }
+    });
+    salvarLocalStorage();
+    carregarDados();
+    limparSelecao();
+    toast(`${alterados} chips atualizados`, 'ok');
+}
+
+function setFiltroChip(filtro, btn) {
+    filtroChip = filtro;
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    limparSelecao();
+    renderizarChips();
+}
+
+function abrirModalChip() {
+    editandoChipId = null;
+    document.getElementById('modal-chip-title').innerText = 'Novo Chip';
+    document.getElementById('chip-numero').value = '';
+    document.getElementById('chip-operador').value = '';
+    document.getElementById('chip-status').value = 'novo';
+    document.getElementById('chip-motivo').value = '';
+    document.getElementById('motivo-group').style.display = 'none';
+    document.getElementById('modal-chip').classList.add('open');
+}
+
+function editarChip(id) {
+    const chip = chips.find(c => c.id === id);
+    if (!chip) return;
+    editandoChipId = id;
+    document.getElementById('modal-chip-title').innerText = 'Editar Chip';
+    document.getElementById('chip-numero').value = chip.numero;
+    document.getElementById('chip-operador').value = chip.operador_id || '';
+    document.getElementById('chip-status').value = chip.status;
+    document.getElementById('chip-motivo').value = chip.motivo_ban || '';
+    document.getElementById('motivo-group').style.display = chip.status === 'banido' ? 'block' : 'none';
+    document.getElementById('modal-chip').classList.add('open');
+}
+
+function toggleMotivoBan() {
+    document.getElementById('motivo-group').style.display = document.getElementById('chip-status').value === 'banido' ? 'block' : 'none';
+}
+
+function verHistorico(id) {
+    const individualHistory = JSON.parse(localStorage.getItem('receptivo_historico') || '[]');
+    const historico = individualHistory.filter(h => h.chipId === id);
+    document.getElementById('history-content').innerHTML = historico.length ? historico.map(h => `<div class="history-item"><div class="history-date">📅 ${new Date(h.data).toLocaleString()}</div><div><strong>👤 ${h.usuario}</strong></div><div>📌 ${h.acao}</div><div class="history-detail">${h.detalhes}</div></div>`).join('') : '<div class="empty-class">Nenhum histórico registrado</div>';
+    document.getElementById('modal-history').classList.add('open');
+}
+
+function formatarTelefone(numero) {
+    let digits = numero.toString().replace(/\D/g, '');
+    if (digits.length === 11) return `(${digits.substring(0,2)}) ${digits.substring(2,7)}-${digits.substring(7,11)}`;
+    if (digits.length === 10) return `(${digits.substring(0,2)}) ${digits.substring(2,6)}-${digits.substring(6,10)}`;
+    return numero;
+}
+
+function salvarChip() {
+    const numero = formatarTelefone(document.getElementById('chip-numero').value.trim());
+    if (!numero) { toast('Informe o número', 'err'); return; }
+    const operador_id = document.getElementById('chip-operador').value || null;
+    const status = document.getElementById('chip-status').value;
+    const motivo_ban = document.getElementById('chip-motivo').value.trim() || null;
+    
+    if (editandoChipId) {
+        const index = chips.findIndex(c => c.id === editandoChipId);
+        if (index !== -1) {
+            const chipOriginal = { ...chips[index] };
+            chips[index] = { ...chips[index], numero, operador_id, status, motivo_ban };
+            if (chipOriginal.status !== status) adicionarHistorico(editandoChipId, 'Status alterado', `Status: ${chipOriginal.status} → ${status}`);
+            if (chipOriginal.operador_id !== operador_id) adicionarHistorico(editandoChipId, 'Operador alterado', `Operador: ${operadores.find(o=>o.id===chipOriginal.operador_id)?.nome || 'nenhum'} → ${operadores.find(o=>o.id===operador_id)?.nome || 'nenhum'}`);
+        }
+        toast('Chip atualizado', 'ok');
+    } else {
+        const newId = Date.now().toString();
+        chips.unshift({ id: newId, numero, operador_id, status, motivo_ban, criado_em: new Date().toISOString() });
+        adicionarHistorico(newId, 'Chip criado', `Chip ${numero} criado`);
+        toast('Chip adicionado', 'ok');
+    }
+    fecharModal('modal-chip');
+    salvarLocalStorage();
+    carregarDados();
+}
+
+function confirmarExcluirChip(id) {
+    const chip = chips.find(c => c.id === id);
+    abrirConfirmModal('Excluir Chip', `Tem certeza que deseja excluir o chip <strong>${chip?.numero}</strong>?`, '🗑️', () => {
+        chips = chips.filter(c => c.id !== id);
+        adicionarHistorico(id, 'Chip excluído', `Chip ${chip.numero} excluído`);
+        salvarLocalStorage();
+        carregarDados();
+        toast('Chip excluído', 'ok');
+    });
+}
+
+function renderizarClasses() {
+    const container = document.getElementById('classes-container');
+    if (!container) return;
+    if (!classes.length) { container.innerHTML = '<div class="empty-class">Nenhuma classe. Clique em "+ Nova Classe"</div>'; return; }
+    document.getElementById('operadores-count').textContent = `${operadores.length} operadores em ${classes.length} classes`;
+    container.innerHTML = classes.map(classe => {
+        const opsDaClasse = operadores.filter(op => op.classe_id === classe.id);
+        let stats = { total: 0, ativos: 0, banidos: 0, novos: 0 };
+        opsDaClasse.forEach(op => {
+            const chipsOp = chips.filter(c => c.operador_id === op.id);
+            stats.total += chipsOp.length;
+            stats.ativos += chipsOp.filter(c => c.status === 'ativo').length;
+            stats.banidos += chipsOp.filter(c => c.status === 'banido').length;
+            stats.novos += chipsOp.filter(c => c.status === 'novo').length;
+        });
+        const isOpen = classesExpandidas[classe.id] !== false;
+        const corClasse = classe.cor || '#7777a0';
+        return `
+            <div class="class-card" style="border-left: 4px solid ${corClasse}">
+                <div class="class-header" onclick="toggleClasse('${classe.id}')">
+                    <div class="class-header-left">
+                        <span class="class-icon">${classe.icone || '📁'}</span>
+                        <span class="class-name" style="color:${corClasse}">${classe.nome}</span>
+                        <div class="class-stats">
+                            <span class="class-stat"><strong>${stats.total}</strong> chips</span>
+                            <span class="class-stat" style="color:var(--accent)">▲ ${stats.ativos}</span>
+                            <span class="class-stat" style="color:var(--red)">▼ ${stats.banidos}</span>
+                            <span class="class-stat" style="color:var(--blue)">● ${stats.novos}</span>
+                            <span class="class-stat">👥 ${opsDaClasse.length}</span>
+                        </div>
+                    </div>
+                    <div class="class-actions" onclick="event.stopPropagation()">
+                        <button class="btn-sm btn-edit" onclick="editarClasse('${classe.id}')">✏️</button>
+                        <button class="btn-sm btn-del" onclick="confirmarExcluirClasse('${classe.id}')">🗑️</button>
+                    </div>
+                </div>
+                <div class="class-content ${isOpen ? 'open' : ''}" id="class-content-${classe.id}">
+                    ${opsDaClasse.length ? `<div class="op-mini-grid">` + opsDaClasse.map(op => {
+                        const opChips = chips.filter(c => c.operador_id === op.id);
+                        const opAtivos = opChips.filter(c => c.status === 'ativo').length;
+                        const opBanidos = opChips.filter(c => c.status === 'banido').length;
+                        const opNovos = opChips.filter(c => c.status === 'novo').length;
+                        const iniciais = op.nome.split(' ').map(n => n[0]).join('').slice(0,2).toUpperCase();
+                        return `<div class="op-card-mini"><div class="op-head"><div class="op-info"><div class="op-avatar" style="background:${corClasse}30;color:${corClasse}">${iniciais}</div><div><strong>${op.nome}</strong></div></div><span class="badge badge-ativo">ativo</span></div><div class="op-stats"><div class="op-stat"><div class="op-stat-label">Total</div><div class="op-stat-val">${opChips.length}</div></div><div class="op-stat"><div class="op-stat-label">Ativos</div><div class="op-stat-val" style="color:var(--accent)">${opAtivos}</div></div><div class="op-stat"><div class="op-stat-label">Banidos</div><div class="op-stat-val" style="color:var(--red)">${opBanidos}</div></div><div class="op-stat"><div class="op-stat-label">Novos</div><div class="op-stat-val" style="color:var(--blue)">${opNovos}</div></div></div><div style="display:flex;gap:6px"><button class="btn-sm btn-edit" onclick="editarOperador('${op.id}')">Editar</button><button class="btn-sm btn-del" onclick="confirmarExcluirOperador('${op.id}')">Excluir</button><button class="btn-sm btn-ghost" onclick="abrirModalMoverOperador('${op.id}')">Mover</button></div></div>`;
+                    }).join('') + `</div>` : `<div class="empty-class">📭 Nenhum operador<br><button class="btn-sm btn-ghost" onclick="abrirModalOpComClasse('${classe.id}')">+ Adicionar</button></div>`}
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
 function toggleClasse(id) { classesExpandidas[id] = !classesExpandidas[id]; const content = document.getElementById(`class-content-${id}`); if (content) content.classList.toggle('open'); }
 function expandirTodas() { classes.forEach(c => classesExpandidas[c.id] = true); renderizarClasses(); }
 function recolherTodas() { classes.forEach(c => classesExpandidas[c.id] = false); renderizarClasses(); }
+
 function abrirModalClasse() { editandoClasseId = null; document.getElementById('modal-classe-title').innerText = 'Nova Classe'; document.getElementById('classe-nome').value = ''; document.getElementById('classe-icon').value = '📁'; document.getElementById('classe-cor').value = '#00e5a0'; document.getElementById('modal-classe').classList.add('open'); }
 function editarClasse(id) { const classe = classes.find(c => c.id === id); if (!classe) return; editandoClasseId = id; document.getElementById('modal-classe-title').innerText = 'Editar Classe'; document.getElementById('classe-nome').value = classe.nome; document.getElementById('classe-icon').value = classe.icone || '📁'; document.getElementById('classe-cor').value = classe.cor || '#00e5a0'; document.getElementById('modal-classe').classList.add('open'); }
 function salvarClasse() { const nome = document.getElementById('classe-nome').value.trim(); if (!nome) { toast('Informe o nome', 'err'); return; } const icone = document.getElementById('classe-icon').value; const cor = document.getElementById('classe-cor').value; if (editandoClasseId) { const index = classes.findIndex(c => c.id === editandoClasseId); if (index !== -1) classes[index] = { ...classes[index], nome, icone, cor }; toast('Classe atualizada', 'ok'); } else { classes.push({ id: Date.now().toString(), nome, icone, cor }); toast('Classe criada', 'ok'); } fecharModal('modal-classe'); salvarLocalStorage(); carregarDados(); }
 function confirmarExcluirClasse(id) { const classe = classes.find(c => c.id === id); const opsNaClasse = operadores.filter(op => op.classe_id === id); let mensagem = `Tem certeza que deseja excluir a classe <strong>${classe?.nome}</strong>?`; if (opsNaClasse.length) mensagem += `<br><br>⚠️ Esta classe tem ${opsNaClasse.length} operador(es). Eles serão movidos para "Sem classe".`; abrirConfirmModal('Excluir Classe', mensagem, '🗑️', () => { operadores = operadores.map(op => op.classe_id === id ? { ...op, classe_id: null } : op); classes = classes.filter(c => c.id !== id); salvarLocalStorage(); carregarDados(); toast('Classe excluída', 'ok'); }); }
-function abrirModalOp() { editandoOpId = null; document.getElementById('modal-op-title').innerText = 'Novo Operador'; document.getElementById('op-nome').value = ''; document.getElementById('op-classe').value = ''; document.getElementById('modal-op').classList.add('open'); }
-function abrirModalOpComClasse(classeId) { editandoOpId = null; document.getElementById('modal-op-title').innerText = 'Novo Operador'; document.getElementById('op-nome').value = ''; document.getElementById('op-classe').value = classeId; document.getElementById('modal-op').classList.add('open'); }
-function editarOperador(id) { const op = operadores.find(o => o.id === id); if (!op) return; editandoOpId = id; document.getElementById('modal-op-title').innerText = 'Editar Operador'; document.getElementById('op-nome').value = op.nome; document.getElementById('op-classe').value = op.classe_id || ''; document.getElementById('modal-op').classList.add('open'); }
+
+function abrirModalOp() { editandoOpId = null; document.getElementById('modal-op-title').innerText = 'Novo Operador'; document.getElementById('op-nome').value = ''; document.getElementById('op-classe').value = ''; const modal = document.getElementById('modal-op'); if(modal) modal.classList.add('open'); }
+function abrirModalOpComClasse(classeId) { editandoOpId = null; document.getElementById('modal-op-title').innerText = 'Novo Operador'; document.getElementById('op-nome').value = ''; document.getElementById('op-classe').value = classeId; const modal = document.getElementById('modal-op'); if(modal) modal.classList.add('open'); }
+function editarOperador(id) { const op = operadores.find(o => o.id === id); if (!op) return; editandoOpId = id; document.getElementById('modal-op-title').innerText = 'Editar Operador'; document.getElementById('op-nome').value = op.nome; document.getElementById('op-classe').value = op.classe_id || ''; const modal = document.getElementById('modal-op'); if(modal) modal.classList.add('open'); }
 function salvarOperador() { const nome = document.getElementById('op-nome').value.trim(); if (!nome) { toast('Informe o nome', 'err'); return; } const classe_id = document.getElementById('op-classe').value || null; if (editandoOpId) { const index = operadores.findIndex(o => o.id === editandoOpId); if (index !== -1) operadores[index] = { ...operadores[index], nome, classe_id }; toast('Operador atualizado', 'ok'); } else { operadores.push({ id: Date.now().toString(), nome, classe_id }); toast('Operador criado', 'ok'); } fecharModal('modal-op'); salvarLocalStorage(); carregarDados(); }
 function confirmarExcluirOperador(id) { const op = operadores.find(o => o.id === id); const chipsDoOperador = chips.filter(c => c.operador_id === id); let mensagem = `Tem certeza que deseja excluir o operador <strong>${op?.nome}</strong>?`; if (chipsDoOperador.length) mensagem += `<br><br>⚠️ Este operador tem ${chipsDoOperador.length} chip(s) atribuído(s). Eles ficarão sem operador.`; abrirConfirmModal('Excluir Operador', mensagem, '🗑️', () => { operadores = operadores.filter(o => o.id !== id); chips = chips.map(c => c.operador_id === id ? { ...c, operador_id: null } : c); salvarLocalStorage(); carregarDados(); toast('Operador excluído', 'ok'); }); }
+
 function abrirModalMoverOperador(id) { const op = operadores.find(o => o.id === id); if (!op) return; const modalHtml = `<div class="modal-overlay" id="modal-mover" style="display:flex"><div class="modal"><div class="modal-header"><div class="modal-title">Mover Operador</div><button onclick="fecharModalMover()">✕</button></div><div class="form-group"><label class="form-label">Operador: <strong>${op.nome}</strong></label></div><div class="form-group"><label class="form-label">Selecionar Classe</label><select id="mover-classe-select"><option value="">-- Sem classe --</option>${classes.map(c => `<option value="${c.id}" ${op.classe_id === c.id ? 'selected' : ''}>${c.icone} ${c.nome}</option>`).join('')}</select></div><div class="form-actions"><button class="btn-cancel" onclick="fecharModalMover()">Cancelar</button><button class="btn-primary" onclick="confirmarMoverOperador('${id}')">Mover</button></div></div></div>`; const existingModal = document.getElementById('modal-mover'); if (existingModal) existingModal.remove(); document.body.insertAdjacentHTML('beforeend', modalHtml); }
 function fecharModalMover() { const modal = document.getElementById('modal-mover'); if (modal) modal.remove(); }
 function confirmarMoverOperador(id) { const select = document.getElementById('mover-classe-select'); const novaClasseId = select?.value || null; const index = operadores.findIndex(o => o.id === id); if (index !== -1) { operadores[index] = { ...operadores[index], classe_id: novaClasseId }; salvarLocalStorage(); carregarDados(); const classeNome = classes.find(c => c.id === novaClasseId)?.nome || 'nenhuma classe'; toast(`Operador movido para ${classeNome}`, 'ok'); } fecharModalMover(); }
-function popularSelects() { const opSelect = document.getElementById('chip-operador'); if (opSelect) { const atual = opSelect.value; opSelect.innerHTML = '<option value="">Nenhum operador</option>' + operadores.map(o => `<option value="${o.id}">${o.nome}</option>`).join(''); opSelect.value = atual; } const bulkOp = document.getElementById('bulk-operador'); if (bulkOp) bulkOp.innerHTML = '<option value="">Alterar Operador</option>' + operadores.map(o => `<option value="${o.id}">${o.nome}</option>`).join(''); const classeSelect = document.getElementById('op-classe'); if (classeSelect) { const atual = classeSelect.value; classeSelect.innerHTML = '<option value="">Sem classe</option>' + classes.map(c => `<option value="${c.id}">${c.icone} ${c.nome}</option>`).join(''); classeSelect.value = atual; } }
 
-// ==================== EXPORT/IMPORT ====================
-function exportarDados() { const linhas = [['OPERADOR', 'CHIP', 'SITUAÇÃO', 'CLASSE']]; chips.forEach(chip => { const op = operadores.find(o => o.id === chip.operador_id); const classe = op ? classes.find(c => c.id === op.classe_id) : null; linhas.push([op?.nome || '', chip.numero, chip.status === 'ativo' ? 'Ativo' : (chip.status === 'banido' ? 'Banido' : 'Novo'), classe?.nome || '']); }); const csv = linhas.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(';')).join('\n'); const blob = new Blob(["\uFEFF" + csv], { type: 'text/csv;charset=utf-8' }); const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = `chips_${new Date().toISOString().slice(0,19)}.csv`; link.click(); toast('Exportado!', 'ok'); }
-function baixarModelo() { const headers = ['OPERADOR', 'CHIP', 'SITUAÇÃO', 'CLASSE']; const exemplos = [['Exemplo_operador', '(11) 99999-9999', 'Novo', 'CRM']]; const csv = [headers.join(';'), ...exemplos.map(row => row.map(c => `"${c}"`).join(';'))].join('\n'); const blob = new Blob(["\uFEFF" + csv], { type: 'text/csv' }); const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = 'modelo_chips.csv'; link.click(); toast('Modelo baixado!', 'ok'); }
-const dropzone = document.getElementById('dropzone'); const fileInput = document.getElementById('import-file'); if (dropzone && fileInput) { dropzone.addEventListener('click', () => fileInput.click()); dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.classList.add('drag-over'); }); dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag-over')); dropzone.addEventListener('drop', (e) => { e.preventDefault(); dropzone.classList.remove('drag-over'); if (e.dataTransfer.files.length) { fileInput.files = e.dataTransfer.files; previewArquivo(e.dataTransfer.files[0]); } }); fileInput.addEventListener('change', (e) => { if (e.target.files.length) previewArquivo(e.target.files[0]); }); }
-function previewArquivo(file) { const reader = new FileReader(); reader.onload = (ev) => { const preview = document.getElementById('import-preview'); const conteudo = ev.target.result; arquivoSeparador = conteudo.includes(';') ? ';' : ','; const linhas = conteudo.split(/\r?\n/).filter(l => l.trim()); if (linhas.length < 2) { preview.innerHTML = '<span style="color:var(--red)">Arquivo vazio</span>'; preview.style.display = 'block'; return; } const headers = linhas[0].split(arquivoSeparador).map(h => h.replace(/^"|"$/g, '').trim().toUpperCase()); const valid = headers.includes('OPERADOR') && headers.includes('CHIP') && headers.includes('SITUAÇÃO'); if (!valid) { preview.innerHTML = '<span style="color:var(--red)">Colunas: OPERADOR; CHIP; SITUAÇÃO; CLASSE</span>'; preview.style.display = 'block'; return; } const previewRows = linhas.slice(1, 6).map(l => l.split(arquivoSeparador).map(c => c.replace(/^"|"$/g, '').trim())); let html = '<table style="width:100%;border-collapse:collapse"><tr><th>OPERADOR</th><th>CHIP</th><th>SITUAÇÃO</th><th>CLASSE</th></tr>'; previewRows.forEach(r => { if (r.length >= 3) html += `<tr><td>${r[0]||''}</td><td>${r[1]||''}</td><td>${r[2]||''}</td><td>${r[3]||''}</td></tr>`; }); html += '</table><span style="color:var(--accent)">✔️ Pronto para importar</span>'; preview.innerHTML = html; preview.style.display = 'block'; arquivoLinhas = linhas; }; reader.readAsText(file, 'UTF-8'); }
-async function processarImportacao() { if (!arquivoLinhas) { toast('Nenhum arquivo carregado', 'err'); return; } const headers = arquivoLinhas[0].split(arquivoSeparador).map(h => h.replace(/^"|"$/g, '').trim().toUpperCase()); const idxOp = headers.indexOf('OPERADOR'); const idxChip = headers.indexOf('CHIP'); const idxStatus = headers.indexOf('SITUAÇÃO'); const idxClasse = headers.indexOf('CLASSE'); let sucessos = 0, erros = 0, atualizados = 0; const chipsProcessados = new Map(); for (let i = 1; i < arquivoLinhas.length; i++) { if (!arquivoLinhas[i].trim()) continue; const cols = arquivoLinhas[i].split(arquivoSeparador).map(c => c.replace(/^"|"$/g, '').trim()); const nomeOp = cols[idxOp] || ''; let numeroRaw = cols[idxChip] || ''; const situacao = (cols[idxStatus] || '').toLowerCase(); const nomeClasse = idxClasse !== -1 ? (cols[idxClasse] || '').trim() : ''; numeroRaw = numeroRaw.toString().replace(/[^\d]/g, ''); if (numeroRaw.length === 12 && numeroRaw.startsWith('55')) numeroRaw = numeroRaw.substring(2); else if (numeroRaw.length > 11) numeroRaw = numeroRaw.slice(-11); if (numeroRaw.length < 10 || numeroRaw.length > 11) { erros++; continue; } const numero = formatarTelefone(numeroRaw); const statusMap = { 'ativo':'ativo', 'banido':'banido', 'novo':'novo', 'atividade':'ativo', 'active':'ativo' }; const status = statusMap[situacao] || 'novo'; let classe_id = null; if (nomeClasse) { let existente = classes.find(c => c.nome.toLowerCase() === nomeClasse.toLowerCase()); if (existente) classe_id = existente.id; else { classe_id = Date.now().toString() + Math.random(); classes.push({ id: classe_id, nome: nomeClasse, icone: '📁', cor: '#00e5a0' }); } } let operador_id = null; if (nomeOp) { let existente = operadores.find(o => o.nome.toLowerCase() === nomeOp.toLowerCase()); if (existente) operador_id = existente.id; else { operador_id = Date.now().toString() + Math.random(); operadores.push({ id: operador_id, nome: nomeOp, classe_id }); } } const chipExistente = chips.find(c => c.numero.replace(/\D/g, '') === numeroRaw); if (chipExistente) { if (chipExistente.status !== status) { const chipIndex = chips.findIndex(c => c.id === chipExistente.id); if (chipIndex !== -1) chips[chipIndex] = { ...chips[chipIndex], status }; atualizados++; } } else if (!chipsProcessados.has(numeroRaw)) { chips.push({ id: Date.now().toString() + Math.random() + i, numero, operador_id, status, motivo_ban: null, criado_em: new Date().toISOString() }); chipsProcessados.set(numeroRaw, true); sucessos++; } } salvarLocalStorage(); carregarDados(); document.getElementById('import-preview').innerHTML = `✅ Importação concluída!<br>📱 Novos chips: ${sucessos}<br>🔄 Status atualizados: ${atualizados}<br>❌ Erros: ${erros}`; toast(`${sucessos} novos chips, ${atualizados} atualizados`, sucessos || atualizados ? 'ok' : 'err'); arquivoLinhas = null; }
+function popularSelects() { 
+    const opSelect = document.getElementById('chip-operador'); 
+    if (opSelect) { 
+        const atual = opSelect.value; 
+        opSelect.innerHTML = '<option value="">Nenhum operador</option>' + operadores.map(o => `<option value="${o.id}">${o.nome}</option>`).join(''); 
+        opSelect.value = atual; 
+    } 
+    const bulkOp = document.getElementById('bulk-operador'); 
+    if (bulkOp) bulkOp.innerHTML = '<option value="">Alterar Operador</option>' + operadores.map(o => `<option value="${o.id}">${o.nome}</option>`).join(''); 
+    const classeSelect = document.getElementById('op-classe'); 
+    if (classeSelect) { 
+        const atual = classeSelect.value; 
+        classeSelect.innerHTML = '<option value="">Sem classe</option>' + classes.map(c => `<option value="${c.id}">${c.icone} ${c.nome}</option>`).join(''); 
+        classeSelect.value = atual; 
+    } 
+}
 
-// ==================== UTILIDADES ====================
+function exportarDados() { 
+    const linhas = [['OPERADOR', 'CHIP', 'SITUAÇÃO', 'CLASSE']]; 
+    chips.forEach(chip => { 
+        const op = operadores.find(o => o.id === chip.operador_id); 
+        const classe = op ? classes.find(c => c.id === op.classe_id) : null; 
+        linhas.push([op?.nome || '', chip.numero, chip.status === 'ativo' ? 'Ativo' : (chip.status === 'banido' ? 'Banido' : 'Novo'), classe?.nome || '']); 
+    }); 
+    const csv = linhas.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(';')).join('\n'); 
+    const blob = new Blob(["\uFEFF" + csv], { type: 'text/csv;charset=utf-8' }); 
+    const link = document.createElement('a'); 
+    link.href = URL.createObjectURL(blob); 
+    link.download = `chips_${new Date().toISOString().slice(0,19)}.csv`; 
+    link.click(); 
+    toast('Exportado!', 'ok'); 
+}
+
+function baixarModelo() { 
+    const headers = ['OPERADOR', 'CHIP', 'SITUAÇÃO', 'CLASSE']; 
+    const exemplos = [['Exemplo_operador', '(11) 99999-9999', 'Novo', 'CRM']]; 
+    const csv = [headers.join(';'), ...exemplos.map(row => row.map(c => `"${c}"`).join(';'))].join('\n'); 
+    const blob = new Blob(["\uFEFF" + csv], { type: 'text/csv' }); 
+    const link = document.createElement('a'); 
+    link.href = URL.createObjectURL(blob); 
+    link.download = 'modelo_chips.csv'; 
+    link.click(); 
+    toast('Modelo baixado!', 'ok'); 
+}
+
+const dropzone = document.getElementById('dropzone'); 
+const fileInput = document.getElementById('import-file'); 
+if (dropzone && fileInput) { 
+    dropzone.addEventListener('click', () => fileInput.click()); 
+    dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.classList.add('drag-over'); }); 
+    dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag-over')); 
+    dropzone.addEventListener('drop', (e) => { e.preventDefault(); dropzone.classList.remove('drag-over'); if (e.dataTransfer.files.length) { fileInput.files = e.dataTransfer.files; previewArquivo(e.dataTransfer.files[0]); } }); 
+    fileInput.addEventListener('change', (e) => { if (e.target.files.length) previewArquivo(e.target.files[0]); }); 
+}
+
+function previewArquivo(file) { 
+    const reader = new FileReader(); 
+    reader.onload = (ev) => { 
+        const preview = document.getElementById('import-preview'); 
+        const conteudo = ev.target.result; 
+        arquivoSeparador = conteudo.includes(';') ? ';' : ','; 
+        const linhas = conteudo.split(/\r?\n/).filter(l => l.trim()); 
+        if (linhas.length < 2) { 
+            preview.innerHTML = '<span style="color:var(--red)">Arquivo vazio</span>'; 
+            preview.style.display = 'block'; 
+            return; 
+        } 
+        const headers = linhas[0].split(arquivoSeparador).map(h => h.replace(/^"|"$/g, '').trim().toUpperCase()); 
+        const valid = headers.includes('OPERADOR') && headers.includes('CHIP') && headers.includes('SITUAÇÃO'); 
+        if (!valid) { 
+            preview.innerHTML = '<span style="color:var(--red)">Colunas: OPERADOR; CHIP; SITUAÇÃO; CLASSE</span>'; 
+            preview.style.display = 'block'; 
+            return; 
+        } 
+        const previewRows = linhas.slice(1, 6).map(l => l.split(arquivoSeparador).map(c => c.replace(/^"|"$/g, '').trim())); 
+        let html = '<table style="width:100%;border-collapse:collapse"><tr><th>OPERADOR</th><th>CHIP</th><th>SITUAÇÃO</th><th>CLASSE</th></tr>'; 
+        previewRows.forEach(r => { if (r.length >= 3) html += `<tr><td>${r[0]||''}</td><td>${r[1]||''}</td><td>${r[2]||''}</td><td>${r[3]||''}</td></tr>`; }); 
+        html += '</table><span style="color:var(--accent)">✔️ Pronto para importar</span>'; 
+        preview.innerHTML = html; 
+        preview.style.display = 'block'; 
+        arquivoLinhas = linhas; 
+    }; 
+    reader.readAsText(file, 'UTF-8'); 
+}
+
+async function processarImportacao() { 
+    if (!arquivoLinhas) { toast('Nenhum arquivo carregado', 'err'); return; } 
+    const headers = arquivoLinhas[0].split(arquivoSeparador).map(h => h.replace(/^"|"$/g, '').trim().toUpperCase()); 
+    const idxOp = headers.indexOf('OPERADOR'); 
+    const idxChip = headers.indexOf('CHIP'); 
+    const idxStatus = headers.indexOf('SITUAÇÃO'); 
+    const idxClasse = headers.indexOf('CLASSE'); 
+    let sucessos = 0, erros = 0, atualizados = 0; 
+    const chipsProcessados = new Map(); 
+    for (let i = 1; i < arquivoLinhas.length; i++) { 
+        if (!arquivoLinhas[i].trim()) continue; 
+        const cols = arquivoLinhas[i].split(arquivoSeparador).map(c => c.replace(/^"|"$/g, '').trim()); 
+        const nomeOp = cols[idxOp] || ''; 
+        let numeroRaw = cols[idxChip] || ''; 
+        const situacao = (cols[idxStatus] || '').toLowerCase(); 
+        const nomeClasse = idxClasse !== -1 ? (cols[idxClasse] || '').trim() : ''; 
+        numeroRaw = numeroRaw.toString().replace(/[^\d]/g, ''); 
+        if (numeroRaw.length === 12 && numeroRaw.startsWith('55')) numeroRaw = numeroRaw.substring(2); 
+        else if (numeroRaw.length > 11) numeroRaw = numeroRaw.slice(-11); 
+        if (numeroRaw.length < 10 || numeroRaw.length > 11) { erros++; continue; } 
+        const numero = formatarTelefone(numeroRaw); 
+        const statusMap = { 'ativo':'ativo', 'banido':'banido', 'novo':'novo', 'atividade':'ativo', 'active':'ativo' }; 
+        const status = statusMap[situacao] || 'novo'; 
+        let classe_id = null; 
+        if (nomeClasse) { 
+            let existente = classes.find(c => c.nome.toLowerCase() === nomeClasse.toLowerCase()); 
+            if (existente) classe_id = existente.id; 
+            else { 
+                classe_id = Date.now().toString() + Math.random(); 
+                classes.push({ id: classe_id, nome: nomeClasse, icone: '📁', cor: '#00e5a0' }); 
+            } 
+        } 
+        let operador_id = null; 
+        if (nomeOp) { 
+            let existente = operadores.find(o => o.nome.toLowerCase() === nomeOp.toLowerCase()); 
+            if (existente) operador_id = existente.id; 
+            else { 
+                operador_id = Date.now().toString() + Math.random(); 
+                operadores.push({ id: operador_id, nome: nomeOp, classe_id }); 
+            } 
+        } 
+        const chipExistente = chips.find(c => c.numero.replace(/\D/g, '') === numeroRaw); 
+        if (chipExistente) { 
+            if (chipExistente.status !== status) { 
+                const chipIndex = chips.findIndex(c => c.id === chipExistente.id); 
+                if (chipIndex !== -1) chips[chipIndex] = { ...chips[chipIndex], status }; 
+                atualizados++; 
+            } 
+        } else if (!chipsProcessados.has(numeroRaw)) { 
+            chips.push({ id: Date.now().toString() + Math.random() + i, numero, operador_id, status, motivo_ban: null, criado_em: new Date().toISOString() }); 
+            chipsProcessados.set(numeroRaw, true); 
+            sucessos++; 
+        } 
+    } 
+    salvarLocalStorage(); 
+    carregarDados(); 
+    document.getElementById('import-preview').innerHTML = `✅ Importação concluída!<br>📱 Novos chips: ${sucessos}<br>🔄 Status atualizados: ${atualizados}<br>❌ Erros: ${erros}`; 
+    toast(`${sucessos} novos chips, ${atualizados} atualizados`, sucessos || atualizados ? 'ok' : 'err'); 
+    arquivoLinhas = null; 
+}
+
 let acaoConfirmada = null;
-function abrirConfirmModal(titulo, mensagem, icone, acao) { document.getElementById('confirm-title').textContent = titulo; document.getElementById('confirm-message').innerHTML = mensagem; document.getElementById('confirm-icon').textContent = icone || '⚠️'; acaoConfirmada = acao; document.getElementById('confirm-modal').classList.add('open'); }
+function abrirConfirmModal(titulo, mensagem, icone, acao) { 
+    document.getElementById('confirm-title').textContent = titulo; 
+    document.getElementById('confirm-message').innerHTML = mensagem; 
+    document.getElementById('confirm-icon').textContent = icone || '⚠️'; 
+    acaoConfirmada = acao; 
+    document.getElementById('confirm-modal').classList.add('open'); 
+}
 function fecharConfirmModal() { document.getElementById('confirm-modal').classList.remove('open'); acaoConfirmada = null; }
 function executarAcaoConfirmada() { if (acaoConfirmada) { acaoConfirmada(); } fecharConfirmModal(); }
 function fecharModal(id) { document.getElementById(id).classList.remove('open'); }
@@ -1356,10 +1739,11 @@ document.querySelectorAll('.modal-overlay').forEach(modal => { modal.addEventLis
 
 const savedTheme = localStorage.getItem('receptivo_theme');
 if (savedTheme === 'light') document.documentElement.setAttribute('data-theme', 'light');
+
 carregarUsuarios();
 carregarHistoricoCentral();
+initSupabase();
 verificarLogin();
 </script>
 </body>
 </html>
-```
