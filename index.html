@@ -514,6 +514,11 @@ input, select {
   align-items: center;
   gap: 24px;
 }
+.pie-wrap canvas {
+  width: 160px !important;
+  height: 160px !important;
+  flex-shrink: 0;
+}
 .pie-legend {
   display: flex;
   flex-direction: column;
@@ -596,11 +601,11 @@ input, select {
     <div class="charts-row">
       <div class="chart-card">
         <div class="chart-title">Distribuição de Status</div>
-        <div class="pie-wrap"><canvas id="pie-chart" width="160" height="160"></canvas><div class="pie-legend" id="pie-legend"></div></div>
+        <div class="pie-wrap"><canvas id="pie-chart"></canvas><div class="pie-legend" id="pie-legend"></div></div>
       </div>
       <div class="chart-card">
         <div class="chart-title">Chips por Classe</div>
-        <canvas id="bar-chart" height="160"></canvas>
+        <div style="position:relative;height:160px;width:100%"><canvas id="bar-chart"></canvas></div>
       </div>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
@@ -768,7 +773,7 @@ function atualizarDashboard() {
     pieChart = new Chart(ctx, {
       type: 'doughnut',
       data: { labels: ['Ativos', 'Banidos', 'Novos'], datasets: [{ data: [ativos, banidos, novos], backgroundColor: ['#00e5a0', '#ff4d6d', '#4d9eff'] }] },
-      options: { cutout: '60%', plugins: { legend: { display: false } } }
+      options: { responsive: true, maintainAspectRatio: true, cutout: '60%', plugins: { legend: { display: false } }, animation: { duration: 0 } }
     });
   }
   
@@ -796,7 +801,7 @@ function atualizarDashboard() {
     barChart = new Chart(barCtx, {
       type: 'bar',
       data: { labels: dadosClasse.map(d => d[0].length > 12 ? d[0].slice(0,12)+'…' : d[0]), datasets: [{ data: dadosClasse.map(d => d[1]), backgroundColor: '#00e5a040', borderColor: '#00e5a0', borderWidth: 2 }] },
-      options: { plugins: { legend: { display: false } }, scales: { x: { ticks: { color: '#7777a0' } }, y: { ticks: { color: '#7777a0' } } } }
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: '#7777a0' } }, y: { ticks: { color: '#7777a0' }, beginAtZero: true } }, animation: { duration: 0 } }
     });
   }
   
@@ -895,75 +900,217 @@ function excluirChip(id) {
 }
 
 // ==================== OPERADORES E CLASSES ====================
+
+// Função isolada para montar card de cada operador via DOM puro — sem template literal aninhado
+function _buildOpCard(op) {
+  var opId     = op.id;
+  var opNome   = op.nome;
+  var opEmail  = op.email || 'sem email';
+  var opAtivo  = op.ativo;
+
+  // Calcula chips DESTE operador usando o id capturado localmente
+  var total   = 0, ativos = 0, banidos = 0, novos = 0;
+  for (var i = 0; i < chips.length; i++) {
+    if (chips[i].operador_id === opId) {
+      total++;
+      if (chips[i].status === 'ativo')   ativos++;
+      else if (chips[i].status === 'banido') banidos++;
+      else if (chips[i].status === 'novo')   novos++;
+    }
+  }
+
+  var iniciais = opNome.split(' ').map(function(n){ return n ? n[0] : ''; }).join('').slice(0,2).toUpperCase();
+
+  var card = document.createElement('div');
+  card.className = 'op-card-mini';
+
+  // -- Cabeçalho do card --
+  var head = document.createElement('div');
+  head.className = 'op-head';
+
+  var info = document.createElement('div');
+  info.className = 'op-info';
+
+  var avatar = document.createElement('div');
+  avatar.className = 'op-avatar';
+  avatar.textContent = iniciais;
+
+  var nameWrap = document.createElement('div');
+  var strong = document.createElement('strong');
+  strong.textContent = opNome;
+  var br = document.createElement('br');
+  var small = document.createElement('small');
+  small.textContent = opEmail;
+  nameWrap.appendChild(strong);
+  nameWrap.appendChild(br);
+  nameWrap.appendChild(small);
+
+  info.appendChild(avatar);
+  info.appendChild(nameWrap);
+
+  var badge = document.createElement('span');
+  badge.className = 'badge ' + (opAtivo ? 'badge-ativo' : 'badge-inativo');
+  badge.textContent = opAtivo ? 'ativo' : 'inativo';
+
+  head.appendChild(info);
+  head.appendChild(badge);
+  card.appendChild(head);
+
+  // -- Stats --
+  var statsDiv = document.createElement('div');
+  statsDiv.className = 'op-stats';
+
+  [
+    ['Total',   total,   null],
+    ['Ativos',  ativos,  'var(--accent)'],
+    ['Banidos', banidos, 'var(--red)'],
+    ['Novos',   novos,   'var(--blue)']
+  ].forEach(function(item) {
+    var label = item[0], valor = item[1], cor = item[2];
+    var stat = document.createElement('div');
+    stat.className = 'op-stat';
+    var lbl = document.createElement('div');
+    lbl.className = 'op-stat-label';
+    lbl.textContent = label;
+    var val = document.createElement('div');
+    val.className = 'op-stat-val';
+    val.textContent = valor;
+    if (cor) val.style.color = cor;
+    stat.appendChild(lbl);
+    stat.appendChild(val);
+    statsDiv.appendChild(stat);
+  });
+  card.appendChild(statsDiv);
+
+  // -- Botões (closure com IIFE para garantir id correto) --
+  var btns = document.createElement('div');
+  btns.style.cssText = 'display:flex;gap:6px';
+
+  function makeBtnClick(fn, id) {
+    return function() { fn(id); };
+  }
+
+  var bEdit = document.createElement('button');
+  bEdit.className = 'btn-sm btn-edit';
+  bEdit.textContent = 'Editar';
+  bEdit.addEventListener('click', makeBtnClick(editarOperador, opId));
+
+  var bDel = document.createElement('button');
+  bDel.className = 'btn-sm btn-del';
+  bDel.textContent = 'Excluir';
+  bDel.addEventListener('click', makeBtnClick(excluirOperador, opId));
+
+  var bMov = document.createElement('button');
+  bMov.className = 'btn-sm btn-ghost';
+  bMov.textContent = 'Mover';
+  bMov.addEventListener('click', makeBtnClick(moverOperador, opId));
+
+  btns.appendChild(bEdit);
+  btns.appendChild(bDel);
+  btns.appendChild(bMov);
+  card.appendChild(btns);
+
+  return card;
+}
+
 function renderizarClasses() {
-  const container = document.getElementById('classes-container');
+  var container = document.getElementById('classes-container');
   if (!container) return;
-  if (!classes.length) { container.innerHTML = '<div class="empty-class">Nenhuma classe. Clique em "+ Nova Classe"</div>'; return; }
-  
-  document.getElementById('operadores-count').textContent = `${operadores.length} operadores em ${classes.length} classes`;
-  
-  container.innerHTML = classes.map(classe => {
-    const opsDaClasse = operadores.filter(op => op.classe_id === classe.id);
-    let stats = { total: 0, ativos: 0, banidos: 0, novos: 0 };
-    opsDaClasse.forEach(op => {
-      const chipsOp = chips.filter(c => c.operador_id === op.id);
-      stats.total += chipsOp.length;
-      stats.ativos += chipsOp.filter(c => c.status === 'ativo').length;
-      stats.banidos += chipsOp.filter(c => c.status === 'banido').length;
-      stats.novos += chipsOp.filter(c => c.status === 'novo').length;
+  if (!classes.length) {
+    container.innerHTML = '<div class="empty-class">Nenhuma classe. Clique em "+ Nova Classe"</div>';
+    return;
+  }
+
+  document.getElementById('operadores-count').textContent =
+    operadores.length + ' operadores em ' + classes.length + ' classes';
+
+  container.innerHTML = '';
+
+  classes.forEach(function(classe) {
+    var classeId = classe.id;
+    var opsDaClasse = operadores.filter(function(op){ return op.classe_id === classeId; });
+
+    // Stats da classe (totais)
+    var st = { total: 0, ativos: 0, banidos: 0, novos: 0 };
+    opsDaClasse.forEach(function(op) {
+      chips.forEach(function(c) {
+        if (c.operador_id === op.id) {
+          st.total++;
+          if (c.status === 'ativo')   st.ativos++;
+          else if (c.status === 'banido') st.banidos++;
+          else if (c.status === 'novo')   st.novos++;
+        }
+      });
     });
-    const isOpen = classesExpandidas[classe.id] !== false;
-    
-    return `
-      <div class="class-card">
-        <div class="class-header" onclick="toggleClasse('${classe.id}')">
-          <div class="class-header-left">
-            <span class="class-icon">${classe.icone || '📁'}</span>
-            <span class="class-name">${classe.nome}</span>
-            <div class="class-stats">
-              <span class="class-stat"><strong>${stats.total}</strong> chips</span>
-              <span class="class-stat" style="color:var(--accent)">▲ ${stats.ativos}</span>
-              <span class="class-stat" style="color:var(--red)">▼ ${stats.banidos}</span>
-              <span class="class-stat" style="color:var(--blue)">● ${stats.novos}</span>
-              <span class="class-stat">👥 ${opsDaClasse.length}</span>
-            </div>
-          </div>
-          <div class="class-actions" onclick="event.stopPropagation()">
-            <button class="btn-sm btn-edit" onclick="editarClasse('${classe.id}')">✏️</button>
-            <button class="btn-sm btn-del" onclick="excluirClasse('${classe.id}')">🗑️</button>
-          </div>
-        </div>
-        <div class="class-content ${isOpen ? 'open' : ''}" id="class-content-${classe.id}">
-          ${opsDaClasse.length ? `<div class="op-mini-grid">${opsDaClasse.map(op => {
-            const chipsOp = chips.filter(c => c.operador_id === op.id);
-            const iniciais = op.nome.split(' ').map(n => n[0]).join('').slice(0,2).toUpperCase();
-            return `
-              <div class="op-card-mini">
-                <div class="op-head">
-                  <div class="op-info">
-                    <div class="op-avatar">${iniciais}</div>
-                    <div><strong>${op.nome}</strong><br><small>${op.email || 'sem email'}</small></div>
-                  </div>
-                  <span class="badge ${op.ativo ? 'badge-ativo' : 'badge-inativo'}">${op.ativo ? 'ativo' : 'inativo'}</span>
-                </div>
-                <div class="op-stats">
-                  <div class="op-stat"><div class="op-stat-label">Total</div><div class="op-stat-val">${chipsOp.length}</div></div>
-                  <div class="op-stat"><div class="op-stat-label">Ativos</div><div class="op-stat-val" style="color:var(--accent)">${chipsOp.filter(c=>c.status==='ativo').length}</div></div>
-                  <div class="op-stat"><div class="op-stat-label">Banidos</div><div class="op-stat-val" style="color:var(--red)">${chipsOp.filter(c=>c.status==='banido').length}</div></div>
-                  <div class="op-stat"><div class="op-stat-label">Novos</div><div class="op-stat-val" style="color:var(--blue)">${chipsOp.filter(c=>c.status==='novo').length}</div></div>
-                </div>
-                <div style="display:flex;gap:6px">
-                  <button class="btn-sm btn-edit" onclick="editarOperador('${op.id}')">Editar</button>
-                  <button class="btn-sm btn-del" onclick="excluirOperador('${op.id}')">Excluir</button>
-                  <button class="btn-sm btn-ghost" onclick="moverOperador('${op.id}')">Mover</button>
-                </div>
-              </div>
-            `;
-          }).join('')}</div>` : `<div class="empty-class">📭 Nenhum operador<br><button class="btn-sm btn-ghost" onclick="abrirModalOpComClasse('${classe.id}')">+ Adicionar</button></div>`}
-        </div>
-      </div>
-    `;
-  }).join('');
+
+    var isOpen = classesExpandidas[classeId] !== false;
+
+    // Monta estrutura da classe sem nenhum dado de operador inline
+    var classCard = document.createElement('div');
+    classCard.className = 'class-card';
+
+    var hdr = document.createElement('div');
+    hdr.className = 'class-header';
+    hdr.addEventListener('click', (function(cid){ return function(){ toggleClasse(cid); }; })(classeId));
+
+    hdr.innerHTML =
+      '<div class="class-header-left">' +
+        '<span class="class-icon">' + (classe.icone || '📁') + '</span>' +
+        '<span class="class-name">' + classe.nome + '</span>' +
+        '<div class="class-stats">' +
+          '<span class="class-stat"><strong>' + st.total + '</strong> chips</span>' +
+          '<span class="class-stat" style="color:var(--accent)">▲ ' + st.ativos + '</span>' +
+          '<span class="class-stat" style="color:var(--red)">▼ ' + st.banidos + '</span>' +
+          '<span class="class-stat" style="color:var(--blue)">● ' + st.novos + '</span>' +
+          '<span class="class-stat">👥 ' + opsDaClasse.length + '</span>' +
+        '</div>' +
+      '</div>';
+
+    var actions = document.createElement('div');
+    actions.className = 'class-actions';
+    actions.addEventListener('click', function(e){ e.stopPropagation(); });
+
+    var btnEditClasse = document.createElement('button');
+    btnEditClasse.className = 'btn-sm btn-edit';
+    btnEditClasse.textContent = '✏️';
+    btnEditClasse.addEventListener('click', (function(cid){ return function(){ editarClasse(cid); }; })(classeId));
+
+    var btnDelClasse = document.createElement('button');
+    btnDelClasse.className = 'btn-sm btn-del';
+    btnDelClasse.textContent = '🗑️';
+    btnDelClasse.addEventListener('click', (function(cid){ return function(){ excluirClasse(cid); }; })(classeId));
+
+    actions.appendChild(btnEditClasse);
+    actions.appendChild(btnDelClasse);
+    hdr.appendChild(actions);
+    classCard.appendChild(hdr);
+
+    var content = document.createElement('div');
+    content.className = 'class-content' + (isOpen ? ' open' : '');
+    content.id = 'class-content-' + classeId;
+
+    if (opsDaClasse.length) {
+      var grid = document.createElement('div');
+      grid.className = 'op-mini-grid';
+      opsDaClasse.forEach(function(op) {
+        grid.appendChild(_buildOpCard(op));
+      });
+      content.appendChild(grid);
+    } else {
+      var empty = document.createElement('div');
+      empty.className = 'empty-class';
+      empty.innerHTML = '📭 Nenhum operador<br>';
+      var btnAdd = document.createElement('button');
+      btnAdd.className = 'btn-sm btn-ghost';
+      btnAdd.textContent = '+ Adicionar';
+      btnAdd.addEventListener('click', (function(cid){ return function(){ abrirModalOpComClasse(cid); }; })(classeId));
+      empty.appendChild(btnAdd);
+      content.appendChild(empty);
+    }
+
+    classCard.appendChild(content);
+    container.appendChild(classCard);
+  });
 }
 
 function toggleClasse(id) {
