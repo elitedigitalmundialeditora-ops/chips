@@ -16,7 +16,6 @@
   box-sizing: border-box;
 }
 
-/* Temas */
 :root {
   --bg: #0b0b10;
   --bg2: #13131c;
@@ -56,7 +55,6 @@ body {
   transition: background 0.3s, color 0.3s;
 }
 
-/* Login Screen */
 #login-screen {
   position: fixed;
   inset: 0;
@@ -588,21 +586,9 @@ input, select {
 .confirm-modal-title { font-family: var(--font); font-weight: 800; font-size: 20px; margin-bottom: 12px; }
 .confirm-modal-message { color: var(--text2); margin-bottom: 24px; line-height: 1.5; }
 .confirm-modal-actions { display: flex; gap: 12px; justify-content: center; }
-.delete-checkbox { width: 18px; height: 18px; cursor: pointer; }
-.user-table-avatar {
-  width: 28px;
-  height: 28px;
-  border-radius: 6px;
-  display: inline-block;
-  margin-right: 8px;
-}
-.password-toggle {
-  cursor: pointer;
-  margin-left: 8px;
-}
 .sync-status {
   font-size: 10px;
-  color: var(--text2);
+  margin-top: 5px;
   display: flex;
   align-items: center;
   gap: 4px;
@@ -614,7 +600,6 @@ input, select {
 </head>
 <body>
 
-<!-- Tela de Login -->
 <div id="login-screen">
   <div class="login-card">
     <div class="login-logo">RECEP<span>TIVO</span></div>
@@ -645,7 +630,7 @@ input, select {
   </nav>
   <div class="sidebar-foot">
     <span class="dot"></span>Cloud Sync
-    <div class="sync-status" id="sync-status">✅ Sincronizado</div>
+    <div class="sync-status" id="sync-status">✅ Conectado</div>
   </div>
 </div>
 
@@ -762,7 +747,6 @@ input, select {
     </div>
   </div>
 
-  <!-- Página de Usuários (Apenas Gerente) -->
   <div class="page" id="page-usuarios">
     <div class="page-header">
       <div><div class="page-title">Usuários do Sistema</div><div class="page-sub">Gerencie quem pode acessar</div></div>
@@ -778,7 +762,6 @@ input, select {
     </div>
   </div>
 
-  <!-- Página de Histórico (Apenas Gerente) -->
   <div class="page" id="page-historico">
     <div class="page-header">
       <div><div class="page-title">Histórico</div><div class="page-sub">Logs de todas as ações</div></div>
@@ -792,7 +775,6 @@ input, select {
   </div>
 </div>
 
-<!-- Modais -->
 <div class="modal-overlay" id="modal-chip"><div class="modal"><div class="modal-header"><div class="modal-title" id="modal-chip-title">Novo Chip</div><button onclick="fecharModal('modal-chip')">✕</button></div><div class="form-group"><label class="form-label">Número</label><input id="chip-numero" placeholder="(11) 99999-9999"></div><div class="form-group"><label class="form-label">Operador</label><select id="chip-operador"></select></div><div class="form-group"><label class="form-label">Status</label><select id="chip-status" onchange="toggleMotivoBan()"><option value="novo">Novo</option><option value="ativo">Ativo</option><option value="banido">Banido</option></select></div><div class="form-group" id="motivo-group" style="display:none"><label class="form-label">Motivo do Ban</label><input id="chip-motivo"></div><div class="form-actions"><button class="btn-cancel" onclick="fecharModal('modal-chip')">Cancelar</button><button class="btn-primary" onclick="salvarChip()">Salvar</button></div></div></div>
 
 <div class="modal-overlay" id="modal-op"><div class="modal"><div class="modal-header"><div class="modal-title" id="modal-op-title">Novo Operador</div><button onclick="fecharModal('modal-op')">✕</button></div><div class="form-group"><label class="form-label">Nome</label><input id="op-nome"></div><div class="form-group"><label class="form-label">Classe</label><select id="op-classe"></select></div><div class="form-actions"><button class="btn-cancel" onclick="fecharModal('modal-op')">Cancelar</button><button class="btn-primary" onclick="salvarOperador()">Salvar</button></div></div></div>
@@ -801,7 +783,6 @@ input, select {
 
 <div class="modal-overlay" id="modal-history"><div class="modal"><div class="modal-header"><div class="modal-title">Histórico do Chip</div><button onclick="fecharModal('modal-history')">✕</button></div><div id="history-content" class="history-log"></div></div></div>
 
-<!-- Modal Usuário -->
 <div class="modal-overlay" id="modal-usuario"><div class="modal"><div class="modal-header"><div class="modal-title" id="modal-usuario-title">Novo Usuário</div><button onclick="fecharModal('modal-usuario')">✕</button></div><div class="form-group"><label class="form-label">Login</label><input id="usuario-login" placeholder="ex: joao_silva"></div><div class="form-group"><label class="form-label">Senha</label><input id="usuario-senha" type="password" placeholder="******"></div><div class="form-group"><label class="form-label">Cor do Usuário (Avatar)</label><input type="color" id="usuario-cor" value="#00e5a0"></div><div class="form-actions"><button class="btn-cancel" onclick="fecharModal('modal-usuario')">Cancelar</button><button class="btn-primary" onclick="salvarUsuario()">Salvar</button></div></div></div>
 
 <div class="confirm-modal-overlay" id="confirm-modal"><div class="confirm-modal"><div class="confirm-modal-icon" id="confirm-icon">⚠️</div><div class="confirm-modal-title" id="confirm-title">Confirmar</div><div class="confirm-modal-message" id="confirm-message"></div><div class="confirm-modal-actions"><button class="btn-cancel" onclick="fecharConfirmModal()">Cancelar</button><button class="btn-primary" id="confirm-btn" onclick="executarAcaoConfirmada()">Confirmar</button></div></div></div>
@@ -810,14 +791,13 @@ input, select {
 
 <script>
 // ==================== SUPABASE CONFIGURAÇÃO ====================
-// ⚠️ SUBSTITUA PELAS SUAS CREDENCIAIS DO SUPABASE ⚠️
-const SUPABASE_URL = 'https://fyeqxmokaiovnjfmoior.supabase.co/rest/v1/';  // COLOQUE SUA URL AQUI
-const SUPABASE_ANON_KEY = 'sb_publishable_3bthuT44LXmjRVYAFw9peQ_6ityZ0cL';          // COLOQUE SUA ANON KEY AQUI
+// ✅ CREDENCIAIS CORRIGIDAS
+const SUPABASE_URL = 'https://fyeqxmokaiovnjfmoior.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_3bthuT44LXmjRVYAFw9peQ_6ityZ0cL';
 
 let supabase = null;
 let supabaseConnected = false;
 
-// ==================== AUTENTICAÇÃO E USUÁRIOS ====================
 let usuarioLogado = null;
 let usuarioLogadoObj = null;
 const USUARIO_MASTER = { login: 'beatriz_rodrigues', senha: 'beatriz123', cor: '#9d4dff', isMaster: true };
@@ -838,174 +818,101 @@ let arquivoLinhas = null;
 let arquivoSeparador = null;
 let historicoAlteracoes = [];
 
-// Inicializar Supabase
 async function initSupabase() {
     try {
         supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        // Testar conexão
         const { data, error } = await supabase.from('classes').select('count', { count: 'exact', head: true });
         if (error) throw error;
         supabaseConnected = true;
         document.getElementById('sync-status').innerHTML = '✅ Conectado';
         document.getElementById('sync-status').className = 'sync-status synced';
-        console.log('✅ Supabase conectado com sucesso!');
+        console.log('✅ Supabase conectado!');
+        await carregarDadosDoSupabase();
         return true;
     } catch (error) {
         console.error('❌ Erro ao conectar Supabase:', error);
         supabaseConnected = false;
-        document.getElementById('sync-status').innerHTML = '⚠️ Offline (usando localStorage)';
+        document.getElementById('sync-status').innerHTML = '⚠️ Offline';
         document.getElementById('sync-status').className = 'sync-status error';
-        toast('Modo offline - usando apenas localStorage', 'err');
+        toast('Modo offline - usando localStorage', 'err');
+        carregarDados();
         return false;
     }
 }
 
-// Funções de sincronização
+async function carregarDadosDoSupabase() {
+    if (!supabaseConnected) return;
+    try {
+        const { data: classesData } = await supabase.from('classes').select('*');
+        if (classesData && classesData.length) classes = classesData;
+        
+        const { data: operadoresData } = await supabase.from('operadores').select('*');
+        if (operadoresData && operadoresData.length) operadores = operadoresData;
+        
+        const { data: chipsData } = await supabase.from('chips').select('*');
+        if (chipsData && chipsData.length) chips = chipsData;
+        
+        const { data: usuariosData } = await supabase.from('usuarios_sistema').select('*');
+        if (usuariosData && usuariosData.length) {
+            usuariosSistema = usuariosData.map(u => ({
+                login: u.login,
+                senha: u.senha,
+                cor: u.cor,
+                isMaster: u.is_master
+            }));
+        }
+        
+        const { data: historicoData } = await supabase
+            .from('historico_central')
+            .select('*')
+            .order('data', { ascending: false })
+            .limit(500);
+        if (historicoData && historicoData.length) historicoAlteracoes = historicoData;
+        
+        salvarLocalStorage();
+        carregarDados();
+    } catch (error) {
+        console.error('Erro ao carregar dados do Supabase:', error);
+    }
+}
+
+async function syncToSupabase(tabela, dados) {
+    if (!supabaseConnected) return;
+    try {
+        for (const item of dados) {
+            await supabase.from(tabela).upsert(item, { onConflict: 'id' });
+        }
+    } catch (error) {
+        console.error(`Erro ao sync ${tabela}:`, error);
+    }
+}
+
 async function syncAllData() {
     if (!supabaseConnected) {
         toast('Modo offline - não é possível sincronizar', 'err');
         return;
     }
-    
     document.getElementById('sync-status').innerHTML = '🔄 Sincronizando...';
     document.getElementById('sync-status').className = 'sync-status syncing';
-    
     try {
-        await syncClasses();
-        await syncOperadores();
-        await syncChips();
-        await syncUsuarios();
-        await syncHistoricoCentral();
-        
-        document.getElementById('sync-status').innerHTML = '✅ Sincronizado';
-        document.getElementById('sync-status').className = 'sync-status synced';
-        toast('Dados sincronizados com sucesso!', 'ok');
-        carregarDados();
-    } catch (error) {
-        console.error('Erro na sincronização:', error);
-        document.getElementById('sync-status').innerHTML = '⚠️ Erro na sincronização';
-        document.getElementById('sync-status').className = 'sync-status error';
-        toast('Erro ao sincronizar dados', 'err');
-    }
-}
-
-async function syncClasses() {
-    // Enviar classes locais para o Supabase
-    for (const classe of classes) {
-        const { error } = await supabase
-            .from('classes')
-            .upsert({
-                id: classe.id,
-                nome: classe.nome,
-                icone: classe.icone,
-                cor: classe.cor,
-                created_at: classe.created_at || new Date().toISOString()
-            }, { onConflict: 'id' });
-        if (error) console.error('Erro ao sync classe:', error);
-    }
-    
-    // Buscar classes do Supabase
-    const { data, error } = await supabase.from('classes').select('*');
-    if (!error && data) {
-        classes = data;
-        salvarLocalStorage();
-    }
-}
-
-async function syncOperadores() {
-    for (const op of operadores) {
-        const { error } = await supabase
-            .from('operadores')
-            .upsert({
-                id: op.id,
-                nome: op.nome,
-                classe_id: op.classe_id,
-                created_at: op.created_at || new Date().toISOString()
-            }, { onConflict: 'id' });
-        if (error) console.error('Erro ao sync operador:', error);
-    }
-    
-    const { data, error } = await supabase.from('operadores').select('*');
-    if (!error && data) {
-        operadores = data;
-        salvarLocalStorage();
-    }
-}
-
-async function syncChips() {
-    for (const chip of chips) {
-        const { error } = await supabase
-            .from('chips')
-            .upsert({
-                id: chip.id,
-                numero: chip.numero,
-                operador_id: chip.operador_id,
-                status: chip.status,
-                motivo_ban: chip.motivo_ban,
-                criado_em: chip.criado_em || new Date().toISOString(),
-                updated_at: new Date().toISOString()
-            }, { onConflict: 'id' });
-        if (error) console.error('Erro ao sync chip:', error);
-    }
-    
-    const { data, error } = await supabase.from('chips').select('*');
-    if (!error && data) {
-        chips = data;
-        salvarLocalStorage();
-    }
-}
-
-async function syncUsuarios() {
-    for (const user of usuariosSistema) {
-        const { error } = await supabase
-            .from('usuarios_sistema')
-            .upsert({
-                login: user.login,
-                senha: user.senha,
-                cor: user.cor,
-                is_master: user.isMaster || false,
-                created_at: user.created_at || new Date().toISOString()
-            }, { onConflict: 'login' });
-        if (error) console.error('Erro ao sync usuario:', error);
-    }
-    
-    const { data, error } = await supabase.from('usuarios_sistema').select('*');
-    if (!error && data) {
-        usuariosSistema = data.map(u => ({
+        await syncToSupabase('classes', classes);
+        await syncToSupabase('operadores', operadores);
+        await syncToSupabase('chips', chips);
+        await syncToSupabase('usuarios_sistema', usuariosSistema.map(u => ({
             login: u.login,
             senha: u.senha,
             cor: u.cor,
-            isMaster: u.is_master
-        }));
-        if (!usuariosSistema.find(u => u.login === USUARIO_MASTER.login)) {
-            usuariosSistema.push(USUARIO_MASTER);
-        }
-        salvarUsuarios();
-    }
-}
-
-async function syncHistoricoCentral() {
-    for (const hist of historicoAlteracoes.slice(0, 100)) {
-        const { error } = await supabase
-            .from('historico_central')
-            .upsert({
-                id: hist.id,
-                usuario: hist.usuario,
-                resumo: hist.resumo,
-                detalhes: hist.detalhes,
-                data: hist.data
-            }, { onConflict: 'id' });
-        if (error) console.error('Erro ao sync historico:', error);
-    }
-    
-    const { data, error } = await supabase
-        .from('historico_central')
-        .select('*')
-        .order('data', { ascending: false })
-        .limit(500);
-    if (!error && data) {
-        historicoAlteracoes = data;
-        salvarHistoricoCentral();
+            is_master: u.isMaster
+        })));
+        await syncToSupabase('historico_central', historicoAlteracoes);
+        document.getElementById('sync-status').innerHTML = '✅ Sincronizado';
+        document.getElementById('sync-status').className = 'sync-status synced';
+        toast('Dados sincronizados com sucesso!', 'ok');
+    } catch (error) {
+        console.error('Erro na sincronização:', error);
+        document.getElementById('sync-status').innerHTML = '⚠️ Erro';
+        document.getElementById('sync-status').className = 'sync-status error';
+        toast('Erro ao sincronizar dados', 'err');
     }
 }
 
@@ -1017,18 +924,11 @@ async function adicionarHistoricoCentralSupabase(resumoAcao, detalhes) {
         detalhes: detalhes,
         data: new Date().toISOString()
     };
-    
     historicoAlteracoes.unshift(novoHistorico);
     if (historicoAlteracoes.length > 1000) historicoAlteracoes.pop();
     salvarHistoricoCentral();
     renderizarHistoricoCentral();
-    
-    if (supabaseConnected) {
-        const { error } = await supabase
-            .from('historico_central')
-            .insert(novoHistorico);
-        if (error) console.error('Erro ao salvar histórico no Supabase:', error);
-    }
+    if (supabaseConnected) await supabase.from('historico_central').insert(novoHistorico);
 }
 
 async function adicionarHistoricoChipSupabase(chipId, acao, detalhes) {
@@ -1040,15 +940,7 @@ async function adicionarHistoricoChipSupabase(chipId, acao, detalhes) {
         detalhes: detalhes,
         data: new Date().toISOString()
     };
-    
-    if (supabaseConnected) {
-        const { error } = await supabase
-            .from('historico_chips')
-            .insert(novoHistorico);
-        if (error) console.error('Erro ao salvar histórico do chip:', error);
-    }
-    
-    // Salvar também localmente
+    if (supabaseConnected) await supabase.from('historico_chips').insert(novoHistorico);
     const individualHistory = JSON.parse(localStorage.getItem('receptivo_historico') || '[]');
     individualHistory.unshift({
         id: Date.now(),
@@ -1062,7 +954,6 @@ async function adicionarHistoricoChipSupabase(chipId, acao, detalhes) {
     localStorage.setItem('receptivo_historico', JSON.stringify(individualHistory));
 }
 
-// Funções auxiliares
 function salvarLocalStorage() {
     localStorage.setItem('receptivo_classes', JSON.stringify(classes));
     localStorage.setItem('receptivo_operadores', JSON.stringify(operadores));
@@ -1107,31 +998,24 @@ function adicionarHistorico(chipId, acao, detalhes) {
 async function fazerLogin() {
     const login = document.getElementById('login-user').value;
     const senha = document.getElementById('login-pass').value;
-    
     const loadingEl = document.getElementById('login-loading');
     loadingEl.style.display = 'block';
-    
     await initSupabase();
-    
     const usuarioEncontrado = usuariosSistema.find(u => u.login === login && u.senha === senha);
     if (usuarioEncontrado) {
         usuarioLogado = login;
         usuarioLogadoObj = usuarioEncontrado;
         localStorage.setItem('receptivo_logado', login);
         document.getElementById('login-screen').style.display = 'none';
-        
         const avatarEl = document.getElementById('user-avatar');
         const nameEl = document.getElementById('user-name-display');
         if(avatarEl) avatarEl.style.backgroundColor = usuarioLogadoObj.cor;
         if(nameEl) nameEl.innerText = login;
-        
         const isAdmin = (login === USUARIO_MASTER.login);
         const navUsuarios = document.getElementById('nav-usuarios');
         const navHistorico = document.getElementById('nav-historico');
         if(navUsuarios) navUsuarios.style.display = isAdmin ? 'flex' : 'none';
         if(navHistorico) navHistorico.style.display = isAdmin ? 'flex' : 'none';
-        
-        carregarDados();
         if(isAdmin) renderizarUsuarios();
         renderizarHistoricoCentral();
     } else {
@@ -1152,13 +1036,11 @@ function verificarLogin() {
             const nameEl = document.getElementById('user-name-display');
             if(avatarEl) avatarEl.style.backgroundColor = user.cor;
             if(nameEl) nameEl.innerText = user.login;
-            
             const isAdmin = (user.login === USUARIO_MASTER.login);
             const navUsuarios = document.getElementById('nav-usuarios');
             const navHistorico = document.getElementById('nav-historico');
             if(navUsuarios) navUsuarios.style.display = isAdmin ? 'flex' : 'none';
             if(navHistorico) navHistorico.style.display = isAdmin ? 'flex' : 'none';
-            
             carregarDados();
             if(isAdmin) renderizarUsuarios();
             renderizarHistoricoCentral();
@@ -1173,17 +1055,21 @@ function carregarDados() {
     const savedOps = localStorage.getItem('receptivo_operadores');
     const savedChips = localStorage.getItem('receptivo_chips');
     
-    classes = savedClasses ? JSON.parse(savedClasses) : [
-        { id: '1', nome: 'CRM', icone: '🚀', cor: '#4d9eff' },
-        { id: '2', nome: 'Digital', icone: '🎯', cor: '#00e5a0' },
-        { id: '3', nome: 'Home', icone: '🏠', cor: '#ffd60a' },
-        { id: '4', nome: 'Novatos', icone: '🌱', cor: '#ff9f4d' },
-        { id: '5', nome: 'Menor', icone: '👶', cor: '#ff6b9d' },
-        { id: '6', nome: 'Elite', icone: '⭐', cor: '#9d4dff' }
-    ];
+    if (savedClasses && savedClasses !== '[]') {
+        classes = JSON.parse(savedClasses);
+    } else if (classes.length === 0) {
+        classes = [
+            { id: '1', nome: 'CRM', icone: '🚀', cor: '#4d9eff' },
+            { id: '2', nome: 'Digital', icone: '🎯', cor: '#00e5a0' },
+            { id: '3', nome: 'Home', icone: '🏠', cor: '#ffd60a' },
+            { id: '4', nome: 'Novatos', icone: '🌱', cor: '#ff9f4d' },
+            { id: '5', nome: 'Menor', icone: '👶', cor: '#ff6b9d' },
+            { id: '6', nome: 'Elite', icone: '⭐', cor: '#9d4dff' }
+        ];
+    }
     
-    operadores = savedOps ? JSON.parse(savedOps) : [];
-    chips = savedChips ? JSON.parse(savedChips) : [];
+    if (savedOps && savedOps !== '[]') operadores = JSON.parse(savedOps);
+    if (savedChips && savedChips !== '[]') chips = JSON.parse(savedChips);
     
     classes.forEach(c => { if(classesExpandidas[c.id] === undefined) classesExpandidas[c.id] = true; });
     
@@ -1352,7 +1238,7 @@ function renderizarChips() {
     
     document.getElementById('chips-count').textContent = `${chips.length} chips (${chips.filter(c=>c.status==='novo').length} novos)`;
     const tbody = document.getElementById('chips-tbody');
-    if (!filtrados.length) { tbody.innerHTML = '<tr><td colspan="7">Nenhum chip encontrado</td></tr>'; return; }
+    if (!filtrados.length) { tbody.innerHTML = '</td><td colspan="7">Nenhum chip encontrado</td></tr>'; return; }
     
     tbody.innerHTML = filtrados.map(c => {
         const op = operadores.find(o => o.id === c.operador_id);
@@ -1648,7 +1534,7 @@ function previewArquivo(file) {
             return; 
         } 
         const previewRows = linhas.slice(1, 6).map(l => l.split(arquivoSeparador).map(c => c.replace(/^"|"$/g, '').trim())); 
-        let html = '<table style="width:100%;border-collapse:collapse"><tr><th>OPERADOR</th><th>CHIP</th><th>SITUAÇÃO</th><th>CLASSE</th></tr>'; 
+        let html = '<table style="width:100%;border-collapse:collapse"><table><th>OPERADOR</th><th>CHIP</th><th>SITUAÇÃO</th><th>CLASSE</th>一行'; 
         previewRows.forEach(r => { if (r.length >= 3) html += `<tr><td>${r[0]||''}</td><td>${r[1]||''}</td><td>${r[2]||''}</td><td>${r[3]||''}</td></tr>`; }); 
         html += '</table><span style="color:var(--accent)">✔️ Pronto para importar</span>'; 
         preview.innerHTML = html; 
