@@ -3,10 +3,16 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
-<meta name="theme-color" content="#0b0b10"/>
-<title>Receptivo | Gestão de Chips WhatsApp</title>
+<meta name="theme-color" content="#0a0f1c"/>
+<title>Bookplay | Gestão de Chips WhatsApp</title>
+<!-- Favicon Vercel -->
+<link rel="icon" href="https://vercel.com/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" href="https://vercel.com/favicon-16x16.png" sizes="16x16">
+<link rel="icon" type="image/png" href="https://vercel.com/favicon-32x32.png" sizes="32x32">
+<link rel="icon" type="image/svg+xml" href="https://vercel.com/favicon.svg">
+<link rel="apple-touch-icon" href="https://vercel.com/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=DM+Mono:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
@@ -14,36 +20,38 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 :root {
-  --bg: #0b0b10;
-  --bg2: #13131c;
-  --bg3: #1c1c28;
-  --bg4: #22222f;
-  --border: #2e2e40;
-  --accent: #00e5a0;
-  --red: #ff4d6d;
-  --yellow: #ffd60a;
-  --blue: #4d9eff;
-  --text: #eeeef5;
-  --text2: #7777a0;
-  --font: 'Syne', sans-serif;
+  --bg: #0a0f1c;
+  --bg2: #111827;
+  --bg3: #1a2332;
+  --bg4: #1f2a3c;
+  --border: #2d3748;
+  --accent: #0a58ca;
+  --accent-hover: #0d6efd;
+  --accent-glow: #0a58ca30;
+  --red: #dc3545;
+  --yellow: #ffc107;
+  --blue: #0d6efd;
+  --text: #f0f2f5;
+  --text2: #9ca3af;
+  --font: 'Inter', sans-serif;
   --mono: 'DM Mono', monospace;
-  --radius: 10px;
-  --shadow: 0 4px 20px rgba(0,0,0,0.3);
-  --tooltip-bg: #1a1a2e;
-  --tooltip-text: #eeeef5;
+  --radius: 0px;
+  --shadow: 0 4px 12px rgba(0,0,0,0.3);
+  --tooltip-bg: #1e293b;
+  --tooltip-text: #f0f2f5;
 }
 
 [data-theme="light"] {
-  --bg: #f0f2f5;
+  --bg: #f8fafc;
   --bg2: #ffffff;
-  --bg3: #f8f9fa;
-  --bg4: #e9ecef;
-  --border: #dee2e6;
-  --text: #212529;
-  --text2: #6c757d;
-  --shadow: 0 4px 20px rgba(0,0,0,0.1);
+  --bg3: #f1f5f9;
+  --bg4: #e2e8f0;
+  --border: #cbd5e1;
+  --text: #0f172a;
+  --text2: #475569;
+  --shadow: 0 4px 12px rgba(0,0,0,0.08);
   --tooltip-bg: #ffffff;
-  --tooltip-text: #212529;
+  --tooltip-text: #0f172a;
 }
 
 body {
@@ -56,14 +64,36 @@ body {
   transition: background 0.3s, color 0.3s;
 }
 
-/* Tooltip Styles */
+.watermark {
+  position: fixed;
+  bottom: 16px;
+  right: 20px;
+  z-index: 999;
+  font-family: var(--font);
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--text2);
+  background: var(--bg2);
+  padding: 6px 14px;
+  border: 1px solid var(--border);
+  backdrop-filter: blur(4px);
+  opacity: 0.8;
+  letter-spacing: 0.3px;
+  pointer-events: none;
+  transition: opacity 0.2s;
+  box-shadow: var(--shadow);
+}
+.watermark span {
+  color: var(--accent);
+  font-weight: 800;
+}
+
 .tooltip-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 18px;
   height: 18px;
-  border-radius: 50%;
   background: var(--bg3);
   color: var(--text2);
   font-size: 11px;
@@ -74,14 +104,13 @@ body {
 }
 .tooltip-icon:hover {
   background: var(--accent);
-  color: #000;
+  color: #fff;
 }
 .tooltip-content {
   position: fixed;
   background: var(--tooltip-bg);
   color: var(--tooltip-text);
   padding: 8px 12px;
-  border-radius: 8px;
   font-size: 12px;
   max-width: 250px;
   z-index: 10000;
@@ -92,11 +121,9 @@ body {
   line-height: 1.4;
 }
 
-/* Theme Toggle Melhorado */
 .theme-toggle-enhanced {
   background: var(--bg3);
   border: 1px solid var(--border);
-  border-radius: 30px;
   padding: 6px 12px;
   cursor: pointer;
   display: flex;
@@ -107,13 +134,9 @@ body {
 }
 .theme-toggle-enhanced:hover {
   background: var(--accent);
-  color: #000;
-}
-.theme-toggle-enhanced span {
-  font-size: 16px;
+  color: #fff;
 }
 
-/* Botões de Exportação */
 .btn-group {
   display: flex;
   gap: 8px;
@@ -131,10 +154,9 @@ body {
   color: white;
 }
 .btn-report:hover {
-  background: #3a7bc8;
+  background: #0b5ed7;
 }
 
-/* Loading Spinner */
 .spinner {
   display: inline-block;
   width: 14px;
@@ -166,7 +188,6 @@ body {
 .loading-content {
   background: var(--bg2);
   padding: 30px;
-  border-radius: 16px;
   text-align: center;
   border: 1px solid var(--border);
 }
@@ -180,11 +201,9 @@ body {
   margin: 0 auto 15px;
 }
 
-/* Badge de Backup */
 .backup-badge {
   background: var(--bg3);
   padding: 2px 8px;
-  border-radius: 12px;
   font-size: 10px;
   color: var(--text2);
   display: inline-flex;
@@ -195,29 +214,30 @@ body {
 #login-screen {
   position: fixed;
   inset: 0;
-  background: linear-gradient(135deg, #0b0b10 0%, #1a1a2e 100%);
+  background: linear-gradient(135deg, #0a0f1c 0%, #0f172a 100%);
   z-index: 10000;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 [data-theme="light"] #login-screen {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #0a58ca 0%, #0d6efd 100%);
 }
 .login-card {
   background: var(--bg2);
-  border-radius: 20px;
   padding: 40px;
   width: 90%;
-  max-width: 400px;
+  max-width: 420px;
   box-shadow: var(--shadow);
   text-align: center;
+  border: 1px solid var(--border);
 }
 .login-logo {
   font-family: var(--font);
-  font-size: 32px;
+  font-size: 36px;
   font-weight: 800;
   margin-bottom: 30px;
+  letter-spacing: -0.5px;
 }
 .login-logo span { color: var(--accent); }
 .login-error {
@@ -242,13 +262,12 @@ body {
   padding: 10px;
   background: var(--bg3);
   border: 1px solid var(--border);
-  border-radius: 8px;
   cursor: pointer;
   font-weight: 600;
 }
 .login-tab.active {
   background: var(--accent);
-  color: #000;
+  color: #fff;
   border-color: var(--accent);
 }
 .password-wrapper {
@@ -271,7 +290,7 @@ body {
 }
 
 #sidebar {
-  width: 240px;
+  width: 260px;
   background: var(--bg2);
   border-right: 1px solid var(--border);
   display: flex;
@@ -281,31 +300,35 @@ body {
   transition: transform 0.3s ease;
 }
 .logo {
-  padding: 26px 20px 18px;
+  padding: 28px 24px 20px;
   border-bottom: 1px solid var(--border);
 }
 .logo-text {
   font-family: var(--font);
   font-weight: 800;
-  font-size: 20px;
+  font-size: 28px;
+  letter-spacing: -1px;
+  background: linear-gradient(135deg, #fff 0%, var(--accent) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
-.logo-text span { color: var(--accent); }
 .logo-sub {
   color: var(--text2);
   font-size: 11px;
-  margin-top: 3px;
+  margin-top: 4px;
+  font-weight: 500;
 }
 nav {
-  padding: 10px 8px;
+  padding: 20px 12px;
   flex: 1;
 }
 .nav-btn {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   width: 100%;
-  padding: 10px 12px;
-  border-radius: 8px;
+  padding: 12px 14px;
   border: none;
   background: transparent;
   color: var(--text2);
@@ -313,8 +336,9 @@ nav {
   font-weight: 600;
   font-size: 14px;
   cursor: pointer;
-  margin-bottom: 2px;
+  margin-bottom: 4px;
   text-align: left;
+  transition: all 0.2s;
 }
 .nav-btn:hover {
   background: var(--bg3);
@@ -325,7 +349,7 @@ nav {
   color: var(--accent);
 }
 .sidebar-foot {
-  padding: 14px 20px;
+  padding: 16px 20px;
   border-top: 1px solid var(--border);
   color: var(--text2);
   font-size: 11px;
@@ -334,7 +358,6 @@ nav {
   display: inline-block;
   width: 7px;
   height: 7px;
-  border-radius: 50%;
   background: var(--accent);
   margin-right: 6px;
 }
@@ -345,19 +368,20 @@ nav {
 }
 .page {
   display: none;
-  padding: 20px;
+  padding: 24px;
   animation: fadeIn 0.25s ease;
 }
 @media (max-width: 768px) {
   .page { padding: 16px; }
-  #sidebar { position: fixed; left: -240px; z-index: 1000; transition: left 0.3s; }
+  #sidebar { position: fixed; left: -260px; z-index: 1000; transition: left 0.3s; }
   #sidebar.open { left: 0; }
-  .menu-toggle { display: block; position: fixed; top: 16px; left: 16px; z-index: 1001; background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; cursor: pointer; }
+  .menu-toggle { display: block; position: fixed; top: 16px; left: 16px; z-index: 1001; background: var(--bg2); border: 1px solid var(--border); padding: 8px 12px; cursor: pointer; }
   .cards-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 12px !important; }
   .charts-row { grid-template-columns: 1fr !important; }
   .export-import-grid { grid-template-columns: 1fr !important; }
   .op-mini-grid { grid-template-columns: 1fr !important; }
   .page-header { flex-direction: column; align-items: flex-start; gap: 12px; }
+  .watermark { bottom: 12px; right: 12px; font-size: 10px; padding: 4px 10px; }
 }
 @media (min-width: 769px) {
   .menu-toggle { display: none; }
@@ -371,15 +395,14 @@ nav {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 24px;
+  margin-bottom: 28px;
   flex-wrap: wrap;
   gap: 12px;
 }
 .header-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
 .user-info {
   background: var(--bg3);
-  border-radius: 8px;
-  padding: 5px 12px;
+  padding: 5px 14px;
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -388,15 +411,14 @@ nav {
   cursor: pointer;
 }
 .user-avatar {
-  width: 24px;
-  height: 24px;
-  border-radius: 20px;
+  width: 28px;
+  height: 28px;
   background: var(--accent);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: #000;
-  font-size: 12px;
+  color: #fff;
+  font-size: 13px;
   font-weight: 800;
 }
 .page-title {
@@ -406,27 +428,27 @@ nav {
   display: inline-flex;
   align-items: center;
   gap: 8px;
+  letter-spacing: -0.5px;
 }
 .page-sub {
   color: var(--text2);
   font-size: 13px;
-  margin-top: 3px;
+  margin-top: 4px;
 }
 .cards-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-  margin-bottom: 28px;
+  gap: 18px;
+  margin-bottom: 32px;
 }
 .stat-card {
   background: var(--bg2);
   border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 20px;
-  transition: transform 0.2s;
+  padding: 22px;
+  transition: transform 0.2s, border-color 0.2s;
   position: relative;
 }
-.stat-card:hover { transform: translateY(-2px); }
+.stat-card:hover { transform: translateY(-3px); border-color: var(--accent); }
 .stat-label {
   font-family: var(--font);
   font-size: 11px;
@@ -437,7 +459,7 @@ nav {
 .stat-value {
   font-family: var(--font);
   font-weight: 800;
-  font-size: 38px;
+  font-size: 42px;
   line-height: 1;
   margin-top: 8px;
 }
@@ -449,7 +471,6 @@ nav {
 .table-wrap {
   background: var(--bg2);
   border: 1px solid var(--border);
-  border-radius: var(--radius);
   overflow: auto;
 }
 table {
@@ -457,7 +478,7 @@ table {
   border-collapse: collapse;
 }
 th, td {
-  padding: 12px 16px;
+  padding: 14px 16px;
   text-align: left;
   border-bottom: 1px solid var(--border);
 }
@@ -471,33 +492,32 @@ th {
 tr:hover td { background: var(--bg3); }
 .badge {
   display: inline-flex;
-  padding: 3px 10px;
-  border-radius: 20px;
+  padding: 3px 12px;
   font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
 }
-.badge-ativo { background: #00e5a018; color: var(--accent); border: 1px solid #00e5a030; }
-.badge-banido { background: #ff4d6d18; color: var(--red); border: 1px solid #ff4d6d30; }
+.badge-ativo { background: #0a58ca18; color: var(--accent); border: 1px solid #0a58ca30; }
+.badge-banido { background: #dc354518; color: var(--red); border: 1px solid #dc354530; }
 .badge-gerente { background: #9d4dff18; color: #9d4dff; border: 1px solid #9d4dff30; }
-.badge-master { background: #4d9eff18; color: var(--blue); border: 1px solid #4d9eff30; }
+.badge-master { background: #0d6efd18; color: var(--blue); border: 1px solid #0d6efd30; }
 .badge-padrao { background: var(--bg4); color: var(--text2); border: 1px solid var(--border); }
 button {
   cursor: pointer;
   border: none;
-  border-radius: 8px;
   font-family: var(--font);
   transition: all 0.15s;
 }
-.btn-primary { background: var(--accent); color: #000; padding: 10px 20px; font-weight: 700; font-size: 14px; }
+.btn-primary { background: var(--accent); color: #fff; padding: 10px 22px; font-weight: 700; font-size: 14px; }
+.btn-primary:hover { background: var(--accent-hover); }
 .btn-sm { padding: 6px 14px; font-size: 12px; font-weight: 700; }
 .btn-edit { background: var(--bg3); color: var(--text); border: 1px solid var(--border); }
-.btn-del { background: #ff4d6d18; color: var(--red); border: 1px solid #ff4d6d30; }
+.btn-del { background: #dc354518; color: var(--red); border: 1px solid #dc354530; }
 .btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--text2); padding: 8px 16px; }
-.btn-error { background: #ff4d6d18; color: var(--red); border: 1px solid var(--red); padding: 8px 16px; }
+.btn-error { background: #dc354518; color: var(--red); border: 1px solid var(--red); padding: 8px 16px; }
 .btn-cancel { background: var(--bg3); color: var(--text2); border: 1px solid var(--border); }
 .checkbox-col { width: 40px; }
-.bulk-actions { background: var(--bg3); padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; display: none; gap: 12px; align-items: center; flex-wrap: wrap; }
+.bulk-actions { background: var(--bg3); padding: 12px 16px; margin-bottom: 16px; display: none; gap: 12px; align-items: center; flex-wrap: wrap; }
 .bulk-actions.show { display: flex; }
 .filters {
   display: flex;
@@ -517,20 +537,18 @@ input, select {
   background: var(--bg3);
   border: 1px solid var(--border);
   color: var(--text);
-  border-radius: 8px;
   padding: 10px 14px;
   outline: none;
   width: 100%;
 }
 .filter-btn {
-  padding: 8px 16px;
-  border-radius: 8px;
+  padding: 8px 18px;
   border: 1px solid var(--border);
   background: transparent;
   color: var(--text2);
   font-weight: 700;
 }
-.filter-btn.active { background: var(--accent); color: #000; border-color: var(--accent); }
+.filter-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
 .modal-overlay {
   display: none;
   position: fixed;
@@ -544,7 +562,6 @@ input, select {
 .modal {
   background: var(--bg2);
   border: 1px solid var(--border);
-  border-radius: 14px;
   width: 100%;
   max-width: 520px;
   padding: 28px;
@@ -555,7 +572,7 @@ input, select {
   align-items: center;
   margin-bottom: 22px;
 }
-.modal-title { font-family: var(--font); font-weight: 800; font-size: 18px; }
+.modal-title { font-family: var(--font); font-weight: 800; font-size: 20px; }
 .form-group { margin-bottom: 14px; }
 .form-label {
   display: block;
@@ -569,7 +586,6 @@ input, select {
 .class-card {
   background: var(--bg2);
   border: 1px solid var(--border);
-  border-radius: var(--radius);
   margin-bottom: 16px;
 }
 .class-header {
@@ -598,7 +614,6 @@ input, select {
 .op-card-mini {
   background: var(--bg3);
   border: 1px solid var(--border);
-  border-radius: var(--radius);
   padding: 16px;
 }
 .op-head {
@@ -611,7 +626,6 @@ input, select {
 .op-avatar {
   width: 36px;
   height: 36px;
-  border-radius: 8px;
   background: var(--bg4);
   display: flex;
   align-items: center;
@@ -626,7 +640,6 @@ input, select {
 }
 .op-stat {
   background: var(--bg4);
-  border-radius: 6px;
   padding: 8px;
   text-align: center;
 }
@@ -636,12 +649,10 @@ input, select {
 .exim-card {
   background: var(--bg2);
   border: 1px solid var(--border);
-  border-radius: var(--radius);
   padding: 28px;
 }
 .file-dropzone {
   border: 2px dashed var(--border);
-  border-radius: 12px;
   padding: 28px;
   text-align: center;
   margin: 20px 0;
@@ -651,7 +662,6 @@ input, select {
 .file-dropzone:hover { border-color: var(--accent); }
 .import-preview {
   background: var(--bg3);
-  border-radius: 10px;
   padding: 12px;
   margin-top: 16px;
   max-height: 250px;
@@ -665,11 +675,10 @@ input, select {
 #toast {
   position: fixed;
   bottom: 24px;
-  right: 24px;
-  background: var(--bg3);
+  left: 24px;
+  background: var(--bg2);
   border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 12px 20px;
+  padding: 10px 20px;
   z-index: 2000;
   transform: translateY(80px);
   opacity: 0;
@@ -682,7 +691,6 @@ input, select {
 .chart-card {
   background: var(--bg2);
   border: 1px solid var(--border);
-  border-radius: var(--radius);
   padding: 22px;
 }
 .chart-title { font-family: var(--font); font-weight: 700; font-size: 14px; margin-bottom: 16px; display: inline-flex; align-items: center; gap: 8px; }
@@ -690,11 +698,10 @@ input, select {
 .pie-wrap canvas { width: 160px !important; height: 160px !important; flex-shrink: 0; }
 .pie-legend { display: flex; flex-direction: column; gap: 10px; }
 .legend-item { display: flex; align-items: center; gap: 8px; }
-.legend-dot { width: 10px; height: 10px; border-radius: 3px; }
+.legend-dot { width: 10px; height: 10px; }
 .ranking-card {
   background: var(--bg2);
   border: 1px solid var(--border);
-  border-radius: var(--radius);
   padding: 22px;
 }
 .ranking-row {
@@ -721,7 +728,6 @@ input, select {
 .confirm-modal {
   background: var(--bg2);
   border: 1px solid var(--border);
-  border-radius: 14px;
   width: 100%;
   max-width: 400px;
   padding: 28px;
@@ -742,7 +748,6 @@ input, select {
   position: absolute;
   background: var(--bg2);
   border: 1px solid var(--border);
-  border-radius: 8px;
   padding: 8px 0;
   min-width: 150px;
   z-index: 1000;
@@ -780,44 +785,35 @@ input, select {
 }
 .log-acoes {
   background: var(--bg3);
-  border-radius: 4px;
   padding: 2px 6px;
   font-size: 10px;
 }
-.loading-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0,0,0,0.7);
-  z-index: 10001;
-  display: none;
+.btn-expandir {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: bold;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
+  transition: all 0.2s;
 }
-.loading-overlay.show {
-  display: flex;
-}
-.loading-content {
-  background: var(--bg2);
-  padding: 30px;
-  border-radius: 16px;
-  text-align: center;
-  border: 1px solid var(--border);
-}
-.loading-spinner {
-  width: 40px;
-  height: 40px;
-  border: 3px solid var(--border);
-  border-top-color: var(--accent);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-  margin: 0 auto 15px;
+.btn-expandir:hover {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
 }
 </style>
 </head>
 <body>
+
+<div class="watermark">
+  Paulo Silva - <span>Elite</span>
+</div>
 
 <div id="login-screen">
   <div class="login-card">
@@ -856,7 +852,7 @@ input, select {
       </div>
       <div class="form-group">
         <label class="form-label">Cor do Usuário</label>
-        <input type="color" id="register-color" value="#00e5a0">
+        <input type="color" id="register-color" value="#0a58ca">
       </div>
       <button class="btn-primary" style="width:100%" id="register-btn">Cadastrar</button>
     </div>
@@ -867,8 +863,8 @@ input, select {
 
 <div id="sidebar">
   <div class="logo">
-    <div class="logo-text">RECEP<span>TIVO</span></div>
-    <div class="logo-sub">Gestão de chips WhatsApp</div>
+    <div class="logo-text">BOOK<span>PLAY</span></div>
+    <div class="logo-sub">gestão de chips WhatsApp</div>
   </div>
   <nav>
     <button class="nav-btn active" data-page="dashboard">📊 Dashboard</button>
@@ -891,10 +887,7 @@ input, select {
   <div class="page active" id="page-dashboard">
     <div class="page-header">
       <div>
-        <div class="page-title">
-          Dashboard
-          <span class="tooltip-icon" data-tooltip="Visão geral do sistema com métricas principais, incluindo total de chips, ativos, banidos e rankings de desempenho.">❓</span>
-        </div>
+        <div class="page-title">Dashboard<span class="tooltip-icon" data-tooltip="Visão geral do sistema com métricas principais.">❓</span></div>
         <div class="page-sub">Visão geral do sistema</div>
       </div>
       <div class="header-actions">
@@ -906,221 +899,149 @@ input, select {
           <div class="user-menu-item danger" onclick="logout()">🚪 Desconectar</div>
         </div>
         <button class="theme-toggle-enhanced" onclick="toggleTheme()" id="theme-toggle-btn">
-          <span>🌓</span> <span id="theme-text">Tema Escuro</span>
+          <span id="theme-icon">🌙</span> <span id="theme-text">Tema Escuro</span>
         </button>
         <button class="btn-ghost" onclick="carregarDadosDoSupabase()">🔄 Recarregar</button>
         <button class="btn-primary" onclick="logout()" style="background:var(--red); color:white;">🔓 Sair</button>
       </div>
     </div>
     <div class="cards-grid">
-      <div class="stat-card">
-        <div class="stat-label">Total de Chips <span class="tooltip-icon" data-tooltip="Quantidade total de chips cadastrados no sistema.">❓</span></div>
-        <div class="stat-value" id="d-total">0</div>
-        <div class="stat-change">📈 Todos os chips</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Ativos <span class="tooltip-icon" data-tooltip="Chips que estão em operação normal.">❓</span></div>
-        <div class="stat-value" id="d-ativos" style="color:var(--accent)">0</div>
-        <div class="stat-change">✅ Em operação</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Banidos <span class="tooltip-icon" data-tooltip="Chips que foram bloqueados ou banidos.">❓</span></div>
-        <div class="stat-value" id="d-banidos" style="color:var(--red)">0</div>
-        <div class="stat-change">⚠️ Bloqueados</div>
-      </div>
+      <div class="stat-card"><div class="stat-label">Total de Chips</div><div class="stat-value" id="d-total">0</div><div class="stat-change">📈 Todos os chips</div></div>
+      <div class="stat-card"><div class="stat-label">Ativos</div><div class="stat-value" id="d-ativos" style="color:var(--accent)">0</div><div class="stat-change">✅ Em operação</div></div>
+      <div class="stat-card"><div class="stat-label">Banidos</div><div class="stat-value" id="d-banidos" style="color:var(--red)">0</div><div class="stat-change">⚠️ Bloqueados</div></div>
     </div>
     <div class="charts-row">
-      <div class="chart-card">
-        <div class="chart-title">Distribuição de Status <span class="tooltip-icon" data-tooltip="Distribuição percentual entre chips ativos e banidos.">❓</span></div>
-        <div class="pie-wrap"><canvas id="pie-chart"></canvas><div class="pie-legend" id="pie-legend"></div></div>
-      </div>
-      <div class="chart-card">
-        <div class="chart-title">Chips por Classe <span class="tooltip-icon" data-tooltip="Quantidade de chips distribuídos por cada classe de operador.">❓</span></div>
-        <div style="position:relative;height:200px"><canvas id="bar-chart"></canvas></div>
-      </div>
+      <div class="chart-card"><div class="chart-title">Distribuição de Status</div><div class="pie-wrap"><canvas id="pie-chart"></canvas><div class="pie-legend" id="pie-legend"></div></div></div>
+      <div class="chart-card"><div class="chart-title">Chips por Classe</div><div style="position:relative;height:200px"><canvas id="bar-chart"></canvas></div></div>
     </div>
     <div class="charts-row">
-      <div class="ranking-card"><div class="chart-title">🏆 Ranking — Mais Ativos <span class="tooltip-icon" data-tooltip="Operadores com maior número de chips ativos.">❓</span></div><div id="rank-ativos"></div></div>
-      <div class="ranking-card"><div class="chart-title">📉 Ranking — Mais Banidos <span class="tooltip-icon" data-tooltip="Operadores com maior número de chips banidos.">❓</span></div><div id="rank-banidos"></div></div>
+      <div class="ranking-card"><div class="chart-title">🏆 Ranking — Mais Ativos</div><div id="rank-ativos"></div></div>
+      <div class="ranking-card"><div class="chart-title">📉 Ranking — Mais Banidos</div><div id="rank-banidos"></div></div>
     </div>
-    <div class="ranking-card">
-      <div class="chart-title">📊 Eficiência por Chip <span class="tooltip-icon" data-tooltip="Taxa de sucesso (chips ativos / total de chips) por operador.">❓</span></div>
-      <div id="taxa-aprovacao"></div>
-    </div>
+    <div class="ranking-card"><div class="chart-title">📊 Eficiência por Chip</div><div id="taxa-aprovacao"></div></div>
   </div>
 
   <div class="page" id="page-chips">
     <div class="page-header">
-      <div>
-        <div class="page-title">
-          Chips
-          <span class="tooltip-icon" data-tooltip="Gerencie todos os chips cadastrados. Você pode adicionar, editar, excluir e alterar status em massa.">❓</span>
-        </div>
-        <div class="page-sub" id="chips-count">carregando...</div>
-      </div>
-      <div class="header-actions">
-        <button class="btn-primary" onclick="abrirModalChip()">+ Adicionar Chip</button>
-      </div>
+      <div><div class="page-title">Chips</div><div class="page-sub" id="chips-count">carregando...</div></div>
+      <div class="header-actions"><button class="btn-primary" onclick="abrirModalChip()">+ Adicionar Chip</button></div>
     </div>
     <div class="bulk-actions" id="bulk-actions">
       <span>📌 <span id="selected-count">0</span> chips selecionados</span>
-      <select id="bulk-status" style="width:auto">
-        <option value="">Alterar Status</option>
-        <option value="ativo">Ativo</option>
-        <option value="banido">Banido</option>
-      </select>
-      <select id="bulk-operador" style="width:auto">
-        <option value="">Alterar Operador</option>
-      </select>
+      <select id="bulk-status" style="width:auto"><option value="">Alterar Status</option><option value="ativo">Ativo</option><option value="banido">Banido</option></select>
+      <select id="bulk-operador" style="width:auto"><option value="">Alterar Operador</option></select>
       <button class="btn-primary btn-sm" onclick="aplicarEdicaoEmMassa()">Aplicar</button>
       <button class="btn-del btn-sm" onclick="confirmarExclusaoEmMassa()">🗑️ Excluir Selecionados</button>
       <button class="btn-ghost btn-sm" onclick="limparSelecao()">Limpar</button>
     </div>
     <div class="filters">
-      <div class="search-wrap">
-        <span class="search-icon">🔍</span>
-        <input id="chip-search" placeholder="Buscar por número, operador ou classe..." oninput="buscarChipsDebounce()">
-      </div>
+      <div class="search-wrap"><span class="search-icon">🔍</span><input id="chip-search" placeholder="Buscar..." oninput="buscarChipsDebounce()"></div>
       <button class="filter-btn active" onclick="setFiltroChip('todos',this)">Todos</button>
       <button class="filter-btn" onclick="setFiltroChip('ativo',this)">Ativo</button>
       <button class="filter-btn" onclick="setFiltroChip('banido',this)">Banido</button>
     </div>
     <div class="table-wrap">
-      <table>
-        <thead>
-          <tr><th class="checkbox-col"><input type="checkbox" id="select-all-chips" onchange="selecionarTodosChips()"></th><th>Número</th><th>Operador</th><th>Classe</th><th>Status</th><th>Obs</th><th>Ações</th></tr>
-        </thead>
-        <tbody id="chips-tbody"></tbody>
-      </table>
+      <table><thead><tr><th class="checkbox-col"><input type="checkbox" id="select-all-chips" onchange="selecionarTodosChips()"></th><th>Número</th><th>Operador</th><th>Classe</th><th>Status</th><th>Obs</th><th>Ações</th></tr></thead><tbody id="chips-tbody"></tbody></table>
     </div>
   </div>
 
   <div class="page" id="page-operadores">
     <div class="page-header">
-      <div>
-        <div class="page-title">
-          Operadores
-          <span class="tooltip-icon" data-tooltip="Organize operadores por classes. Cada operador pode ter múltiplos chips atribuídos.">❓</span>
-        </div>
-        <div class="page-sub" id="operadores-count">Organize por classe</div>
-      </div>
-      <div class="header-actions">
-        <button class="btn-primary" onclick="abrirModalClasse()">+ Nova Classe</button>
-        <button class="btn-primary" onclick="abrirModalOp()">+ Novo Operador</button>
-      </div>
+      <div><div class="page-title">Operadores</div><div class="page-sub" id="operadores-count">Organize por classe</div></div>
+      <div class="header-actions"><button class="btn-primary" onclick="abrirModalClasse()">+ Nova Classe</button><button class="btn-primary" onclick="abrirModalOp()">+ Novo Operador</button></div>
     </div>
-    <div class="classes-header">
-      <button class="btn-ghost" onclick="expandirTodas()">📂 Expandir todas</button>
-      <button class="btn-ghost" onclick="recolherTodas()">📁 Recolher todas</button>
-    </div>
+    <div class="classes-header"><button class="btn-ghost" onclick="expandirTodas()">📂 Expandir todas</button><button class="btn-ghost" onclick="recolherTodas()">📁 Recolher todas</button></div>
     <div id="classes-container"></div>
   </div>
 
   <div class="page" id="page-exportar">
-    <div class="page-header">
-      <div>
-        <div class="page-title">
-          Importação / Exportação
-          <span class="tooltip-icon" data-tooltip="Exporte dados em CSV ou Excel, ou importe via arquivo CSV. Você também pode gerar relatórios de eficiência dos operadores.">❓</span>
-        </div>
-        <div class="page-sub">Arquivo CSV com separador ;</div>
-      </div>
-    </div>
+    <div class="page-header"><div><div class="page-title">Importação / Exportação</div><div class="page-sub">Arquivo CSV com separador ;</div></div></div>
     <div class="export-import-grid">
-      <div class="exim-card">
-        <div class="exim-icon">📤</div>
-        <div class="exim-title">Exportar Dados</div>
-        <div class="btn-group" style="margin-top:20px">
-          <button class="btn-primary" onclick="exportarDadosCSV()">📄 Exportar CSV</button>
-          <button class="btn-primary btn-excel" onclick="exportarDadosExcel()">📊 Exportar Excel</button>
-          <button class="btn-primary btn-report" onclick="exportarRelatorioEficiencia()">📈 Relatório Eficiência</button>
-        </div>
-      </div>
-      <div class="exim-card">
-        <div class="exim-icon">📥</div>
-        <div class="exim-title">Importar Dados</div>
-        <button class="btn-ghost" style="width:100%;margin-bottom:12px" onclick="baixarModelo()">Baixar Modelo</button>
-        <div class="file-dropzone" id="dropzone">📂 Clique ou arraste arquivo CSV<input type="file" id="import-file" accept=".csv" style="display:none"></div>
-        <button class="btn-primary" style="width:100%" onclick="processarImportacao()">Processar Importação</button>
-        <div id="import-error-button" class="error-button-container" style="display:none">
-          <button class="btn-error btn-sm" onclick="mostrarErrosImportacao()">⚠️ Ver Erros</button>
-        </div>
-        <div id="import-preview" class="import-preview" style="display:none"></div>
-      </div>
+      <div class="exim-card"><div class="exim-icon">📤</div><div class="exim-title">Exportar Dados</div><div class="btn-group" style="margin-top:20px"><button class="btn-primary" onclick="exportarDadosCSV()">📄 Exportar CSV</button><button class="btn-primary btn-excel" onclick="exportarDadosExcel()">📊 Exportar Excel</button><button class="btn-primary btn-report" onclick="exportarRelatorioEficiencia()">📈 Relatório Eficiência</button></div></div>
+      <div class="exim-card"><div class="exim-icon">📥</div><div class="exim-title">Importar Dados</div><button class="btn-ghost" style="width:100%;margin-bottom:12px" onclick="baixarModelo()">Baixar Modelo</button><div class="file-dropzone" id="dropzone">📂 Clique ou arraste arquivo CSV<input type="file" id="import-file" accept=".csv" style="display:none"></div><button class="btn-primary" style="width:100%" onclick="processarImportacao()">Processar Importação</button><div id="import-error-button" class="error-button-container" style="display:none"><button class="btn-error btn-sm" onclick="mostrarErrosImportacao()">⚠️ Ver Erros</button></div><div id="import-preview" class="import-preview" style="display:none"></div></div>
     </div>
   </div>
 
   <div class="page" id="page-historico">
-    <div class="page-header">
-      <div>
-        <div class="page-title">
-          Histórico de Logs
-          <span class="tooltip-icon" data-tooltip="Últimos 50 registros de atividades realizadas no sistema.">❓</span>
-        </div>
-        <div class="page-sub">Últimos 50 registros de atividades</div>
-      </div>
-      <div class="header-actions">
-        <button class="btn-ghost" onclick="carregarHistorico()">🔄 Atualizar</button>
-      </div>
-    </div>
+    <div class="page-header"><div><div class="page-title">Histórico de Logs</div><div class="page-sub">Últimos 50 registros - Clique no + para ver detalhes</div></div><div class="header-actions"><button class="btn-ghost" onclick="carregarHistorico()">🔄 Atualizar</button></div></div>
     <div class="table-wrap">
-      <table class="log-table">
-        <thead>
-          <tr><th>Data/Hora</th><th>Usuário</th><th>Ação</th><th>Detalhes</th></tr>
-        </thead>
-        <tbody id="historico-tbody"></tbody>
-      </table>
+      <table class="log-table"><thead><tr><th>Data/Hora</th><th>Usuário</th><th>Ação</th><th style="width:80px">Detalhes</th></tr></thead><tbody id="historico-tbody"></tbody></table>
     </div>
   </div>
 
   <div class="page" id="page-usuarios">
-    <div class="page-header">
-      <div>
-        <div class="page-title">
-          Usuários do Sistema
-          <span class="tooltip-icon" data-tooltip="Gerencie quem pode acessar o sistema. Apenas Master e Gerente têm acesso a esta página.">❓</span>
-        </div>
-        <div class="page-sub">Gerencie quem pode acessar</div>
-      </div>
-      <div class="header-actions">
-        <button class="btn-primary" onclick="abrirModalUsuario()">+ Novo Usuário</button>
-      </div>
-    </div>
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr><th>Usuário</th><th>Senha</th><th>Cor</th><th>Perfil</th><th>Ações</th></tr>
-        </thead>
-        <tbody id="usuarios-tbody"></tbody>
-      </table>
-    </div>
+    <div class="page-header"><div><div class="page-title">Usuários do Sistema</div><div class="page-sub">Gerencie quem pode acessar</div></div><div class="header-actions"><button class="btn-primary" onclick="abrirModalUsuario()">+ Novo Usuário</button></div></div>
+    <div class="table-wrap"><table><thead><tr><th>Usuário</th><th>Senha</th><th>Cor</th><th>Perfil</th><th>Ações</th></tr></thead><tbody id="usuarios-tbody"></tbody></table></div>
   </div>
 </div>
 
-<div class="loading-overlay" id="loading-overlay">
-  <div class="loading-content">
-    <div class="loading-spinner"></div>
-    <div>Processando...</div>
-  </div>
-</div>
+<div class="loading-overlay" id="loading-overlay"><div class="loading-content"><div class="loading-spinner"></div><div>Processando...</div></div></div>
 
-<div class="modal-overlay" id="modal-chip"><div class="modal"><div class="modal-header"><div class="modal-title" id="modal-chip-title">Novo Chip</div><button onclick="fecharModal('modal-chip')">✕</button></div><div class="form-group"><label class="form-label">Número</label><input id="chip-numero" placeholder="(11) 99999-9999"></div><div class="form-group"><label class="form-label">Operador</label><select id="chip-operador"></select></div><div class="form-group"><label class="form-label">Status</label><select id="chip-status" onchange="toggleObsGroup()"><option value="ativo">Ativo</option><option value="banido">Banido</option></select></div><div class="form-group" id="obs-group" style="display:none"><label class="form-label">Obs</label><input id="chip-obs" placeholder="Observação sobre o chip..."></div><div class="form-actions"><button class="btn-cancel" onclick="fecharModal('modal-chip')">Cancelar</button><button class="btn-primary" onclick="salvarChip()">Salvar</button></div></div></div>
+<!-- MODAIS -->
+<div class="modal-overlay" id="modal-chip"><div class="modal"><div class="modal-header"><div class="modal-title" id="modal-chip-title">Novo Chip</div><button onclick="fecharModal('modal-chip')">✕</button></div><div class="form-group"><label class="form-label">Número</label><input id="chip-numero" placeholder="(11) 99999-9999"></div><div class="form-group"><label class="form-label">Operador</label><select id="chip-operador"></select></div><div class="form-group"><label class="form-label">Status</label><select id="chip-status" onchange="toggleObsGroup()"><option value="ativo">Ativo</option><option value="banido">Banido</option></select></div><div class="form-group" id="obs-group" style="display:none"><label class="form-label">Obs</label><input id="chip-obs" placeholder="Observação..."></div><div class="form-actions"><button class="btn-cancel" onclick="fecharModal('modal-chip')">Cancelar</button><button class="btn-primary" onclick="salvarChip()">Salvar</button></div></div></div>
 
 <div class="modal-overlay" id="modal-op"><div class="modal"><div class="modal-header"><div class="modal-title" id="modal-op-title">Novo Operador</div><button onclick="fecharModal('modal-op')">✕</button></div><div class="form-group"><label class="form-label">Nome</label><input id="op-nome"></div><div class="form-group"><label class="form-label">Classe</label><select id="op-classe"></select></div><div class="form-actions"><button class="btn-cancel" onclick="fecharModal('modal-op')">Cancelar</button><button class="btn-primary" onclick="salvarOperador()">Salvar</button></div></div></div>
 
-<div class="modal-overlay" id="modal-classe"><div class="modal"><div class="modal-header"><div class="modal-title" id="modal-classe-title">Nova Classe</div><button onclick="fecharModal('modal-classe')">✕</button></div><div class="form-group"><label class="form-label">Nome da Classe</label><input id="classe-nome"></div><div class="form-group"><label class="form-label">Ícone</label><select id="classe-icon"><option value="📁">📁 Pasta</option><option value="🚀">🚀 CRM</option><option value="🎯">🎯 Digital</option><option value="🏠">🏠 Home</option><option value="🌱">🌱 Novatos</option><option value="👶">👶 Menor</option><option value="⭐">⭐ Elite</option><option value="💎">💎 Diamante</option><option value="🔥">🔥 Top</option></select></div><div class="form-group"><label class="form-label">Cor da Classe</label><input type="color" id="classe-cor" value="#00e5a0"></div><div class="form-actions"><button class="btn-cancel" onclick="fecharModal('modal-classe')">Cancelar</button><button class="btn-primary" onclick="salvarClasse()">Salvar</button></div></div></div>
+<div class="modal-overlay" id="modal-classe"><div class="modal"><div class="modal-header"><div class="modal-title" id="modal-classe-title">Nova Classe</div><button onclick="fecharModal('modal-classe')">✕</button></div><div class="form-group"><label class="form-label">Nome da Classe</label><input id="classe-nome"></div><div class="form-group"><label class="form-label">Ícone</label><select id="classe-icon"><option value="📁">📁 Pasta</option><option value="🚀">🚀 CRM</option><option value="🎯">🎯 Digital</option><option value="🏠">🏠 Home</option><option value="🌱">🌱 Novatos</option><option value="👶">👶 Menor</option><option value="⭐">⭐ Elite</option><option value="💎">💎 Diamante</option><option value="🔥">🔥 Top</option></select></div><div class="form-group"><label class="form-label">Cor da Classe</label><input type="color" id="classe-cor" value="#0a58ca"></div><div class="form-actions"><button class="btn-cancel" onclick="fecharModal('modal-classe')">Cancelar</button><button class="btn-primary" onclick="salvarClasse()">Salvar</button></div></div></div>
 
-<div class="modal-overlay" id="modal-usuario"><div class="modal"><div class="modal-header"><div class="modal-title" id="modal-usuario-title">Novo Usuário</div><button onclick="fecharModal('modal-usuario')">✕</button></div><div class="form-group"><label class="form-label">Login</label><input id="usuario-login" placeholder="ex: joao_silva"></div><div class="form-group"><label class="form-label">Senha</label><div class="password-wrapper"><input id="usuario-senha" type="password" placeholder="******"><button type="button" class="toggle-password" onclick="togglePasswordVisibility('usuario-senha')">👁️</button></div></div><div class="form-group"><label class="form-label">Cor do Usuário</label><input type="color" id="usuario-cor" value="#00e5a0"></div><div class="form-group"><label class="form-label">Perfil</label><select id="usuario-perfil"><option value="padrao">Padrão</option><option value="master">Master</option><option value="gerente">Gerente</option></select></div><div class="form-actions"><button class="btn-cancel" onclick="fecharModal('modal-usuario')">Cancelar</button><button class="btn-primary" onclick="salvarUsuario()">Salvar</button></div></div></div>
+<div class="modal-overlay" id="modal-usuario"><div class="modal"><div class="modal-header"><div class="modal-title" id="modal-usuario-title">Novo Usuário</div><button onclick="fecharModal('modal-usuario')">✕</button></div><div class="form-group"><label class="form-label">Login</label><input id="usuario-login" placeholder="ex: joao_silva"></div><div class="form-group"><label class="form-label">Senha</label><div class="password-wrapper"><input id="usuario-senha" type="password" placeholder="******"><button type="button" class="toggle-password" onclick="togglePasswordVisibility('usuario-senha')">👁️</button></div></div><div class="form-group"><label class="form-label">Cor do Usuário</label><input type="color" id="usuario-cor" value="#0a58ca"></div><div class="form-group"><label class="form-label">Perfil</label><select id="usuario-perfil"><option value="padrao">Padrão</option><option value="master">Master</option><option value="gerente">Gerente</option></select></div><div class="form-actions"><button class="btn-cancel" onclick="fecharModal('modal-usuario')">Cancelar</button><button class="btn-primary" onclick="salvarUsuario()">Salvar</button></div></div></div>
 
 <div class="modal-overlay" id="modal-editar-usuario"><div class="modal"><div class="modal-header"><div class="modal-title">Editar Usuário</div><button onclick="fecharModal('modal-editar-usuario')">✕</button></div><div class="form-group"><label class="form-label">Login</label><input id="edit-usuario-login" readonly style="background:var(--bg4)"></div><div class="form-group"><label class="form-label">Senha</label><div class="password-wrapper"><input id="edit-usuario-senha" type="password"><button type="button" class="toggle-password" onclick="togglePasswordVisibility('edit-usuario-senha')">👁️</button></div></div><div class="form-group"><label class="form-label">Cor do Usuário</label><input type="color" id="edit-usuario-cor"></div><div class="form-group"><label class="form-label">Perfil</label><select id="edit-usuario-perfil"><option value="padrao">Padrão</option><option value="master">Master</option><option value="gerente">Gerente</option></select></div><div class="form-actions"><button class="btn-cancel" onclick="fecharModal('modal-editar-usuario')">Cancelar</button><button class="btn-primary" onclick="salvarEdicaoUsuario()">Salvar</button></div></div></div>
 
-<div class="modal-overlay" id="modal-erros-importacao"><div class="modal error-log-modal"><div class="modal-header"><div class="modal-title">⚠️ Erros na Importação</div><button onclick="fecharModal('modal-erros-importacao')">✕</button></div><div id="erros-importacao-content" class="error-log-modal" style="max-height: 60vh; overflow-y: auto;"></div><div class="form-actions"><button class="btn-primary" onclick="fecharModal('modal-erros-importacao')">Fechar</button></div></div></div>
+<div class="modal-overlay" id="modal-erros-importacao"><div class="modal error-log-modal"><div class="modal-header"><div class="modal-title">⚠️ Erros na Importação</div><button onclick="fecharModal('modal-erros-importacao')">✕</button></div><div id="erros-importacao-content" style="max-height: 60vh; overflow-y: auto;"></div><div class="form-actions"><button class="btn-primary" onclick="fecharModal('modal-erros-importacao')">Fechar</button></div></div></div>
+
+<div class="modal-overlay" id="modal-detalhes-log"><div class="modal error-log-modal" style="max-width: 600px;"><div class="modal-header"><div class="modal-title">📋 Detalhes da Ação</div><button onclick="fecharModalDetalhesLog()">✕</button></div><div id="detalhes-log-content" style="padding: 20px;"></div><div class="form-actions"><button class="btn-primary" onclick="fecharModalDetalhesLog()">Fechar</button></div></div></div>
 
 <div class="confirm-modal-overlay" id="confirm-modal"><div class="confirm-modal"><div class="confirm-modal-icon" id="confirm-icon">⚠️</div><div class="confirm-modal-title" id="confirm-title">Confirmar</div><div class="confirm-modal-message" id="confirm-message"></div><div class="confirm-modal-actions"><button class="btn-cancel" onclick="fecharConfirmModal()">Cancelar</button><button class="btn-primary" id="confirm-btn" onclick="executarAcaoConfirmada()">Confirmar</button></div></div></div>
 
 <div id="toast"></div>
 
 <script>
+// Funções globais que precisam estar disponíveis antes de tudo
+function togglePasswordVisibility(inputId) {
+    const input = document.getElementById(inputId);
+    if (input) {
+        if (input.type === 'password') input.type = 'text';
+        else input.type = 'password';
+    }
+}
+
+function fecharModalDetalhesLog() {
+    const modal = document.getElementById('modal-detalhes-log');
+    if (modal) modal.classList.remove('open');
+}
+
+function mostrarDetalhesLog(detalhes, acao, usuario, data) {
+    const modalContent = document.getElementById('detalhes-log-content');
+    if (modalContent) {
+        const dataFormatada = new Date(data).toLocaleString('pt-BR');
+        const detalhesFormatados = detalhes || 'Nenhum detalhe disponível';
+        modalContent.innerHTML = `
+            <div style="margin-bottom: 16px;">
+                <div style="font-weight: 700; color: var(--accent); margin-bottom: 8px;">📋 Informações da ação:</div>
+                <div style="background: var(--bg3); padding: 10px; border-radius: 4px; margin-bottom: 12px;">
+                    <div><strong>Usuário:</strong> ${escapeHtml(usuario)}</div>
+                    <div><strong>Ação:</strong> ${escapeHtml(acao)}</div>
+                    <div><strong>Data/Hora:</strong> ${dataFormatada}</div>
+                </div>
+                <div style="font-weight: 700; color: var(--accent); margin-bottom: 8px;">📝 Detalhamento completo:</div>
+                <div style="background: var(--bg3); padding: 12px; border-radius: 4px; font-family: var(--mono); font-size: 12px; line-height: 1.5; white-space: pre-wrap; word-break: break-word; max-height: 400px; overflow-y: auto;">
+                    ${escapeHtml(detalhesFormatados).replace(/\n/g, '<br>')}
+                </div>
+            </div>
+        `;
+    }
+    document.getElementById('modal-detalhes-log').classList.add('open');
+}
+
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// Início do IIFE principal
 (function() {
     const SUPABASE_URL = 'https://fyeqxmokaiovnjfmoior.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_3bthuT44LXmjRVYAFw9peQ_6ityZ0cL';
@@ -1134,6 +1055,7 @@ input, select {
     let timeoutErroBotao = null;
     let paginaAtual = 'dashboard';
     let timeoutBusca = null;
+    let autoRefreshInterval = null;
 
     let chips = [];
     let operadores = [];
@@ -1158,157 +1080,69 @@ input, select {
     const CACHE_EXPIRY = 5 * 60 * 1000;
     const BACKUP_KEY = 'receptivo_backup';
     const BACKUP_INTERVAL = 24 * 60 * 60 * 1000;
+    const AUTO_REFRESH_INTERVAL = 15000;
 
-    // Tooltips
     function initTooltips() {
         const tooltips = document.querySelectorAll('.tooltip-icon');
         let tooltipElement = null;
-        
         tooltips.forEach(el => {
             el.addEventListener('mouseenter', (e) => {
                 const text = el.getAttribute('data-tooltip');
                 if (!text) return;
-                
                 if (tooltipElement) tooltipElement.remove();
                 tooltipElement = document.createElement('div');
                 tooltipElement.className = 'tooltip-content';
                 tooltipElement.textContent = text;
                 document.body.appendChild(tooltipElement);
-                
                 const rect = el.getBoundingClientRect();
                 tooltipElement.style.left = rect.left + 'px';
                 tooltipElement.style.top = (rect.bottom + 5) + 'px';
             });
-            
             el.addEventListener('mouseleave', () => {
-                if (tooltipElement) {
-                    tooltipElement.remove();
-                    tooltipElement = null;
-                }
+                if (tooltipElement) { tooltipElement.remove(); tooltipElement = null; }
             });
         });
     }
 
-    // Cache functions
     function salvarCache(dados) {
-        const cache = {
-            timestamp: Date.now(),
-            data: {
-                chips: dados.chips,
-                operadores: dados.operadores,
-                classes: dados.classes
-            }
-        };
+        const cache = { timestamp: Date.now(), data: { chips: dados.chips, operadores: dados.operadores, classes: dados.classes } };
         localStorage.setItem(CACHE_KEY, JSON.stringify(cache));
     }
 
     function carregarCache() {
         const cached = localStorage.getItem(CACHE_KEY);
         if (!cached) return null;
-        
         try {
             const cache = JSON.parse(cached);
-            if (Date.now() - cache.timestamp < CACHE_EXPIRY) {
-                return cache.data;
-            }
+            if (Date.now() - cache.timestamp < CACHE_EXPIRY) return cache.data;
         } catch(e) {}
         return null;
     }
 
-    // Backup automático
     function realizarBackup() {
-        const backup = {
-            timestamp: Date.now(),
-            data: {
-                chips: chips,
-                operadores: operadores,
-                classes: classes,
-                usuarios: usuariosSistema
-            }
-        };
+        const backup = { timestamp: Date.now(), data: { chips, operadores, classes, usuarios: usuariosSistema } };
         localStorage.setItem(BACKUP_KEY, JSON.stringify(backup));
-        console.log('Backup automático realizado em:', new Date().toLocaleString());
     }
 
-    function agendarBackup() {
-        setInterval(() => {
-            if (usuarioLogado && chips.length > 0) {
-                realizarBackup();
-                toast('Backup automático realizado', 'ok');
-            }
-        }, BACKUP_INTERVAL);
-    }
+    function agendarBackup() { setInterval(() => { if (usuarioLogado && chips.length) realizarBackup(); }, BACKUP_INTERVAL); }
 
-    function restaurarBackup() {
-        const backup = localStorage.getItem(BACKUP_KEY);
-        if (!backup) return false;
-        
-        try {
-            const backupData = JSON.parse(backup);
-            if (backupData.data && confirm('Deseja restaurar dados do último backup? Data: ' + new Date(backupData.timestamp).toLocaleString())) {
-                chips = backupData.data.chips || [];
-                operadores = backupData.data.operadores || [];
-                classes = backupData.data.classes || [];
-                usuariosSistema = backupData.data.usuarios || [];
-                toast('Backup restaurado com sucesso!', 'ok');
-                return true;
-            }
-        } catch(e) {}
-        return false;
-    }
+    function mostrarLoading() { document.getElementById('loading-overlay').classList.add('show'); }
+    function esconderLoading() { document.getElementById('loading-overlay').classList.remove('show'); }
+    function buscarChipsDebounce() { clearTimeout(timeoutBusca); timeoutBusca = setTimeout(() => renderizarChips(), 500); }
 
-    function mostrarLoading() {
-        document.getElementById('loading-overlay').classList.add('show');
-    }
-    
-    function esconderLoading() {
-        document.getElementById('loading-overlay').classList.remove('show');
-    }
-
-    function buscarChipsDebounce() {
-        clearTimeout(timeoutBusca);
-        timeoutBusca = setTimeout(() => {
-            renderizarChips();
-        }, 500);
-    }
-
-    function salvarPaginaAtual() {
-        if (usuarioLogado) {
-            localStorage.setItem('receptivo_pagina_atual', paginaAtual);
-        }
-    }
-
-    function carregarPaginaAtual() {
-        const salva = localStorage.getItem('receptivo_pagina_atual');
-        if (salva && salva !== 'login') {
-            return salva;
-        }
-        return 'dashboard';
-    }
+    function salvarPaginaAtual() { if (usuarioLogado) localStorage.setItem('receptivo_pagina_atual', paginaAtual); }
+    function carregarPaginaAtual() { const salva = localStorage.getItem('receptivo_pagina_atual'); return (salva && salva !== 'login') ? salva : 'dashboard'; }
 
     function navegarParaPagina(pagina) {
         paginaAtual = pagina;
         salvarPaginaAtual();
-        
-        const allPages = document.querySelectorAll('.page');
-        for (let i = 0; i < allPages.length; i++) {
-            allPages[i].classList.remove('active');
-        }
-        const allNavBtns = document.querySelectorAll('.nav-btn');
-        for (let i = 0; i < allNavBtns.length; i++) {
-            allNavBtns[i].classList.remove('active');
-        }
-        
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
         const pageEl = document.getElementById('page-' + pagina);
         if (pageEl) pageEl.classList.add('active');
-        
         const navBtn = document.querySelector('.nav-btn[data-page="' + pagina + '"]');
         if (navBtn) navBtn.classList.add('active');
-        
-        if (window.innerWidth <= 768) {
-            const sidebar = document.getElementById('sidebar');
-            if (sidebar) sidebar.classList.remove('open');
-        }
+        if (window.innerWidth <= 768) document.getElementById('sidebar')?.classList.remove('open');
     }
 
     function iniciarTimerDesconexao() {
@@ -1321,109 +1155,108 @@ input, select {
                 usuarioLogado = null;
                 usuarioLogadoObj = null;
                 document.getElementById('login-screen').style.display = 'flex';
-                document.getElementById('sidebar').classList.remove('open');
-                document.getElementById('login-user').value = '';
-                document.getElementById('login-pass').value = '';
                 toast('Sessão expirada. Faça login novamente.', 'err');
+                if (autoRefreshInterval) clearInterval(autoRefreshInterval);
             }
         }, TEMPO_SESSAO);
         localStorage.setItem('receptivo_login_time', Date.now().toString());
     }
 
-    function reiniciarTimer() {
-        if (usuarioLogado) {
-            iniciarTimerDesconexao();
-        }
-    }
-
+    function reiniciarTimer() { if (usuarioLogado) iniciarTimerDesconexao(); }
     document.addEventListener('click', reiniciarTimer);
     document.addEventListener('keypress', reiniciarTimer);
     document.addEventListener('mousemove', reiniciarTimer);
 
-    async function registrarLog(acao, detalhes) {
+    function iniciarAutoRefresh() {
+        if (autoRefreshInterval) clearInterval(autoRefreshInterval);
+        autoRefreshInterval = setInterval(async () => {
+            if (usuarioLogado && supabaseConnected) await carregarDadosDoSupabaseSilencioso();
+        }, AUTO_REFRESH_INTERVAL);
+    }
+
+    async function carregarDadosDoSupabaseSilencioso() {
+        if (!supabaseConnected) return;
+        try {
+            const { data: chipsData } = await supabase.from('chips').select('*');
+            const { data: operadoresData } = await supabase.from('operadores').select('*');
+            const { data: classesData } = await supabase.from('classes').select('*');
+            let mudou = false;
+            if (chipsData && JSON.stringify(chipsData) !== JSON.stringify(chips)) { chips = chipsData; mudou = true; }
+            if (operadoresData && JSON.stringify(operadoresData) !== JSON.stringify(operadores)) { operadores = operadoresData; mudou = true; }
+            if (classesData && JSON.stringify(classesData) !== JSON.stringify(classes)) { classes = classesData; mudou = true; }
+            if (mudou) {
+                salvarCache({ chips, operadores, classes });
+                atualizarDashboard();
+                renderizarChips();
+                renderizarClasses();
+                popularSelects();
+            }
+        } catch(e) { console.error('Auto-refresh error:', e); }
+    }
+
+    async function registrarLog(acao, detalhes, detalhesExtras = null) {
         if (!supabaseConnected || !usuarioLogado) return;
         try {
-            const novoLog = {
-                usuario: usuarioLogado,
-                acao: acao,
-                detalhes: detalhes || null,
-                data: new Date().toISOString()
-            };
-            
-            const { error } = await supabase.from('historico_central').insert(novoLog);
-            if (error) console.error('Erro ao salvar log:', error);
-            
+            let detalhesCompletos = detalhes || '';
+            if (detalhesExtras) detalhesCompletos = detalhes + '\n\n📋 Detalhes adicionais:\n' + detalhesExtras;
+            const novoLog = { usuario: usuarioLogado, acao: acao, detalhes: detalhesCompletos, data: new Date().toISOString() };
+            await supabase.from('historico_central').insert(novoLog);
             historico.unshift({ ...novoLog, id: Date.now() });
             if (historico.length > 50) historico.pop();
-            
-            if (paginaAtual === 'historico') {
-                renderizarHistorico();
-            }
-        } catch (error) {
-            console.error('Erro ao registrar log:', error);
-        }
+            if (paginaAtual === 'historico') renderizarHistorico();
+        } catch(e) { console.error('Erro ao salvar log:', e); }
     }
 
     async function carregarHistorico() {
         if (!supabaseConnected) return;
         try {
-            const { data, error } = await supabase
-                .from('historico_central')
-                .select('*')
-                .order('data', { ascending: false })
-                .limit(50);
-            
+            const { data, error } = await supabase.from('historico_central').select('*').order('data', { ascending: false }).limit(50);
             if (error) throw error;
             historico = data || [];
             renderizarHistorico();
-        } catch (error) {
-            console.error('Erro ao carregar histórico:', error);
-        }
+        } catch(e) { console.error('Erro ao carregar histórico:', e); }
     }
 
     function renderizarHistorico() {
         const tbody = document.getElementById('historico-tbody');
         if (!tbody) return;
-        
-        if (!historico.length) {
-            tbody.innerHTML = '<tr><td colspan="4">Nenhum registro encontrado</td></tr>';
-            return;
-        }
-        
-        tbody.innerHTML = historico.map(log => {
+        if (!historico.length) { tbody.innerHTML = '<tr><td colspan="4">Nenhum registro encontrado</td></tr>'; return; }
+        tbody.innerHTML = '';
+        historico.forEach((log, idx) => {
             const data = new Date(log.data);
             const dataStr = data.toLocaleString('pt-BR');
-            return `<tr>
+            const acaoResumida = log.acao.length > 35 ? log.acao.substring(0, 35) + '...' : log.acao;
+            const detalhesResumidos = log.detalhes ? (log.detalhes.length > 50 ? log.detalhes.substring(0, 50) + '...' : log.detalhes) : '—';
+            const row = document.createElement('tr');
+            row.innerHTML = `
                 <td style="white-space: nowrap">${dataStr}</td>
-                <td><span class="badge badge-padrao">${log.usuario}</span></td>
-                <td><span class="log-acoes">${log.acao}</span></td>
-                <td>${log.detalhes || '—'}</td>
-            </tr>`;
-        }).join('');
+                <td><span class="badge badge-padrao">${escapeHtml(log.usuario)}</span></td>
+                <td><span class="log-acoes">${escapeHtml(acaoResumida)}</span></td>
+                <td style="width:80px">
+                    <div style="display:flex; align-items:center; gap:6px;">
+                        <span style="font-size:11px; color:var(--text2);">${escapeHtml(detalhesResumidos)}</span>
+                        <button class="btn-expandir" onclick="mostrarDetalhesLog('${escapeHtml(log.detalhes || '')}', '${escapeHtml(log.acao)}', '${escapeHtml(log.usuario)}', '${log.data}')" title="Ver detalhes completos">+</button>
+                    </div>
+                </td>
+            `;
+            tbody.appendChild(row);
+        });
     }
 
     async function initSupabase() {
         try {
             supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-            const { error } = await supabase.from('classes').select('count', { count: 'exact', head: true });
-            if (error) throw error;
+            await supabase.from('classes').select('count', { count: 'exact', head: true });
             supabaseConnected = true;
-            const syncStatus = document.getElementById('sync-status');
-            if (syncStatus) {
-                syncStatus.innerHTML = '✅ Conectado';
-                syncStatus.className = 'sync-status synced';
-            }
+            document.getElementById('sync-status').innerHTML = '✅ Conectado';
             await carregarUsuariosDoSupabase();
             await carregarDadosDoSupabase();
             await carregarHistorico();
+            iniciarAutoRefresh();
             return true;
-        } catch (error) {
+        } catch(e) {
             supabaseConnected = false;
-            const syncStatus = document.getElementById('sync-status');
-            if (syncStatus) {
-                syncStatus.innerHTML = '⚠️ Offline (usando cache)';
-                syncStatus.className = 'sync-status error';
-            }
+            document.getElementById('sync-status').innerHTML = '⚠️ Offline (usando cache)';
             const cache = carregarCache();
             if (cache) {
                 chips = cache.chips || [];
@@ -1442,126 +1275,38 @@ input, select {
     async function carregarUsuariosDoSupabase() {
         if (!supabaseConnected) return;
         try {
-            const { data: usuariosData, error: usersError } = await supabase.from('usuarios_sistema').select('*');
-            if (usersError) throw usersError;
+            const { data: usuariosData } = await supabase.from('usuarios_sistema').select('*');
             if (usuariosData && usuariosData.length) {
-                usuariosSistema = usuariosData.map(u => ({
-                    login: u.login,
-                    senha: u.senha,
-                    cor: u.cor || '#00e5a0',
-                    perfil: u.perfil || 'padrao'
-                }));
+                usuariosSistema = usuariosData.map(u => ({ login: u.login, senha: u.senha, cor: u.cor || '#0a58ca', perfil: u.perfil || 'padrao' }));
             } else {
-                await inserirUsuariosIniciais();
+                const usuariosIniciais = [
+                    { login: 'beatriz_rodrigues', senha: 'beatriz123', cor: '#9d4dff', perfil: 'gerente' },
+                    { login: 'paulo_silva', senha: 'paulo123', cor: '#0a58ca', perfil: 'master' },
+                    { login: 'admin', senha: 'admin123', cor: '#0a58ca', perfil: 'gerente' }
+                ];
+                for (const u of usuariosIniciais) { await supabase.from('usuarios_sistema').upsert(u, { onConflict: 'login' }); usuariosSistema.push(u); }
             }
-        } catch (error) {
-            console.error('Erro ao carregar usuarios:', error);
-        }
-    }
-
-    async function inserirUsuariosIniciais() {
-        const usuariosIniciais = [
-            { login: 'beatriz_rodrigues', senha: 'beatriz123', cor: '#9d4dff', perfil: 'gerente' },
-            { login: 'paulo_silva', senha: 'paulo123', cor: '#4d9eff', perfil: 'master' },
-            { login: 'admin', senha: 'admin123', cor: '#00e5a0', perfil: 'gerente' }
-        ];
-        
-        for (const usuario of usuariosIniciais) {
-            await supabase.from('usuarios_sistema').upsert(usuario, { onConflict: 'login' });
-            usuariosSistema.push(usuario);
-        }
+        } catch(e) { console.error('Erro ao carregar usuarios:', e); }
     }
 
     async function carregarDadosDoSupabase() {
-        if (!supabaseConnected) {
-            const cache = carregarCache();
-            if (cache) {
-                chips = cache.chips || [];
-                operadores = cache.operadores || [];
-                classes = cache.classes || [];
-                atualizarDashboard();
-                renderizarChips();
-                renderizarClasses();
-                popularSelects();
-            }
-            return;
-        }
-        
+        if (!supabaseConnected) { const cache = carregarCache(); if (cache) { chips = cache.chips || []; operadores = cache.operadores || []; classes = cache.classes || []; atualizarDashboard(); renderizarChips(); renderizarClasses(); popularSelects(); } return; }
         mostrarLoading();
         try {
             const { data: classesData } = await supabase.from('classes').select('*');
             if (classesData && classesData.length) classes = classesData;
-            else await inserirClassesPadrao();
-            
+            else { const classesPadrao = [{ id: '1', nome: 'CRM', icone: '🚀', cor: '#0d6efd' }, { id: '2', nome: 'Digital', icone: '🎯', cor: '#0a58ca' }, { id: '3', nome: 'Home', icone: '🏠', cor: '#ffc107' }, { id: '4', nome: 'Elite', icone: '⭐', cor: '#9d4dff' }]; for (const c of classesPadrao) await supabase.from('classes').upsert(c, { onConflict: 'id' }); classes = classesPadrao; }
             const { data: operadoresData } = await supabase.from('operadores').select('*');
             if (operadoresData) operadores = operadoresData;
-            
             const { data: chipsData } = await supabase.from('chips').select('*');
             if (chipsData) chips = chipsData;
-            
             salvarCache({ chips, operadores, classes });
-            
             atualizarDashboard();
             renderizarChips();
             renderizarClasses();
             popularSelects();
-        } catch (error) {
-            console.error('Erro ao carregar dados:', error);
-            toast('Erro ao carregar dados', 'err');
-        } finally {
-            esconderLoading();
-        }
-    }
-
-    async function inserirClassesPadrao() {
-        const classesPadrao = [
-            { id: '1', nome: 'CRM', icone: '🚀', cor: '#4d9eff' },
-            { id: '2', nome: 'Digital', icone: '🎯', cor: '#00e5a0' },
-            { id: '3', nome: 'Home', icone: '🏠', cor: '#ffd60a' },
-            { id: '4', nome: 'Elite', icone: '⭐', cor: '#9d4dff' }
-        ];
-        for (const classe of classesPadrao) {
-            await supabase.from('classes').upsert(classe, { onConflict: 'id' });
-        }
-        classes = classesPadrao;
-    }
-
-    async function registrarUsuario() {
-        const login = document.getElementById('register-user').value.trim();
-        const senha = document.getElementById('register-pass').value.trim();
-        const masterSenha = document.getElementById('register-master-pass').value.trim();
-        const cor = document.getElementById('register-color').value;
-
-        if (!login || !senha) {
-            document.getElementById('login-error').textContent = 'Preencha todos os campos';
-            document.getElementById('login-error').style.display = 'block';
-            return;
-        }
-        
-        const master = usuariosSistema.find(u => u.perfil === 'master');
-        
-        if (!master || master.senha !== masterSenha) {
-            document.getElementById('login-error').textContent = 'Senha do Master incorreta';
-            document.getElementById('login-error').style.display = 'block';
-            return;
-        }
-        
-        if (usuariosSistema.find(u => u.login === login)) {
-            document.getElementById('login-error').textContent = 'Usuario ja existe';
-            document.getElementById('login-error').style.display = 'block';
-            return;
-        }
-
-        const novoUsuario = { login, senha, cor, perfil: 'padrao' };
-        usuariosSistema.push({ login, senha, cor, perfil: 'padrao' });
-        if (supabaseConnected) {
-            await supabase.from('usuarios_sistema').insert(novoUsuario);
-            await registrarLog('Criou usuário', `Criou o usuário: ${login}`);
-        }
-        document.getElementById('login-error').style.display = 'none';
-        document.getElementById('login-error').textContent = '';
-        document.querySelector('.login-tab[data-tab="login"]').click();
-        toast('Usuario cadastrado com sucesso!', 'ok');
+        } catch(e) { console.error('Erro ao carregar dados:', e); toast('Erro ao carregar dados', 'err'); }
+        finally { esconderLoading(); }
     }
 
     async function fazerLogin() {
@@ -1569,51 +1314,53 @@ input, select {
         const senha = document.getElementById('login-pass').value;
         const loadingEl = document.getElementById('login-loading');
         const errorEl = document.getElementById('login-error');
-        
         loadingEl.style.display = 'block';
         errorEl.style.display = 'none';
-        
         await carregarUsuariosDoSupabase();
-        
         const usuarioEncontrado = usuariosSistema.find(u => u.login === login && u.senha === senha);
         if (usuarioEncontrado) {
             usuarioLogado = login;
             usuarioLogadoObj = usuarioEncontrado;
             localStorage.setItem('receptivo_logado', login);
             document.getElementById('login-screen').style.display = 'none';
-            
             const avatarEl = document.getElementById('user-avatar');
             const nameEl = document.getElementById('user-name-display');
             if(avatarEl) avatarEl.style.backgroundColor = usuarioLogadoObj.cor;
             if(nameEl) nameEl.innerText = login;
-            
             const podeAcessarUsuarios = (usuarioLogadoObj.perfil === 'gerente' || usuarioLogadoObj.perfil === 'master');
-            const navUsuarios = document.getElementById('nav-usuarios');
-            if(navUsuarios) navUsuarios.style.display = podeAcessarUsuarios ? 'flex' : 'none';
-            
+            document.getElementById('nav-usuarios').style.display = podeAcessarUsuarios ? 'flex' : 'none';
             const podeAcessarHistorico = (usuarioLogadoObj.perfil === 'gerente' || usuarioLogadoObj.perfil === 'master');
-            const navHistorico = document.getElementById('nav-historico');
-            if(navHistorico) navHistorico.style.display = podeAcessarHistorico ? 'flex' : 'none';
-            
-            if (podeAcessarUsuarios) {
-                renderizarUsuarios();
-            }
-            
+            document.getElementById('nav-historico').style.display = podeAcessarHistorico ? 'flex' : 'none';
+            if (podeAcessarUsuarios) renderizarUsuarios();
             await carregarDadosDoSupabase();
             await carregarHistorico();
-            await registrarLog('Login', `Usuário ${login} realizou login`);
-            
-            const paginaSalva = carregarPaginaAtual();
-            navegarParaPagina(paginaSalva);
-            
+            await registrarLog('Login', `Usuário ${login} realizou login`, `Horário: ${new Date().toLocaleString()}`);
+            navegarParaPagina(carregarPaginaAtual());
             iniciarTimerDesconexao();
             agendarBackup();
+            iniciarAutoRefresh();
         } else {
             errorEl.textContent = 'Usuario ou senha incorretos';
             errorEl.style.display = 'block';
             document.getElementById('login-pass').value = '';
         }
         loadingEl.style.display = 'none';
+    }
+
+    async function registrarUsuario() {
+        const login = document.getElementById('register-user').value.trim();
+        const senha = document.getElementById('register-pass').value.trim();
+        const masterSenha = document.getElementById('register-master-pass').value.trim();
+        const cor = document.getElementById('register-color').value;
+        if (!login || !senha) { document.getElementById('login-error').textContent = 'Preencha todos os campos'; document.getElementById('login-error').style.display = 'block'; return; }
+        const master = usuariosSistema.find(u => u.perfil === 'master');
+        if (!master || master.senha !== masterSenha) { document.getElementById('login-error').textContent = 'Senha do Master incorreta'; document.getElementById('login-error').style.display = 'block'; return; }
+        if (usuariosSistema.find(u => u.login === login)) { document.getElementById('login-error').textContent = 'Usuario ja existe'; document.getElementById('login-error').style.display = 'block'; return; }
+        usuariosSistema.push({ login, senha, cor, perfil: 'padrao' });
+        if (supabaseConnected) await supabase.from('usuarios_sistema').insert({ login, senha, cor, perfil: 'padrao' });
+        document.getElementById('login-error').style.display = 'none';
+        document.querySelector('.login-tab[data-tab="login"]').click();
+        toast('Usuario cadastrado com sucesso!', 'ok');
     }
 
     function logout() {
@@ -1625,71 +1372,38 @@ input, select {
         usuarioLogadoObj = null;
         document.getElementById('login-screen').style.display = 'flex';
         document.getElementById('sidebar').classList.remove('open');
-        document.getElementById('user-menu').classList.remove('show');
-        document.getElementById('login-user').value = '';
-        document.getElementById('login-pass').value = '';
         toast('Desconectado com sucesso', 'ok');
+        if (autoRefreshInterval) clearInterval(autoRefreshInterval);
     }
 
-    function toggleUserMenu(event) {
-        event.stopPropagation();
-        const menu = document.getElementById('user-menu');
-        menu.classList.toggle('show');
-    }
-
-    document.addEventListener('click', function() {
-        const menu = document.getElementById('user-menu');
-        if (menu) menu.classList.remove('show');
-    });
+    function toggleUserMenu(event) { event.stopPropagation(); document.getElementById('user-menu').classList.toggle('show'); }
+    document.addEventListener('click', () => document.getElementById('user-menu')?.classList.remove('show'));
 
     async function verificarLogin() {
         await carregarUsuariosDoSupabase();
-        
         const loggedUser = localStorage.getItem('receptivo_logado');
         const loginTime = localStorage.getItem('receptivo_login_time');
-        
         if (loggedUser && loginTime) {
             const elapsed = Date.now() - parseInt(loginTime);
-            if (elapsed > TEMPO_SESSAO) {
-                localStorage.removeItem('receptivo_logado');
-                localStorage.removeItem('receptivo_login_time');
-                localStorage.removeItem('receptivo_pagina_atual');
-                return false;
-            }
+            if (elapsed > TEMPO_SESSAO) { localStorage.removeItem('receptivo_logado'); localStorage.removeItem('receptivo_login_time'); return false; }
             const user = usuariosSistema.find(u => u.login === loggedUser);
             if(user) {
                 usuarioLogado = loggedUser;
                 usuarioLogadoObj = user;
                 document.getElementById('login-screen').style.display = 'none';
-                const avatarEl = document.getElementById('user-avatar');
-                const nameEl = document.getElementById('user-name-display');
-                if(avatarEl) avatarEl.style.backgroundColor = user.cor;
-                if(nameEl) nameEl.innerText = user.login;
-                
+                document.getElementById('user-avatar').style.backgroundColor = user.cor;
+                document.getElementById('user-name-display').innerText = user.login;
                 const podeAcessarUsuarios = (user.perfil === 'gerente' || user.perfil === 'master');
-                const navUsuarios = document.getElementById('nav-usuarios');
-                if(navUsuarios) navUsuarios.style.display = podeAcessarUsuarios ? 'flex' : 'none';
-                
-                const podeAcessarHistorico = (user.perfil === 'gerente' || user.perfil === 'master');
-                const navHistorico = document.getElementById('nav-historico');
-                if(navHistorico) navHistorico.style.display = podeAcessarHistorico ? 'flex' : 'none';
-                
-                if (podeAcessarUsuarios) {
-                    renderizarUsuarios();
-                }
+                document.getElementById('nav-usuarios').style.display = podeAcessarUsuarios ? 'flex' : 'none';
+                document.getElementById('nav-historico').style.display = podeAcessarUsuarios ? 'flex' : 'none';
+                if (podeAcessarUsuarios) renderizarUsuarios();
                 await carregarDadosDoSupabase();
                 await carregarHistorico();
-                
-                const paginaSalva = carregarPaginaAtual();
-                navegarParaPagina(paginaSalva);
-                
+                navegarParaPagina(carregarPaginaAtual());
                 iniciarTimerDesconexao();
                 agendarBackup();
+                iniciarAutoRefresh();
                 return true;
-            } else {
-                localStorage.removeItem('receptivo_logado');
-                localStorage.removeItem('receptivo_login_time');
-                localStorage.removeItem('receptivo_pagina_atual');
             }
         }
         return false;
@@ -1699,1131 +1413,100 @@ input, select {
         const total = chips.length;
         const ativos = chips.filter(c => c.status === 'ativo').length;
         const banidos = chips.filter(c => c.status === 'banido').length;
-        
         document.getElementById('d-total').textContent = total;
         document.getElementById('d-ativos').textContent = ativos;
         document.getElementById('d-banidos').textContent = banidos;
-        
-        const ctx = document.getElementById('pie-chart');
-        if (ctx) {
-            if (pieChart) pieChart.destroy();
-            pieChart = new Chart(ctx, {
-                type: 'doughnut',
-                data: { labels: ['Ativos', 'Banidos'], datasets: [{ data: [ativos, banidos], backgroundColor: ['#00e5a0', '#ff4d6d'], borderWidth: 0 }] },
-                options: { responsive: true, maintainAspectRatio: true, cutout: '60%', plugins: { legend: { display: false } } }
-            });
-        }
-        
-        document.getElementById('pie-legend').innerHTML = [
-            ['Ativos', ativos, '#00e5a0'],
-            ['Banidos', banidos, '#ff4d6d']
-        ].map(function(item) {
-            return '<div class="legend-item"><div class="legend-dot" style="background:' + item[2] + '"></div><span>' + item[0] + '</span><span style="margin-left:auto">' + item[1] + '</span></div>';
-        }).join('');
-        
-        var porClasse = {};
-        chips.forEach(function(chip) {
-            var op = operadores.find(function(o) { return o.id === chip.operador_id; });
-            if (op && op.classe_id) {
-                var classe = classes.find(function(c) { return c.id === op.classe_id; });
-                var nome = classe ? classe.nome : 'Sem classe';
-                porClasse[nome] = (porClasse[nome] || 0) + 1;
-            }
-        });
-        
-        var dadosClasse = Object.entries(porClasse).sort(function(a,b) { return b[1] - a[1]; }).slice(0,7);
-        var barCtx = document.getElementById('bar-chart');
-        if (barCtx && dadosClasse.length) {
-            if (barChart) barChart.destroy();
-            var coresBarras = dadosClasse.map(function(d) {
-                var classe = classes.find(function(c) { return c.nome === d[0]; });
-                return classe ? classe.cor : '#00e5a0';
-            });
-            barChart = new Chart(barCtx, {
-                type: 'bar',
-                data: { labels: dadosClasse.map(function(d) { return d[0]; }), datasets: [{ data: dadosClasse.map(function(d) { return d[1]; }), backgroundColor: coresBarras, borderRadius: 8 }] },
-                options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
-            });
-        }
-        
-        var rankingAtivos = operadores.map(function(op) {
-            return { id: op.id, nome: op.nome, ativos: chips.filter(function(c) { return c.operador_id === op.id && c.status === 'ativo'; }).length };
-        }).filter(function(op) { return op.ativos > 0; }).sort(function(a,b) { return b.ativos - a.ativos; }).slice(0,6);
-        
-        var rankingBanidos = operadores.map(function(op) {
-            return { id: op.id, nome: op.nome, banidos: chips.filter(function(c) { return c.operador_id === op.id && c.status === 'banido'; }).length };
-        }).filter(function(op) { return op.banidos > 0; }).sort(function(a,b) { return b.banidos - a.banidos; }).slice(0,6);
-        
-        var rankAtivosHtml = rankingAtivos.length ? rankingAtivos.map(function(o,i) {
-            return '<div class="ranking-row"><span class="rank-num" style="color:' + (i===0?'#00e5a0':'var(--border)') + '">' + (i+1) + '</span><span class="rank-name">' + o.nome + '</span><span style="color:#00e5a0">' + o.ativos + '</span></div>';
-        }).join('') : '<div class="empty-class">Sem dados</div>';
-        
-        var rankBanidosHtml = rankingBanidos.length ? rankingBanidos.map(function(o,i) {
-            return '<div class="ranking-row"><span class="rank-num" style="color:' + (i===0?'#ff4d6d':'var(--border)') + '">' + (i+1) + '</span><span class="rank-name">' + o.nome + '</span><span style="color:#ff4d6d">' + o.banidos + '</span></div>';
-        }).join('') : '<div class="empty-class">Sem dados</div>';
-        
-        document.getElementById('rank-ativos').innerHTML = rankAtivosHtml;
-        document.getElementById('rank-banidos').innerHTML = rankBanidosHtml;
-        
-        var eficiencia = operadores.map(function(op) {
-            var totalChips = chips.filter(function(c) { return c.operador_id === op.id; }).length;
-            var ativosChips = chips.filter(function(c) { return c.operador_id === op.id && c.status === 'ativo'; }).length;
-            var taxa = totalChips > 0 ? ((ativosChips / totalChips) * 100).toFixed(1) : 0;
-            return { id: op.id, nome: op.nome, taxa: taxa, totalChips: totalChips };
-        }).filter(function(op) { return op.totalChips > 0; }).sort(function(a,b) { return b.taxa - a.taxa; }).slice(0,6);
-        
-        var eficienciaHtml = eficiencia.length ? eficiencia.map(function(o,i) {
-            var corTaxa = o.taxa >= 70 ? '#00e5a0' : (o.taxa >= 40 ? '#ffd60a' : '#ff4d6d');
-            return '<div class="ranking-row"><span class="rank-num">' + (i+1) + '</span><span class="rank-name">' + o.nome + '</span><span style="color:' + corTaxa + '">' + o.taxa + '%</span></div>';
-        }).join('') : '<div class="empty-class">Sem dados</div>';
-        
-        document.getElementById('taxa-aprovacao').innerHTML = eficienciaHtml;
+        if (pieChart) pieChart.destroy();
+        pieChart = new Chart(document.getElementById('pie-chart'), { type: 'doughnut', data: { labels: ['Ativos', 'Banidos'], datasets: [{ data: [ativos, banidos], backgroundColor: ['#0a58ca', '#dc3545'] }] }, options: { responsive: true, cutout: '60%', plugins: { legend: { display: false } } } });
+        document.getElementById('pie-legend').innerHTML = [['Ativos', ativos, '#0a58ca'], ['Banidos', banidos, '#dc3545']].map(i => '<div class="legend-item"><div class="legend-dot" style="background:' + i[2] + '"></div><span>' + i[0] + '</span><span style="margin-left:auto">' + i[1] + '</span></div>').join('');
+        const porClasse = {};
+        chips.forEach(chip => { const op = operadores.find(o => o.id === chip.operador_id); if (op && op.classe_id) { const classe = classes.find(c => c.id === op.classe_id); const nome = classe ? classe.nome : 'Sem classe'; porClasse[nome] = (porClasse[nome] || 0) + 1; } });
+        const dadosClasse = Object.entries(porClasse).sort((a,b) => b[1] - a[1]).slice(0,7);
+        if (barChart) barChart.destroy();
+        if (dadosClasse.length) barChart = new Chart(document.getElementById('bar-chart'), { type: 'bar', data: { labels: dadosClasse.map(d => d[0]), datasets: [{ data: dadosClasse.map(d => d[1]), backgroundColor: dadosClasse.map(d => { const c = classes.find(cl => cl.nome === d[0]); return c ? c.cor : '#0a58ca'; }) }] }, options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } } });
+        const rankingAtivos = operadores.map(op => ({ nome: op.nome, ativos: chips.filter(c => c.operador_id === op.id && c.status === 'ativo').length })).filter(o => o.ativos > 0).sort((a,b) => b.ativos - a.ativos).slice(0,6);
+        const rankingBanidos = operadores.map(op => ({ nome: op.nome, banidos: chips.filter(c => c.operador_id === op.id && c.status === 'banido').length })).filter(o => o.banidos > 0).sort((a,b) => b.banidos - a.banidos).slice(0,6);
+        document.getElementById('rank-ativos').innerHTML = rankingAtivos.length ? rankingAtivos.map((o,i) => '<div class="ranking-row"><span class="rank-num" style="color:' + (i===0?'#0a58ca':'var(--border)') + '">' + (i+1) + '</span><span class="rank-name">' + o.nome + '</span><span style="color:#0a58ca">' + o.ativos + '</span></div>').join('') : '<div class="empty-class">Sem dados</div>';
+        document.getElementById('rank-banidos').innerHTML = rankingBanidos.length ? rankingBanidos.map((o,i) => '<div class="ranking-row"><span class="rank-num" style="color:' + (i===0?'#dc3545':'var(--border)') + '">' + (i+1) + '</span><span class="rank-name">' + o.nome + '</span><span style="color:#dc3545">' + o.banidos + '</span></div>').join('') : '<div class="empty-class">Sem dados</div>';
+        const eficiencia = operadores.map(op => { const total = chips.filter(c => c.operador_id === op.id).length; const ativos = chips.filter(c => c.operador_id === op.id && c.status === 'ativo').length; return { nome: op.nome, taxa: total ? ((ativos/total)*100).toFixed(1) : 0 }; }).filter(o => o.taxa > 0).sort((a,b) => b.taxa - a.taxa).slice(0,6);
+        document.getElementById('taxa-aprovacao').innerHTML = eficiencia.length ? eficiencia.map((o,i) => '<div class="ranking-row"><span class="rank-num">' + (i+1) + '</span><span class="rank-name">' + o.nome + '</span><span style="color:' + (o.taxa>=70?'#0a58ca':(o.taxa>=40?'#ffc107':'#dc3545')) + '">' + o.taxa + '%</span></div>').join('') : '<div class="empty-class">Sem dados</div>';
     }
 
     function renderizarChips() {
-        var busca = document.getElementById('chip-search') ? (document.getElementById('chip-search').value.toLowerCase() || '') : '';
-        
-        var filtrados = chips.filter(function(c) {
-            if (filtroChip !== 'todos' && c.status !== filtroChip) return false;
-            if (!busca) return true;
-            
-            var op = operadores.find(function(o) { return o.id === c.operador_id; });
-            var classe = op ? classes.find(function(cl) { return cl.id === op.classe_id; }) : null;
-            var nomeOp = op ? op.nome.toLowerCase() : '';
-            var nomeClasse = classe ? classe.nome.toLowerCase() : '';
-            var numero = c.numero.toLowerCase();
-            
-            return numero.indexOf(busca) !== -1 || nomeOp.indexOf(busca) !== -1 || nomeClasse.indexOf(busca) !== -1;
-        });
-        
-        var chipsCountEl = document.getElementById('chips-count');
-        if (chipsCountEl) chipsCountEl.textContent = chips.length + ' chips (' + chips.filter(function(c) { return c.status === 'ativo'; }).length + ' ativos)';
-        
-        var tbody = document.getElementById('chips-tbody');
-        if (!tbody) return;
-        
-        if (!filtrados.length) {
-            tbody.innerHTML = '<tr><td colspan="7">Nenhum chip encontrado</td></tr>';
-            return;
-        }
-        
-        tbody.innerHTML = filtrados.map(function(c) {
-            var op = operadores.find(function(o) { return o.id === c.operador_id; });
-            var classe = op ? classes.find(function(cl) { return cl.id === op.classe_id; }) : null;
-            var corClasse = classe ? classe.cor : '#7777a0';
-            var statusClass = c.status === 'ativo' ? 'badge-ativo' : 'badge-banido';
-            var statusText = c.status === 'ativo' ? 'Ativo' : 'Banido';
-            var obsText = c.obs || '—';
-            var opNome = op ? op.nome : '—';
-            var classeHtml = classe ? '<span style="display:inline-flex;align-items:center;gap:4px"><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:' + corClasse + '"></span> ' + classe.nome + '</span>' : '📁 Sem classe';
-            return '<tr>' +
-                '<td class="checkbox-col"><input type="checkbox" class="chip-checkbox" value="' + c.id + '" ' + (chipsSelecionados.has(c.id) ? 'checked' : '') + ' onchange="window.toggleSelecionarChip(\'' + c.id + '\')"></td>' +
-                '<td>' + c.numero + '</td>' +
-                '<td>' + opNome + '</td>' +
-                '<td>' + classeHtml + '</td>' +
-                '<td><span class="badge ' + statusClass + '">' + statusText + '</span></td>' +
-                '<td>' + obsText + '</td>' +
-                '<td><button class="btn-sm btn-edit" onclick="window.editarChip(\'' + c.id + '\')">Editar</button> <button class="btn-sm btn-del" onclick="window.confirmarExcluirChip(\'' + c.id + '\')">Excluir</button></td>' +
-                '</tr>';
-        }).join('');
-        
-        var selectedCountEl = document.getElementById('selected-count');
-        var bulkActionsEl = document.getElementById('bulk-actions');
-        if (selectedCountEl) selectedCountEl.textContent = chipsSelecionados.size;
-        if (bulkActionsEl) bulkActionsEl.classList.toggle('show', chipsSelecionados.size > 0);
+        const busca = document.getElementById('chip-search')?.value.toLowerCase() || '';
+        const filtrados = chips.filter(c => { if (filtroChip !== 'todos' && c.status !== filtroChip) return false; if (!busca) return true; const op = operadores.find(o => o.id === c.operador_id); const classe = op ? classes.find(cl => cl.id === op.classe_id) : null; return c.numero.toLowerCase().includes(busca) || (op?.nome.toLowerCase().includes(busca)) || (classe?.nome.toLowerCase().includes(busca)); });
+        document.getElementById('chips-count').innerHTML = chips.length + ' chips (' + chips.filter(c => c.status === 'ativo').length + ' ativos)';
+        const tbody = document.getElementById('chips-tbody');
+        if (!filtrados.length) { tbody.innerHTML = '<tr><td colspan="7">Nenhum chip encontrado</td></tr>'; return; }
+        tbody.innerHTML = filtrados.map(c => { const op = operadores.find(o => o.id === c.operador_id); const classe = op ? classes.find(cl => cl.id === op.classe_id) : null; return `<tr><td class="checkbox-col"><input type="checkbox" class="chip-checkbox" value="${c.id}" ${chipsSelecionados.has(c.id) ? 'checked' : ''} onchange="window.toggleSelecionarChip('${c.id}')"></td><td>${c.numero}</td><td>${op ? op.nome : '—'}</td><td>${classe ? `<span style="display:inline-flex;align-items:center;gap:4px"><span style="display:inline-block;width:10px;height:10px;background:${classe.cor}"></span> ${classe.nome}</span>` : '📁 Sem classe'}</td><td><span class="badge ${c.status === 'ativo' ? 'badge-ativo' : 'badge-banido'}">${c.status === 'ativo' ? 'Ativo' : 'Banido'}</span></td><td>${c.obs || '—'}</td><td><button class="btn-sm btn-edit" onclick="window.editarChip('${c.id}')">Editar</button> <button class="btn-sm btn-del" onclick="window.confirmarExcluirChip('${c.id}')">Excluir</button></td></tr>`; }).join('');
+        document.getElementById('selected-count').textContent = chipsSelecionados.size;
+        document.getElementById('bulk-actions').classList.toggle('show', chipsSelecionados.size > 0);
     }
 
-    window.toggleSelecionarChip = function(id) {
-        if (chipsSelecionados.has(id)) chipsSelecionados.delete(id);
-        else chipsSelecionados.add(id);
-        renderizarChips();
-    };
-
-    window.selecionarTodosChips = function() {
-        var busca = document.getElementById('chip-search') ? (document.getElementById('chip-search').value.toLowerCase() || '') : '';
-        var filtrados = chips.filter(function(c) {
-            if (filtroChip !== 'todos' && c.status !== filtroChip) return false;
-            if (!busca) return true;
-            var op = operadores.find(function(o) { return o.id === c.operador_id; });
-            var classe = op ? classes.find(function(cl) { return cl.id === op.classe_id; }) : null;
-            var nomeOp = op ? op.nome.toLowerCase() : '';
-            var nomeClasse = classe ? classe.nome.toLowerCase() : '';
-            return c.numero.toLowerCase().indexOf(busca) !== -1 || nomeOp.indexOf(busca) !== -1 || nomeClasse.indexOf(busca) !== -1;
-        });
-        var selectAll = document.getElementById('select-all-chips');
-        if (selectAll && selectAll.checked) {
-            filtrados.forEach(function(c) { chipsSelecionados.add(c.id); });
-        } else {
-            filtrados.forEach(function(c) { chipsSelecionados.delete(c.id); });
-        }
-        renderizarChips();
-    };
-
+    window.toggleSelecionarChip = function(id) { if (chipsSelecionados.has(id)) chipsSelecionados.delete(id); else chipsSelecionados.add(id); renderizarChips(); };
+    window.selecionarTodosChips = function() { const busca = document.getElementById('chip-search')?.value.toLowerCase() || ''; const filtrados = chips.filter(c => { if (filtroChip !== 'todos' && c.status !== filtroChip) return false; if (!busca) return true; const op = operadores.find(o => o.id === c.operador_id); const classe = op ? classes.find(cl => cl.id === op.classe_id) : null; return c.numero.toLowerCase().includes(busca) || (op?.nome.toLowerCase().includes(busca)) || (classe?.nome.toLowerCase().includes(busca)); }); const selectAll = document.getElementById('select-all-chips'); if (selectAll?.checked) filtrados.forEach(c => chipsSelecionados.add(c.id)); else filtrados.forEach(c => chipsSelecionados.delete(c.id)); renderizarChips(); };
     window.limparSelecao = function() { chipsSelecionados.clear(); renderizarChips(); };
+    window.setFiltroChip = function(filtro, btn) { filtroChip = filtro; document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); chipsSelecionados.clear(); renderizarChips(); };
+    window.abrirModalChip = function() { editandoChipId = null; document.getElementById('modal-chip-title').innerText = 'Novo Chip'; document.getElementById('chip-numero').value = ''; document.getElementById('chip-operador').value = ''; document.getElementById('chip-status').value = 'ativo'; document.getElementById('chip-obs').value = ''; document.getElementById('obs-group').style.display = 'none'; document.getElementById('modal-chip').classList.add('open'); };
+    window.editarChip = function(id) { const chip = chips.find(c => c.id === id); if (!chip) return; editandoChipId = id; document.getElementById('modal-chip-title').innerText = 'Editar Chip'; document.getElementById('chip-numero').value = chip.numero; document.getElementById('chip-operador').value = chip.operador_id || ''; document.getElementById('chip-status').value = chip.status; document.getElementById('chip-obs').value = chip.obs || ''; document.getElementById('obs-group').style.display = chip.status === 'banido' ? 'block' : 'none'; document.getElementById('modal-chip').classList.add('open'); };
+    window.toggleObsGroup = function() { document.getElementById('obs-group').style.display = document.getElementById('chip-status').value === 'banido' ? 'block' : 'none'; };
+    function formatarTelefone(numero) { const digits = numero.toString().replace(/\D/g, ''); if (digits.length === 11) return '(' + digits.substring(0,2) + ') ' + digits.substring(2,7) + '-' + digits.substring(7,11); if (digits.length === 10) return '(' + digits.substring(0,2) + ') ' + digits.substring(2,6) + '-' + digits.substring(6,10); return numero; }
+    async function salvarChipNoSupabase(chip) { if (!supabaseConnected) return false; try { await supabase.from('chips').upsert(chip, { onConflict: 'id' }); return true; } catch(e) { console.error(e); return false; } }
+    async function excluirChipDoSupabase(id) { if (!supabaseConnected) return false; try { await supabase.from('chips').delete().eq('id', id); return true; } catch(e) { console.error(e); return false; } }
+    window.salvarChip = async function() { const numero = formatarTelefone(document.getElementById('chip-numero').value.trim()); if (!numero) { toast('Informe o numero', 'err'); return; } const operador_id = document.getElementById('chip-operador').value || null; const status = document.getElementById('chip-status').value; const obs = document.getElementById('chip-obs').value.trim() || null; if (editandoChipId) { const index = chips.findIndex(c => c.id === editandoChipId); if (index !== -1) { chips[index] = { ...chips[index], numero, operador_id, status, obs }; await salvarChipNoSupabase(chips[index]); await registrarLog('Editou chip', `Editou chip ${numero}`, `Status: ${status}\nObs: ${obs || 'nenhuma'}`); } toast('Chip atualizado', 'ok'); } else { const newId = Date.now().toString(); const novoChip = { id: newId, numero, operador_id, status, obs, criado_em: new Date().toISOString() }; chips.unshift(novoChip); await salvarChipNoSupabase(novoChip); await registrarLog('Adicionou chip', `Adicionou chip ${numero}`, `Status: ${status}\nObs: ${obs || 'nenhuma'}`); toast('Chip adicionado', 'ok'); } fecharModal('modal-chip'); await carregarDadosDoSupabase(); };
+    window.confirmarExcluirChip = function(id) { const chip = chips.find(c => c.id === id); abrirConfirmModal('Excluir Chip', 'Tem certeza que deseja excluir o chip <strong>' + (chip ? chip.numero : '') + '</strong>?', '🗑️', async () => { chips = chips.filter(c => c.id !== id); await excluirChipDoSupabase(id); await registrarLog('Excluiu chip', `Excluiu chip ${chip?.numero || ''}`, ''); await carregarDadosDoSupabase(); toast('Chip excluido', 'ok'); }); };
 
-    window.aplicarEdicaoEmMassa = async function() {
-        var novoStatus = document.getElementById('bulk-status').value;
-        var novoOperadorId = document.getElementById('bulk-operador').value;
-        if (!novoStatus && !novoOperadorId) { toast('Selecione uma acao para aplicar', 'err'); return; }
-        
-        var alterados = 0;
-        for (var id of chipsSelecionados) {
-            var chipIndex = chips.findIndex(function(c) { return c.id === id; });
-            if (chipIndex !== -1) {
-                if (novoStatus) chips[chipIndex].status = novoStatus;
-                if (novoOperadorId) chips[chipIndex].operador_id = novoOperadorId || null;
-                await salvarChipNoSupabase(chips[chipIndex]);
-                alterados++;
-            }
-        }
-        await registrarLog('Edição em massa', `Alterou ${alterados} chips (Status: ${novoStatus || 'mantido'}, Operador: ${novoOperadorId || 'mantido'})`);
-        await carregarDadosDoSupabase();
-        chipsSelecionados.clear();
-        renderizarChips();
-        toast(alterados + ' chips atualizados', 'ok');
-    };
+    function renderizarClasses() { const container = document.getElementById('classes-container'); if (!container) return; if (!classes.length) { container.innerHTML = '<div class="empty-class">Nenhuma classe. Clique em "+ Nova Classe"</div>'; return; } document.getElementById('operadores-count').innerHTML = operadores.length + ' operadores em ' + classes.length + ' classes'; container.innerHTML = classes.map(classe => { const opsDaClasse = operadores.filter(op => op.classe_id === classe.id); const stats = { total: 0, ativos: 0, banidos: 0 }; opsDaClasse.forEach(op => { const chipsOp = chips.filter(c => c.operador_id === op.id); stats.total += chipsOp.length; stats.ativos += chipsOp.filter(c => c.status === 'ativo').length; stats.banidos += chipsOp.filter(c => c.status === 'banido').length; }); const isOpen = classesExpandidas[classe.id] === true; const corClasse = classe.cor || '#0a58ca'; const opsHtml = opsDaClasse.length ? '<div class="op-mini-grid">' + opsDaClasse.map(op => { const opChips = chips.filter(c => c.operador_id === op.id); const iniciais = op.nome.split(' ').map(n => n[0]).join('').slice(0,2).toUpperCase(); return `<div class="op-card-mini"><div class="op-head"><div class="op-info"><div class="op-avatar" style="background:${corClasse}30;color:${corClasse}">${iniciais}</div><div><strong>${op.nome}</strong></div></div><span class="badge badge-ativo">ativo</span></div><div class="op-stats"><div class="op-stat"><div class="op-stat-label">Total</div><div class="op-stat-val">${opChips.length}</div></div><div class="op-stat"><div class="op-stat-label">Ativos</div><div class="op-stat-val" style="color:var(--accent)">${opChips.filter(c => c.status === 'ativo').length}</div></div><div class="op-stat"><div class="op-stat-label">Banidos</div><div class="op-stat-val" style="color:var(--red)">${opChips.filter(c => c.status === 'banido').length}</div></div></div><div style="display:flex;gap:6px"><button class="btn-sm btn-edit" onclick="window.editarOperador('${op.id}')">Editar</button><button class="btn-sm btn-del" onclick="window.confirmarExcluirOperador('${op.id}')">Excluir</button><button class="btn-sm btn-ghost" onclick="window.abrirModalMoverOperador('${op.id}')">Mover</button></div></div>`; }).join('') + '</div>' : '<div class="empty-class">📭 Nenhum operador<br><button class="btn-sm btn-ghost" onclick="window.abrirModalOpComClasse(\'' + classe.id + '\')">+ Adicionar</button></div>'; return `<div class="class-card" style="border-left: 4px solid ${corClasse}"><div class="class-header" onclick="window.toggleClasse('${classe.id}')"><div class="class-header-left"><span class="class-icon">${classe.icone || '📁'}</span><span class="class-name" style="color:${corClasse}">${classe.nome}</span><div class="class-stats"><span class="class-stat"><strong>${stats.total}</strong> chips</span><span class="class-stat" style="color:var(--accent)">▲ ${stats.ativos}</span><span class="class-stat" style="color:var(--red)">▼ ${stats.banidos}</span><span class="class-stat">👥 ${opsDaClasse.length}</span></div></div><div class="class-actions" onclick="event.stopPropagation()"><button class="btn-sm btn-edit" onclick="window.editarClasse('${classe.id}')">✏️</button><button class="btn-sm btn-del" onclick="window.confirmarExcluirClasse('${classe.id}')">🗑️</button></div></div><div class="class-content ${isOpen ? 'open' : ''}" id="class-content-${classe.id}">${opsHtml}</div></div>`; }).join(''); }
+    window.toggleClasse = function(id) { classesExpandidas[id] = !classesExpandidas[id]; localStorage.setItem('receptivo_classes_expandidas', JSON.stringify(classesExpandidas)); document.getElementById('class-content-' + id)?.classList.toggle('open'); };
+    window.expandirTodas = function() { classes.forEach(c => classesExpandidas[c.id] = true); localStorage.setItem('receptivo_classes_expandidas', JSON.stringify(classesExpandidas)); renderizarClasses(); };
+    window.recolherTodas = function() { classes.forEach(c => classesExpandidas[c.id] = false); localStorage.setItem('receptivo_classes_expandidas', JSON.stringify(classesExpandidas)); renderizarClasses(); };
+    function carregarClassesExpandidas() { const salvo = localStorage.getItem('receptivo_classes_expandidas'); if (salvo) try { classesExpandidas = JSON.parse(salvo); } catch(e) {} }
+    window.abrirModalClasse = function() { editandoClasseId = null; document.getElementById('modal-classe-title').innerText = 'Nova Classe'; document.getElementById('classe-nome').value = ''; document.getElementById('classe-icon').value = '📁'; document.getElementById('classe-cor').value = '#0a58ca'; document.getElementById('modal-classe').classList.add('open'); };
+    window.editarClasse = function(id) { const classe = classes.find(c => c.id === id); if (!classe) return; editandoClasseId = id; document.getElementById('modal-classe-title').innerText = 'Editar Classe'; document.getElementById('classe-nome').value = classe.nome; document.getElementById('classe-icon').value = classe.icone || '📁'; document.getElementById('classe-cor').value = classe.cor || '#0a58ca'; document.getElementById('modal-classe').classList.add('open'); };
+    async function salvarClasseNoSupabase(classe) { if (!supabaseConnected) return false; try { await supabase.from('classes').upsert(classe, { onConflict: 'id' }); return true; } catch(e) { console.error(e); return false; } }
+    async function excluirClasseDoSupabase(id) { if (!supabaseConnected) return false; try { await supabase.from('classes').delete().eq('id', id); return true; } catch(e) { console.error(e); return false; } }
+    window.salvarClasse = async function() { const nome = document.getElementById('classe-nome').value.trim(); if (!nome) { toast('Informe o nome', 'err'); return; } const icone = document.getElementById('classe-icon').value; const cor = document.getElementById('classe-cor').value; if (editandoClasseId) { const index = classes.findIndex(c => c.id === editandoClasseId); if (index !== -1) { classes[index] = { ...classes[index], nome, icone, cor }; await salvarClasseNoSupabase(classes[index]); await registrarLog('Editou classe', `Editou classe ${nome}`, `Ícone: ${icone}\nCor: ${cor}`); toast('Classe atualizada', 'ok'); } } else { const novaClasse = { id: Date.now().toString(), nome, icone, cor }; classes.push(novaClasse); await salvarClasseNoSupabase(novaClasse); await registrarLog('Criou classe', `Criou classe ${nome}`, `Ícone: ${icone}\nCor: ${cor}`); toast('Classe criada', 'ok'); } fecharModal('modal-classe'); await carregarDadosDoSupabase(); };
+    window.confirmarExcluirClasse = function(id) { const classe = classes.find(c => c.id === id); const opsNaClasse = operadores.filter(op => op.classe_id === id); let mensagem = 'Tem certeza que deseja excluir a classe <strong>' + (classe ? classe.nome : '') + '</strong>?'; if (opsNaClasse.length) mensagem += '<br><br>⚠️ Esta classe tem ' + opsNaClasse.length + ' operador(es). Eles serao movidos para "Sem classe".'; abrirConfirmModal('Excluir Classe', mensagem, '🗑️', async () => { for (const op of opsNaClasse) { op.classe_id = null; await salvarOperadorNoSupabase(op); } classes = classes.filter(c => c.id !== id); await excluirClasseDoSupabase(id); await registrarLog('Excluiu classe', `Excluiu classe ${classe ? classe.nome : ''}`, `Operadores movidos: ${opsNaClasse.length}`); await carregarDadosDoSupabase(); toast('Classe excluida', 'ok'); }); };
+    async function salvarOperadorNoSupabase(operador) { if (!supabaseConnected) return false; try { await supabase.from('operadores').upsert(operador, { onConflict: 'id' }); return true; } catch(e) { console.error(e); return false; } }
+    async function excluirOperadorDoSupabase(id) { if (!supabaseConnected) return false; try { await supabase.from('operadores').delete().eq('id', id); return true; } catch(e) { console.error(e); return false; } }
+    window.abrirModalOp = function() { editandoOpId = null; document.getElementById('modal-op-title').innerText = 'Novo Operador'; document.getElementById('op-nome').value = ''; document.getElementById('op-classe').value = ''; document.getElementById('modal-op').classList.add('open'); };
+    window.abrirModalOpComClasse = function(classeId) { editandoOpId = null; document.getElementById('modal-op-title').innerText = 'Novo Operador'; document.getElementById('op-nome').value = ''; document.getElementById('op-classe').value = classeId; document.getElementById('modal-op').classList.add('open'); };
+    window.editarOperador = function(id) { const op = operadores.find(o => o.id === id); if (!op) return; editandoOpId = id; document.getElementById('modal-op-title').innerText = 'Editar Operador'; document.getElementById('op-nome').value = op.nome; document.getElementById('op-classe').value = op.classe_id || ''; document.getElementById('modal-op').classList.add('open'); };
+    window.salvarOperador = async function() { const nome = document.getElementById('op-nome').value.trim(); if (!nome) { toast('Informe o nome', 'err'); return; } const classe_id = document.getElementById('op-classe').value || null; if (editandoOpId) { const index = operadores.findIndex(o => o.id === editandoOpId); if (index !== -1) { operadores[index] = { ...operadores[index], nome, classe_id }; await salvarOperadorNoSupabase(operadores[index]); await registrarLog('Editou operador', `Editou operador ${nome}`, `Classe ID: ${classe_id || 'nenhuma'}`); toast('Operador atualizado', 'ok'); } } else { const novoOperador = { id: Date.now().toString(), nome, classe_id }; operadores.push(novoOperador); await salvarOperadorNoSupabase(novoOperador); await registrarLog('Criou operador', `Criou operador ${nome}`, `Classe ID: ${classe_id || 'nenhuma'}`); toast('Operador criado', 'ok'); } fecharModal('modal-op'); await carregarDadosDoSupabase(); };
+    window.confirmarExcluirOperador = function(id) { const op = operadores.find(o => o.id === id); const chipsDoOperador = chips.filter(c => c.operador_id === id); let mensagem = 'Tem certeza que deseja excluir o operador <strong>' + (op ? op.nome : '') + '</strong>?'; if (chipsDoOperador.length) mensagem += '<br><br>⚠️ Este operador tem ' + chipsDoOperador.length + ' chip(s) atribuido(s). Eles ficarao sem operador.'; abrirConfirmModal('Excluir Operador', mensagem, '🗑️', async () => { for (const chip of chipsDoOperador) { chip.operador_id = null; await salvarChipNoSupabase(chip); } operadores = operadores.filter(o => o.id !== id); await excluirOperadorDoSupabase(id); await registrarLog('Excluiu operador', `Excluiu operador ${op ? op.nome : ''}`, `Chips afetados: ${chipsDoOperador.length}`); await carregarDadosDoSupabase(); toast('Operador excluido', 'ok'); }); };
+    window.abrirModalMoverOperador = function(id) { const op = operadores.find(o => o.id === id); if (!op) return; const classesOptions = classes.map(c => `<option value="${c.id}" ${op.classe_id === c.id ? 'selected' : ''}>${c.icone} ${c.nome}</option>`).join(''); const modalHtml = `<div class="modal-overlay" id="modal-mover" style="display:flex"><div class="modal"><div class="modal-header"><div class="modal-title">Mover Operador</div><button onclick="window.fecharModalMover()">✕</button></div><div class="form-group"><label class="form-label">Operador: <strong>${op.nome}</strong></label></div><div class="form-group"><label class="form-label">Selecionar Classe</label><select id="mover-classe-select"><option value="">-- Sem classe --</option>${classesOptions}</select></div><div class="form-actions"><button class="btn-cancel" onclick="window.fecharModalMover()">Cancelar</button><button class="btn-primary" onclick="window.confirmarMoverOperador('${id}')">Mover</button></div></div></div>`; document.getElementById('modal-mover')?.remove(); document.body.insertAdjacentHTML('beforeend', modalHtml); };
+    window.fecharModalMover = function() { document.getElementById('modal-mover')?.remove(); };
+    window.confirmarMoverOperador = async function(id) { const select = document.getElementById('mover-classe-select'); const novaClasseId = select ? select.value || null : null; const index = operadores.findIndex(o => o.id === id); if (index !== -1) { operadores[index] = { ...operadores[index], classe_id: novaClasseId }; await salvarOperadorNoSupabase(operadores[index]); await registrarLog('Moveu operador', `Moveu operador ${operadores[index].nome}`, `Nova classe: ${novaClasseId || 'nenhuma'}`); await carregarDadosDoSupabase(); toast('Operador movido com sucesso!', 'ok'); } window.fecharModalMover(); };
 
-    window.confirmarExclusaoEmMassa = function() {
-        if (chipsSelecionados.size === 0) { toast('Nenhum chip selecionado', 'err'); return; }
-        abrirConfirmModal('Excluir em Massa', 'Tem certeza que deseja excluir ' + chipsSelecionados.size + ' chip(s)?', '🗑️', async function() {
-            var excluidos = 0;
-            for (var id of chipsSelecionados) {
-                var index = chips.findIndex(function(c) { return c.id === id; });
-                if (index !== -1) {
-                    chips.splice(index, 1);
-                    await excluirChipDoSupabase(id);
-                    excluidos++;
-                }
-            }
-            await registrarLog('Exclusão em massa', `Excluiu ${excluidos} chips`);
-            await carregarDadosDoSupabase();
-            chipsSelecionados.clear();
-            renderizarChips();
-            toast(excluidos + ' chips excluidos', 'ok');
-        });
-    };
+    function popularSelects() { const opSelect = document.getElementById('chip-operador'); if (opSelect) { const atual = opSelect.value; opSelect.innerHTML = '<option value="">Nenhum operador</option>' + operadores.map(o => `<option value="${o.id}">${o.nome}</option>`).join(''); opSelect.value = atual; } const bulkOp = document.getElementById('bulk-operador'); if (bulkOp) bulkOp.innerHTML = '<option value="">Alterar Operador</option>' + operadores.map(o => `<option value="${o.id}">${o.nome}</option>`).join(''); const classeSelect = document.getElementById('op-classe'); if (classeSelect) { const atual = classeSelect.value; classeSelect.innerHTML = '<option value="">Sem classe</option>' + classes.map(c => `<option value="${c.id}">${c.icone} ${c.nome}</option>`).join(''); classeSelect.value = atual; } }
 
-    window.setFiltroChip = function(filtro, btn) {
-        filtroChip = filtro;
-        var btns = document.querySelectorAll('.filter-btn');
-        for (var i = 0; i < btns.length; i++) {
-            btns[i].classList.remove('active');
-        }
-        btn.classList.add('active');
-        chipsSelecionados.clear();
-        renderizarChips();
-    };
+    function renderizarUsuarios() { const tbody = document.getElementById('usuarios-tbody'); if(!tbody) return; tbody.innerHTML = usuariosSistema.map(user => { let perfilClass = '', perfilLabel = ''; if (user.perfil === 'gerente') { perfilClass = 'badge-gerente'; perfilLabel = 'Gerente'; } else if (user.perfil === 'master') { perfilClass = 'badge-master'; perfilLabel = 'Master'; } else { perfilClass = 'badge-padrao'; perfilLabel = 'Padrão'; } let podeEditar = false; if (usuarioLogadoObj?.perfil === 'master') podeEditar = true; else if (usuarioLogadoObj?.perfil === 'gerente') podeEditar = user.perfil !== 'gerente'; const acoes = podeEditar ? `<button class="btn-sm btn-edit" onclick="window.editarUsuario('${user.login}')">✏️</button> <button class="btn-sm btn-del" onclick="window.excluirUsuario('${user.login}')">🗑️</button>` : '<span class="badge badge-padrao">Sem permissão</span>'; return `<tr><td><div style="display:flex;align-items:center;gap:8px"><span style="display:inline-block;width:24px;height:24px;background:${user.cor}"></span> ${user.login}</div></td><td><span id="senha-vis-${user.login}">********</span> <button class="btn-ghost btn-sm" onclick="window.toggleSenhaVisibilidade('${user.login}', '${user.senha}')">👁️</button></td><td><input type="color" value="${user.cor}" onchange="window.atualizarCorUsuario('${user.login}', this.value)"></td><td><span class="badge ${perfilClass}">${perfilLabel}</span></td><td>${acoes}</td></tr>`; }).join(''); }
+    window.toggleSenhaVisibilidade = function(login, senhaReal) { const span = document.getElementById('senha-vis-' + login); if(span.innerText === '********') span.innerText = senhaReal; else span.innerText = '********'; };
+    window.atualizarCorUsuario = async function(login, novaCor) { const userIndex = usuariosSistema.findIndex(u => u.login === login); if(userIndex !== -1) { usuariosSistema[userIndex].cor = novaCor; if (supabaseConnected) await supabase.from('usuarios_sistema').update({ cor: novaCor }).eq('login', login); if(usuarioLogado === login) { usuarioLogadoObj.cor = novaCor; document.getElementById('user-avatar').style.backgroundColor = novaCor; } renderizarUsuarios(); toast('Cor de ' + login + ' atualizada', 'ok'); } };
+    window.editarUsuario = function(login) { const user = usuariosSistema.find(u => u.login === login); if (!user) return; if (usuarioLogadoObj?.perfil === 'gerente' && user.perfil === 'gerente') { toast('Gerente não pode editar outro gerente', 'err'); return; } editandoUsuarioLogin = login; document.getElementById('edit-usuario-login').value = user.login; document.getElementById('edit-usuario-senha').value = user.senha; document.getElementById('edit-usuario-cor').value = user.cor; document.getElementById('edit-usuario-perfil').value = user.perfil || 'padrao'; document.getElementById('modal-editar-usuario').classList.add('open'); };
+    window.salvarEdicaoUsuario = async function() { const login = editandoUsuarioLogin; const novaSenha = document.getElementById('edit-usuario-senha').value; const novaCor = document.getElementById('edit-usuario-cor').value; const novoPerfil = document.getElementById('edit-usuario-perfil').value; const userIndex = usuariosSistema.findIndex(u => u.login === login); if (userIndex !== -1) { usuariosSistema[userIndex] = { ...usuariosSistema[userIndex], senha: novaSenha, cor: novaCor, perfil: novoPerfil }; if (supabaseConnected) await supabase.from('usuarios_sistema').update({ senha: novaSenha, cor: novaCor, perfil: novoPerfil }).eq('login', login); if (usuarioLogado === login) { usuarioLogadoObj = usuariosSistema[userIndex]; document.getElementById('user-avatar').style.backgroundColor = novaCor; } await registrarLog('Editou usuário', `Editou usuário ${login}`, `Novo perfil: ${novoPerfil}`); renderizarUsuarios(); fecharModal('modal-editar-usuario'); toast('Usuario ' + login + ' atualizado', 'ok'); } };
+    window.excluirUsuario = function(login) { const user = usuariosSistema.find(u => u.login === login); if (usuarioLogadoObj?.perfil === 'gerente' && user?.perfil === 'gerente') { toast('Gerente não pode excluir outro gerente', 'err'); return; } abrirConfirmModal('Excluir Usuario', 'Deseja realmente excluir o usuario ' + login + '?', '👤', async () => { usuariosSistema = usuariosSistema.filter(u => u.login !== login); if (supabaseConnected) await supabase.from('usuarios_sistema').delete().eq('login', login); await registrarLog('Excluiu usuário', `Excluiu usuário ${login}`, ''); renderizarUsuarios(); toast('Usuario excluido', 'ok'); }); };
+    window.abrirModalUsuario = function() { if(!usuarioLogadoObj || (usuarioLogadoObj.perfil !== 'gerente' && usuarioLogadoObj.perfil !== 'master')) { toast('Apenas Gerente ou Master podem criar usuarios', 'err'); return; } document.getElementById('modal-usuario-title').innerText = 'Novo Usuario'; document.getElementById('usuario-login').value = ''; document.getElementById('usuario-senha').value = ''; document.getElementById('usuario-cor').value = '#0a58ca'; document.getElementById('usuario-perfil').value = 'padrao'; document.getElementById('modal-usuario').classList.add('open'); };
+    window.salvarUsuario = async function() { const login = document.getElementById('usuario-login').value.trim(); const senha = document.getElementById('usuario-senha').value.trim(); const cor = document.getElementById('usuario-cor').value; const perfil = document.getElementById('usuario-perfil').value; if(!login || !senha) { toast('Preencha login e senha', 'err'); return; } if(usuariosSistema.find(u => u.login === login)) { toast('Login ja existe', 'err'); return; } usuariosSistema.push({ login, senha, cor, perfil }); if (supabaseConnected) await supabase.from('usuarios_sistema').insert({ login, senha, cor, perfil }); await registrarLog('Criou usuário', `Criou usuário ${login}`, `Perfil: ${perfil}`); renderizarUsuarios(); fecharModal('modal-usuario'); toast('Usuario ' + login + ' criado', 'ok'); };
 
-    window.abrirModalChip = function() {
-        editandoChipId = null;
-        document.getElementById('modal-chip-title').innerText = 'Novo Chip';
-        document.getElementById('chip-numero').value = '';
-        document.getElementById('chip-operador').value = '';
-        document.getElementById('chip-status').value = 'ativo';
-        document.getElementById('chip-obs').value = '';
-        document.getElementById('obs-group').style.display = 'none';
-        document.getElementById('modal-chip').classList.add('open');
-    };
+    window.exportarDadosCSV = function() { const linhas = [['OPERADOR', 'CHIP', 'SITUACAO', 'CLASSE', 'OBS']]; chips.forEach(chip => { const op = operadores.find(o => o.id === chip.operador_id); const classe = op ? classes.find(c => c.id === op.classe_id) : null; linhas.push([(op ? op.nome : ''), chip.numero, (chip.status === 'ativo' ? 'Ativo' : 'Banido'), (classe ? classe.nome : ''), chip.obs || '']); }); const csv = linhas.map(row => row.map(cell => '"' + String(cell).replace(/"/g, '""') + '"').join(';')).join('\n'); const blob = new Blob(["\uFEFF" + csv], { type: 'text/csv' }); const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = 'chips_' + new Date().toISOString().slice(0,19) + '.csv'; link.click(); toast('Exportado para CSV!', 'ok'); registrarLog('Exportou dados', 'Exportou todos os chips para CSV', `Total: ${chips.length}`); };
+    window.exportarDadosExcel = function() { mostrarLoading(); try { const data = [['Operador', 'Chip', 'Situação', 'Classe', 'Observação']]; chips.forEach(chip => { const op = operadores.find(o => o.id === chip.operador_id); const classe = op ? classes.find(c => c.id === op.classe_id) : null; data.push([op ? op.nome : '', chip.numero, chip.status === 'ativo' ? 'Ativo' : 'Banido', classe ? classe.nome : '', chip.obs || '']); }); const ws = XLSX.utils.aoa_to_sheet(data); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'Chips'); XLSX.writeFile(wb, `chips_${new Date().toISOString().slice(0,19)}.xlsx`); toast('Exportado para Excel!', 'ok'); registrarLog('Exportou dados', 'Exportou todos os chips para Excel', `Total: ${chips.length}`); } catch(e) { toast('Erro ao exportar Excel', 'err'); } finally { esconderLoading(); } };
+    window.exportarRelatorioEficiencia = function() { mostrarLoading(); try { const data = [['Operador', 'Classe', 'Total Chips', 'Chips Ativos', 'Chips Banidos', 'Eficiência (%)']]; operadores.forEach(op => { const classe = classes.find(c => c.id === op.classe_id); const chipsOp = chips.filter(c => c.operador_id === op.id); const total = chipsOp.length; const ativos = chipsOp.filter(c => c.status === 'ativo').length; const eficiencia = total ? ((ativos/total)*100).toFixed(1) : 0; data.push([op.nome, classe ? classe.nome : 'Sem Classe', total, ativos, total - ativos, eficiencia + '%']); }); const ws = XLSX.utils.aoa_to_sheet(data); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'Relatório'); XLSX.writeFile(wb, `relatorio_eficiencia_${new Date().toISOString().slice(0,19)}.xlsx`); toast('Relatório exportado!', 'ok'); registrarLog('Exportou relatório', 'Exportou relatório de eficiência', `Operadores: ${operadores.length}`); } catch(e) { toast('Erro ao exportar', 'err'); } finally { esconderLoading(); } };
+    window.baixarModelo = function() { const csv = 'OPERADOR;CHIP;SITUACAO;CLASSE;OBS\n"Exemplo_operador";"(11) 99999-9999";"Ativo";"CRM";"Observacao opcional"'; const blob = new Blob(["\uFEFF" + csv], { type: 'text/csv' }); const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = 'modelo_chips.csv'; link.click(); toast('Modelo baixado!', 'ok'); };
 
-    window.editarChip = function(id) {
-        var chip = chips.find(function(c) { return c.id === id; });
-        if (!chip) return;
-        editandoChipId = id;
-        document.getElementById('modal-chip-title').innerText = 'Editar Chip';
-        document.getElementById('chip-numero').value = chip.numero;
-        document.getElementById('chip-operador').value = chip.operador_id || '';
-        document.getElementById('chip-status').value = chip.status;
-        document.getElementById('chip-obs').value = chip.obs || '';
-        document.getElementById('obs-group').style.display = chip.status === 'banido' ? 'block' : 'none';
-        document.getElementById('modal-chip').classList.add('open');
-    };
-
-    window.toggleObsGroup = function() {
-        var status = document.getElementById('chip-status').value;
-        document.getElementById('obs-group').style.display = status === 'banido' ? 'block' : 'none';
-    };
-
-    function formatarTelefone(numero) {
-        var digits = numero.toString().replace(/\D/g, '');
-        if (digits.length === 11) return '(' + digits.substring(0,2) + ') ' + digits.substring(2,7) + '-' + digits.substring(7,11);
-        if (digits.length === 10) return '(' + digits.substring(0,2) + ') ' + digits.substring(2,6) + '-' + digits.substring(6,10);
-        return numero;
-    }
-
-    async function salvarChipNoSupabase(chip) {
-        if (!supabaseConnected) return false;
-        try {
-            var { error } = await supabase.from('chips').upsert(chip, { onConflict: 'id' });
-            if (error) throw error;
-            return true;
-        } catch (error) {
-            console.error('Erro ao salvar chip:', error);
-            return false;
-        }
-    }
-
-    async function excluirChipDoSupabase(id) {
-        if (!supabaseConnected) return false;
-        try {
-            var { error } = await supabase.from('chips').delete().eq('id', id);
-            if (error) throw error;
-            return true;
-        } catch (error) {
-            console.error('Erro ao excluir chip:', error);
-            return false;
-        }
-    }
-
-    window.salvarChip = async function() {
-        var numeroInput = document.getElementById('chip-numero');
-        var numero = formatarTelefone(numeroInput.value.trim());
-        if (!numero) { toast('Informe o numero', 'err'); return; }
-        var operador_id = document.getElementById('chip-operador').value || null;
-        var status = document.getElementById('chip-status').value;
-        var obs = document.getElementById('chip-obs').value.trim() || null;
-        
-        if (editandoChipId) {
-            var index = chips.findIndex(function(c) { return c.id === editandoChipId; });
-            if (index !== -1) {
-                chips[index] = { id: chips[index].id, numero: numero, operador_id: operador_id, status: status, obs: obs, criado_em: chips[index].criado_em };
-                await salvarChipNoSupabase(chips[index]);
-            }
-            await registrarLog('Editou chip', `Editou chip ${numero} (Status: ${status})`);
-            toast('Chip atualizado', 'ok');
-        } else {
-            var newId = Date.now().toString();
-            var novoChip = { id: newId, numero: numero, operador_id: operador_id, status: status, obs: obs, criado_em: new Date().toISOString() };
-            chips.unshift(novoChip);
-            await salvarChipNoSupabase(novoChip);
-            await registrarLog('Adicionou chip', `Adicionou chip ${numero} (Status: ${status})`);
-            toast('Chip adicionado', 'ok');
-        }
-        fecharModal('modal-chip');
-        await carregarDadosDoSupabase();
-    };
-
-    window.confirmarExcluirChip = function(id) {
-        var chip = chips.find(function(c) { return c.id === id; });
-        abrirConfirmModal('Excluir Chip', 'Tem certeza que deseja excluir o chip <strong>' + (chip ? chip.numero : '') + '</strong>?', '🗑️', async function() {
-            chips = chips.filter(function(c) { return c.id !== id; });
-            await excluirChipDoSupabase(id);
-            await registrarLog('Excluiu chip', `Excluiu chip ${chip ? chip.numero : ''}`);
-            await carregarDadosDoSupabase();
-            toast('Chip excluido', 'ok');
-        });
-    };
-
-    function renderizarClasses() {
-        var container = document.getElementById('classes-container');
-        if (!container) return;
-        if (!classes.length) { container.innerHTML = '<div class="empty-class">Nenhuma classe. Clique em "+ Nova Classe"</div>'; return; }
-        
-        var operadoresCountEl = document.getElementById('operadores-count');
-        if (operadoresCountEl) operadoresCountEl.textContent = operadores.length + ' operadores em ' + classes.length + ' classes';
-        
-        var classesHtml = classes.map(function(classe) {
-            var opsDaClasse = operadores.filter(function(op) { return op.classe_id === classe.id; });
-            var stats = { total: 0, ativos: 0, banidos: 0 };
-            opsDaClasse.forEach(function(op) {
-                var chipsOp = chips.filter(function(c) { return c.operador_id === op.id; });
-                stats.total += chipsOp.length;
-                stats.ativos += chipsOp.filter(function(c) { return c.status === 'ativo'; }).length;
-                stats.banidos += chipsOp.filter(function(c) { return c.status === 'banido'; }).length;
-            });
-            var isOpen = classesExpandidas[classe.id] === true;
-            var corClasse = classe.cor || '#7777a0';
-            var opsHtml = '';
-            if (opsDaClasse.length) {
-                opsHtml = '<div class="op-mini-grid">' + opsDaClasse.map(function(op) {
-                    var opChips = chips.filter(function(c) { return c.operador_id === op.id; });
-                    var opAtivos = opChips.filter(function(c) { return c.status === 'ativo'; }).length;
-                    var opBanidos = opChips.filter(function(c) { return c.status === 'banido'; }).length;
-                    var iniciais = op.nome.split(' ').map(function(n) { return n[0]; }).join('').slice(0,2).toUpperCase();
-                    return '<div class="op-card-mini"><div class="op-head"><div class="op-info"><div class="op-avatar" style="background:' + corClasse + '30;color:' + corClasse + '">' + iniciais + '</div><div><strong>' + op.nome + '</strong></div></div><span class="badge badge-ativo">ativo</span></div><div class="op-stats"><div class="op-stat"><div class="op-stat-label">Total</div><div class="op-stat-val">' + opChips.length + '</div></div><div class="op-stat"><div class="op-stat-label">Ativos</div><div class="op-stat-val" style="color:var(--accent)">' + opAtivos + '</div></div><div class="op-stat"><div class="op-stat-label">Banidos</div><div class="op-stat-val" style="color:var(--red)">' + opBanidos + '</div></div></div><div style="display:flex;gap:6px"><button class="btn-sm btn-edit" onclick="window.editarOperador(\'' + op.id + '\')">Editar</button><button class="btn-sm btn-del" onclick="window.confirmarExcluirOperador(\'' + op.id + '\')">Excluir</button><button class="btn-sm btn-ghost" onclick="window.abrirModalMoverOperador(\'' + op.id + '\')">Mover</button></div></div>';
-                }).join('') + '</div>';
-            } else {
-                opsHtml = '<div class="empty-class">📭 Nenhum operador<br><button class="btn-sm btn-ghost" onclick="window.abrirModalOpComClasse(\'' + classe.id + '\')">+ Adicionar</button></div>';
-            }
-            return '<div class="class-card" style="border-left: 4px solid ' + corClasse + '">' +
-                '<div class="class-header" onclick="window.toggleClasse(\'' + classe.id + '\')">' +
-                    '<div class="class-header-left">' +
-                        '<span class="class-icon">' + (classe.icone || '📁') + '</span>' +
-                        '<span class="class-name" style="color:' + corClasse + '">' + classe.nome + '</span>' +
-                        '<div class="class-stats">' +
-                            '<span class="class-stat"><strong>' + stats.total + '</strong> chips</span>' +
-                            '<span class="class-stat" style="color:var(--accent)">▲ ' + stats.ativos + '</span>' +
-                            '<span class="class-stat" style="color:var(--red)">▼ ' + stats.banidos + '</span>' +
-                            '<span class="class-stat">👥 ' + opsDaClasse.length + '</span>' +
-                        '</div>' +
-                    '</div>' +
-                    '<div class="class-actions" onclick="event.stopPropagation()">' +
-                        '<button class="btn-sm btn-edit" onclick="window.editarClasse(\'' + classe.id + '\')">✏️</button>' +
-                        '<button class="btn-sm btn-del" onclick="window.confirmarExcluirClasse(\'' + classe.id + '\')">🗑️</button>' +
-                    '</div>' +
-                '</div>' +
-                '<div class="class-content ' + (isOpen ? 'open' : '') + '" id="class-content-' + classe.id + '">' +
-                    opsHtml +
-                '</div>' +
-            '</div>';
-        }).join('');
-        
-        container.innerHTML = classesHtml;
-    }
-
-    window.toggleClasse = function(id) { 
-        classesExpandidas[id] = !classesExpandidas[id]; 
-        salvarClassesExpandidas();
-        var content = document.getElementById('class-content-' + id); 
-        if (content) content.classList.toggle('open'); 
-    };
-    
-    window.expandirTodas = function() { 
-        classes.forEach(function(c) { classesExpandidas[c.id] = true; }); 
-        salvarClassesExpandidas();
-        renderizarClasses(); 
-    };
-    
-    window.recolherTodas = function() { 
-        classes.forEach(function(c) { classesExpandidas[c.id] = false; }); 
-        salvarClassesExpandidas();
-        renderizarClasses(); 
-    };
-
-    function salvarClassesExpandidas() {
-        localStorage.setItem('receptivo_classes_expandidas', JSON.stringify(classesExpandidas));
-    }
-
-    function carregarClassesExpandidas() {
-        const salvo = localStorage.getItem('receptivo_classes_expandidas');
-        if (salvo) {
-            try {
-                classesExpandidas = JSON.parse(salvo);
-            } catch(e) {}
-        }
-    }
-
-    window.abrirModalClasse = function() { 
-        editandoClasseId = null; 
-        document.getElementById('modal-classe-title').innerText = 'Nova Classe';
-        document.getElementById('classe-nome').value = '';
-        document.getElementById('classe-icon').value = '📁';
-        document.getElementById('classe-cor').value = '#00e5a0';
-        document.getElementById('modal-classe').classList.add('open');
-    };
-    
-    window.editarClasse = function(id) { 
-        var classe = classes.find(function(c) { return c.id === id; }); 
-        if (!classe) return; 
-        editandoClasseId = id; 
-        document.getElementById('modal-classe-title').innerText = 'Editar Classe';
-        document.getElementById('classe-nome').value = classe.nome;
-        document.getElementById('classe-icon').value = classe.icone || '📁';
-        document.getElementById('classe-cor').value = classe.cor || '#00e5a0';
-        document.getElementById('modal-classe').classList.add('open');
-    };
-
-    async function salvarClasseNoSupabase(classe) {
-        if (!supabaseConnected) return false;
-        try {
-            var { error } = await supabase.from('classes').upsert(classe, { onConflict: 'id' });
-            if (error) throw error;
-            return true;
-        } catch (error) {
-            console.error('Erro ao salvar classe:', error);
-            return false;
-        }
-    }
-
-    async function excluirClasseDoSupabase(id) {
-        if (!supabaseConnected) return false;
-        try {
-            var { error } = await supabase.from('classes').delete().eq('id', id);
-            if (error) throw error;
-            return true;
-        } catch (error) {
-            console.error('Erro ao excluir classe:', error);
-            return false;
-        }
-    }
-
-    window.salvarClasse = async function() {
-        var nome = document.getElementById('classe-nome').value.trim();
-        if (!nome) { toast('Informe o nome', 'err'); return; }
-        var icone = document.getElementById('classe-icon').value;
-        var cor = document.getElementById('classe-cor').value;
-        
-        if (editandoClasseId) {
-            var index = classes.findIndex(function(c) { return c.id === editandoClasseId; });
-            if (index !== -1) {
-                classes[index] = { id: classes[index].id, nome: nome, icone: icone, cor: cor };
-                await salvarClasseNoSupabase(classes[index]);
-                await registrarLog('Editou classe', `Editou classe ${nome}`);
-                toast('Classe atualizada', 'ok');
-            }
-        } else {
-            var novaClasse = { id: Date.now().toString(), nome: nome, icone: icone, cor: cor };
-            classes.push(novaClasse);
-            await salvarClasseNoSupabase(novaClasse);
-            await registrarLog('Criou classe', `Criou classe ${nome}`);
-            toast('Classe criada', 'ok');
-        }
-        fecharModal('modal-classe');
-        await carregarDadosDoSupabase();
-    };
-
-    window.confirmarExcluirClasse = function(id) {
-        var classe = classes.find(function(c) { return c.id === id; });
-        var opsNaClasse = operadores.filter(function(op) { return op.classe_id === id; });
-        var mensagem = 'Tem certeza que deseja excluir a classe <strong>' + (classe ? classe.nome : '') + '</strong>?';
-        if (opsNaClasse.length) mensagem += '<br><br>⚠️ Esta classe tem ' + opsNaClasse.length + ' operador(es). Eles serao movidos para "Sem classe".';
-        
-        abrirConfirmModal('Excluir Classe', mensagem, '🗑️', async function() {
-            for (var i = 0; i < opsNaClasse.length; i++) {
-                opsNaClasse[i].classe_id = null;
-                await salvarOperadorNoSupabase(opsNaClasse[i]);
-            }
-            classes = classes.filter(function(c) { return c.id !== id; });
-            await excluirClasseDoSupabase(id);
-            await registrarLog('Excluiu classe', `Excluiu classe ${classe ? classe.nome : ''}`);
-            await carregarDadosDoSupabase();
-            toast('Classe excluida', 'ok');
-        });
-    };
-
-    async function salvarOperadorNoSupabase(operador) {
-        if (!supabaseConnected) return false;
-        try {
-            var { error } = await supabase.from('operadores').upsert(operador, { onConflict: 'id' });
-            if (error) throw error;
-            return true;
-        } catch (error) {
-            console.error('Erro ao salvar operador:', error);
-            return false;
-        }
-    }
-
-    async function excluirOperadorDoSupabase(id) {
-        if (!supabaseConnected) return false;
-        try {
-            var { error } = await supabase.from('operadores').delete().eq('id', id);
-            if (error) throw error;
-            return true;
-        } catch (error) {
-            console.error('Erro ao excluir operador:', error);
-            return false;
-        }
-    }
-
-    window.abrirModalOp = function() { 
-        editandoOpId = null; 
-        document.getElementById('modal-op-title').innerText = 'Novo Operador';
-        document.getElementById('op-nome').value = '';
-        document.getElementById('op-classe').value = '';
-        document.getElementById('modal-op').classList.add('open');
-    };
-    
-    window.abrirModalOpComClasse = function(classeId) { 
-        editandoOpId = null; 
-        document.getElementById('modal-op-title').innerText = 'Novo Operador';
-        document.getElementById('op-nome').value = '';
-        document.getElementById('op-classe').value = classeId;
-        document.getElementById('modal-op').classList.add('open');
-    };
-    
-    window.editarOperador = function(id) { 
-        var op = operadores.find(function(o) { return o.id === id; }); 
-        if (!op) return; 
-        editandoOpId = id; 
-        document.getElementById('modal-op-title').innerText = 'Editar Operador';
-        document.getElementById('op-nome').value = op.nome;
-        document.getElementById('op-classe').value = op.classe_id || '';
-        document.getElementById('modal-op').classList.add('open');
-    };
-
-    window.salvarOperador = async function() {
-        var nome = document.getElementById('op-nome').value.trim();
-        if (!nome) { toast('Informe o nome', 'err'); return; }
-        var classe_id = document.getElementById('op-classe').value || null;
-        
-        if (editandoOpId) {
-            var index = operadores.findIndex(function(o) { return o.id === editandoOpId; });
-            if (index !== -1) {
-                operadores[index] = { id: operadores[index].id, nome: nome, classe_id: classe_id };
-                await salvarOperadorNoSupabase(operadores[index]);
-                await registrarLog('Editou operador', `Editou operador ${nome}`);
-                toast('Operador atualizado', 'ok');
-            }
-        } else {
-            var novoOperador = { id: Date.now().toString(), nome: nome, classe_id: classe_id };
-            operadores.push(novoOperador);
-            await salvarOperadorNoSupabase(novoOperador);
-            await registrarLog('Criou operador', `Criou operador ${nome}`);
-            toast('Operador criado', 'ok');
-        }
-        fecharModal('modal-op');
-        await carregarDadosDoSupabase();
-    };
-
-    window.confirmarExcluirOperador = function(id) {
-        var op = operadores.find(function(o) { return o.id === id; });
-        var chipsDoOperador = chips.filter(function(c) { return c.operador_id === id; });
-        var mensagem = 'Tem certeza que deseja excluir o operador <strong>' + (op ? op.nome : '') + '</strong>?';
-        if (chipsDoOperador.length) mensagem += '<br><br>⚠️ Este operador tem ' + chipsDoOperador.length + ' chip(s) atribuido(s). Eles ficarao sem operador.';
-        
-        abrirConfirmModal('Excluir Operador', mensagem, '🗑️', async function() {
-            for (var i = 0; i < chipsDoOperador.length; i++) {
-                chipsDoOperador[i].operador_id = null;
-                await salvarChipNoSupabase(chipsDoOperador[i]);
-            }
-            operadores = operadores.filter(function(o) { return o.id !== id; });
-            await excluirOperadorDoSupabase(id);
-            await registrarLog('Excluiu operador', `Excluiu operador ${op ? op.nome : ''}`);
-            await carregarDadosDoSupabase();
-            toast('Operador excluido', 'ok');
-        });
-    };
-
-    window.abrirModalMoverOperador = function(id) { 
-        var op = operadores.find(function(o) { return o.id === id; }); 
-        if (!op) return; 
-        var classesOptions = classes.map(function(c) {
-            var selected = op.classe_id === c.id ? 'selected' : '';
-            return '<option value="' + c.id + '" ' + selected + '>' + c.icone + ' ' + c.nome + '</option>';
-        }).join('');
-        var modalHtml = '<div class="modal-overlay" id="modal-mover" style="display:flex"><div class="modal"><div class="modal-header"><div class="modal-title">Mover Operador</div><button onclick="window.fecharModalMover()">✕</button></div><div class="form-group"><label class="form-label">Operador: <strong>' + op.nome + '</strong></label></div><div class="form-group"><label class="form-label">Selecionar Classe</label><select id="mover-classe-select"><option value="">-- Sem classe --</option>' + classesOptions + '</select></div><div class="form-actions"><button class="btn-cancel" onclick="window.fecharModalMover()">Cancelar</button><button class="btn-primary" onclick="window.confirmarMoverOperador(\'' + id + '\')">Mover</button></div></div></div>'; 
-        var existingModal = document.getElementById('modal-mover'); 
-        if (existingModal) existingModal.remove(); 
-        document.body.insertAdjacentHTML('beforeend', modalHtml); 
-    };
-    
-    window.fecharModalMover = function() { var modal = document.getElementById('modal-mover'); if (modal) modal.remove(); };
-    
-    window.confirmarMoverOperador = async function(id) { 
-        var select = document.getElementById('mover-classe-select'); 
-        var novaClasseId = select ? select.value || null : null; 
-        var index = operadores.findIndex(function(o) { return o.id === id; }); 
-        if (index !== -1) { 
-            operadores[index] = { id: operadores[index].id, nome: operadores[index].nome, classe_id: novaClasseId }; 
-            await salvarOperadorNoSupabase(operadores[index]); 
-            await registrarLog('Moveu operador', `Moveu operador ${operadores[index].nome} para classe ${novaClasseId || 'nenhuma'}`);
-            await carregarDadosDoSupabase(); 
-            toast('Operador movido com sucesso!', 'ok'); 
-        } 
-        window.fecharModalMover(); 
-    };
-
-    function popularSelects() { 
-        var opSelect = document.getElementById('chip-operador'); 
-        if (opSelect) { 
-            var atual = opSelect.value; 
-            opSelect.innerHTML = '<option value="">Nenhum operador</option>' + operadores.map(function(o) { return '<option value="' + o.id + '">' + o.nome + '</option>'; }).join(''); 
-            opSelect.value = atual; 
-        } 
-        var bulkOp = document.getElementById('bulk-operador'); 
-        if (bulkOp) bulkOp.innerHTML = '<option value="">Alterar Operador</option>' + operadores.map(function(o) { return '<option value="' + o.id + '">' + o.nome + '</option>'; }).join(''); 
-        var classeSelect = document.getElementById('op-classe'); 
-        if (classeSelect) { 
-            var atualClasse = classeSelect.value; 
-            classeSelect.innerHTML = '<option value="">Sem classe</option>' + classes.map(function(c) { return '<option value="' + c.id + '">' + c.icone + ' ' + c.nome + '</option>'; }).join(''); 
-            classeSelect.value = atualClasse; 
-        } 
-    }
-
-    function renderizarUsuarios() {
-        var tbody = document.getElementById('usuarios-tbody');
-        if(!tbody) return;
-        
-        var podeEditarGlobal = usuarioLogadoObj && (usuarioLogadoObj.perfil === 'gerente' || usuarioLogadoObj.perfil === 'master');
-        
-        tbody.innerHTML = usuariosSistema.map(function(user) {
-            var perfilClass = '';
-            var perfilLabel = '';
-            if (user.perfil === 'gerente') {
-                perfilClass = 'badge-gerente';
-                perfilLabel = 'Gerente';
-            } else if (user.perfil === 'master') {
-                perfilClass = 'badge-master';
-                perfilLabel = 'Master';
-            } else {
-                perfilClass = 'badge-padrao';
-                perfilLabel = 'Padrão';
-            }
-            
-            var podeEditar = false;
-            if (usuarioLogadoObj.perfil === 'master') {
-                podeEditar = true;
-            } else if (usuarioLogadoObj.perfil === 'gerente') {
-                podeEditar = user.perfil !== 'gerente';
-            }
-            
-            var acoes = '';
-            if (podeEditar) {
-                acoes = '<button class="btn-sm btn-edit" onclick="window.editarUsuario(\'' + user.login + '\')">✏️</button> ' +
-                        '<button class="btn-sm btn-del" onclick="window.excluirUsuario(\'' + user.login + '\')">🗑️</button>';
-            } else {
-                acoes = '<span class="badge badge-padrao">Sem permissão</span>';
-            }
-            
-            return '<table>' +
-                '<td><div style="display:flex;align-items:center;gap:8px"><span style="display:inline-block;width:24px;height:24px;border-radius:50%;background:' + user.cor + ';"></span> ' + user.login + '</div></td>' +
-                '<td><span id="senha-vis-' + user.login + '">********</span> <button class="btn-ghost btn-sm" onclick="window.toggleSenhaVisibilidade(\'' + user.login + '\', \'' + user.senha + '\')">👁️</button></td>' +
-                '<td><input type="color" value="' + user.cor + '" onchange="window.atualizarCorUsuario(\'' + user.login + '\', this.value)"></td>' +
-                '<td><span class="badge ' + perfilClass + '">' + perfilLabel + '</span></tr>' +
-                '<td>' + acoes + '</td>' +
-                '</tr>';
-        }).join('');
-    }
-
-    window.editarUsuario = function(login) {
-        var user = usuariosSistema.find(function(u) { return u.login === login; });
-        if (!user) return;
-        
-        if (usuarioLogadoObj.perfil === 'gerente' && user.perfil === 'gerente') {
-            toast('Gerente não pode editar outro gerente', 'err');
-            return;
-        }
-        
-        editandoUsuarioLogin = login;
-        document.getElementById('edit-usuario-login').value = user.login;
-        document.getElementById('edit-usuario-senha').value = user.senha;
-        document.getElementById('edit-usuario-cor').value = user.cor;
-        document.getElementById('edit-usuario-perfil').value = user.perfil || 'padrao';
-        document.getElementById('modal-editar-usuario').classList.add('open');
-    };
-
-    window.salvarEdicaoUsuario = async function() {
-        var login = editandoUsuarioLogin;
-        var novaSenha = document.getElementById('edit-usuario-senha').value;
-        var novaCor = document.getElementById('edit-usuario-cor').value;
-        var novoPerfil = document.getElementById('edit-usuario-perfil').value;
-        
-        var userIndex = usuariosSistema.findIndex(function(u) { return u.login === login; });
-        if (userIndex !== -1) {
-            usuariosSistema[userIndex].senha = novaSenha;
-            usuariosSistema[userIndex].cor = novaCor;
-            usuariosSistema[userIndex].perfil = novoPerfil;
-            
-            if (supabaseConnected) {
-                await supabase.from('usuarios_sistema').update({ 
-                    senha: novaSenha, 
-                    cor: novaCor, 
-                    perfil: novoPerfil 
-                }).eq('login', login);
-            }
-            
-            if (usuarioLogado === login) {
-                usuarioLogadoObj = usuariosSistema[userIndex];
-                var avatarEl = document.getElementById('user-avatar');
-                if(avatarEl) avatarEl.style.backgroundColor = novaCor;
-            }
-            
-            await registrarLog('Editou usuário', `Editou usuário ${login} (Perfil: ${novoPerfil})`);
-            renderizarUsuarios();
-            fecharModal('modal-editar-usuario');
-            toast('Usuario ' + login + ' atualizado', 'ok');
-        }
-    };
-
-    window.toggleSenhaVisibilidade = function(login, senhaReal) {
-        var span = document.getElementById('senha-vis-' + login);
-        if(span.innerText === '********') span.innerText = senhaReal;
-        else span.innerText = '********';
-    };
-
-    window.atualizarCorUsuario = async function(login, novaCor) {
-        var userIndex = usuariosSistema.findIndex(function(u) { return u.login === login; });
-        if(userIndex !== -1) {
-            usuariosSistema[userIndex].cor = novaCor;
-            if (supabaseConnected) {
-                await supabase.from('usuarios_sistema').update({ cor: novaCor }).eq('login', login);
-            }
-            if(usuarioLogado === login) {
-                usuarioLogadoObj.cor = novaCor;
-                var avatarEl = document.getElementById('user-avatar');
-                if(avatarEl) avatarEl.style.backgroundColor = novaCor;
-            }
-            renderizarUsuarios();
-            toast('Cor de ' + login + ' atualizada', 'ok');
-        }
-    };
-
-    window.excluirUsuario = function(login) {
-        var user = usuariosSistema.find(function(u) { return u.login === login; });
-        
-        if (usuarioLogadoObj.perfil === 'gerente' && user && user.perfil === 'gerente') {
-            toast('Gerente não pode excluir outro gerente', 'err');
-            return;
-        }
-        
-        abrirConfirmModal('Excluir Usuario', 'Deseja realmente excluir o usuario ' + login + '?', '👤', async function() {
-            usuariosSistema = usuariosSistema.filter(function(u) { return u.login !== login; });
-            if (supabaseConnected) {
-                await supabase.from('usuarios_sistema').delete().eq('login', login);
-            }
-            await registrarLog('Excluiu usuário', `Excluiu usuário ${login}`);
-            renderizarUsuarios();
-            toast('Usuario excluido', 'ok');
-        });
-    };
-
-    window.abrirModalUsuario = function() {
-        if(!usuarioLogadoObj || (usuarioLogadoObj.perfil !== 'gerente' && usuarioLogadoObj.perfil !== 'master')) {
-            toast('Apenas Gerente ou Master podem criar usuarios', 'err');
-            return;
-        }
-        document.getElementById('modal-usuario-title').innerText = 'Novo Usuario';
-        document.getElementById('usuario-login').value = '';
-        document.getElementById('usuario-senha').value = '';
-        document.getElementById('usuario-cor').value = '#00e5a0';
-        document.getElementById('usuario-perfil').value = 'padrao';
-        document.getElementById('modal-usuario').classList.add('open');
-    };
-
-    window.salvarUsuario = async function() {
-        var login = document.getElementById('usuario-login').value.trim();
-        var senha = document.getElementById('usuario-senha').value.trim();
-        var cor = document.getElementById('usuario-cor').value;
-        var perfil = document.getElementById('usuario-perfil').value;
-        
-        if(!login || !senha) { toast('Preencha login e senha', 'err'); return; }
-        if(usuariosSistema.find(function(u) { return u.login === login; })) { toast('Login ja existe', 'err'); return; }
-        
-        var novoUsuario = { login: login, senha: senha, cor: cor, perfil: perfil };
-        usuariosSistema.push({ login: login, senha: senha, cor: cor, perfil: perfil });
-        
-        if (supabaseConnected) {
-            await supabase.from('usuarios_sistema').insert(novoUsuario);
-            await registrarLog('Criou usuário', `Criou usuário ${login} (Perfil: ${perfil})`);
-        }
-        
-        renderizarUsuarios();
-        fecharModal('modal-usuario');
-        toast('Usuario ' + login + ' criado', 'ok');
-    };
-
-    // Exportações
-    window.exportarDadosCSV = function() { 
-        const linhas = [['OPERADOR', 'CHIP', 'SITUACAO', 'CLASSE', 'OBS']]; 
-        chips.forEach(function(chip) { 
-            const op = operadores.find(function(o) { return o.id === chip.operador_id; }); 
-            const classe = op ? classes.find(function(c) { return c.id === op.classe_id; }) : null; 
-            linhas.push([(op ? op.nome : ''), chip.numero, (chip.status === 'ativo' ? 'Ativo' : 'Banido'), (classe ? classe.nome : ''), chip.obs || '']); 
-        }); 
-        const csv = linhas.map(function(row) { 
-            return row.map(function(cell) { return '"' + String(cell).replace(/"/g, '""') + '"'; }).join(';');
-        }).join('\n'); 
-        const blob = new Blob(["\uFEFF" + csv], { type: 'text/csv;charset=utf-8' }); 
-        const link = document.createElement('a'); 
-        link.href = URL.createObjectURL(blob); 
-        link.download = 'chips_' + new Date().toISOString().slice(0,19) + '.csv'; 
-        link.click(); 
-        toast('Exportado para CSV!', 'ok'); 
-        registrarLog('Exportou dados', 'Exportou todos os chips para CSV');
-    };
-
-    window.exportarDadosExcel = function() {
-        mostrarLoading();
-        try {
-            const data = [];
-            const headers = ['Operador', 'Chip', 'Situação', 'Classe', 'Observação'];
-            data.push(headers);
-            
-            chips.forEach(function(chip) {
-                const op = operadores.find(function(o) { return o.id === chip.operador_id; });
-                const classe = op ? classes.find(function(c) { return c.id === op.classe_id; }) : null;
-                data.push([
-                    op ? op.nome : '',
-                    chip.numero,
-                    chip.status === 'ativo' ? 'Ativo' : 'Banido',
-                    classe ? classe.nome : '',
-                    chip.obs || ''
-                ]);
-            });
-            
-            const ws = XLSX.utils.aoa_to_sheet(data);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, 'Chips');
-            XLSX.writeFile(wb, `chips_${new Date().toISOString().slice(0,19)}.xlsx`);
-            toast('Exportado para Excel!', 'ok');
-            registrarLog('Exportou dados', 'Exportou todos os chips para Excel');
-        } catch(e) {
-            toast('Erro ao exportar Excel', 'err');
-        } finally {
-            esconderLoading();
-        }
-    };
-
-    window.exportarRelatorioEficiencia = function() {
-        mostrarLoading();
-        try {
-            const data = [];
-            const headers = ['Operador', 'Classe', 'Total Chips', 'Chips Ativos', 'Chips Banidos', 'Eficiência (%)'];
-            data.push(headers);
-            
-            operadores.forEach(function(op) {
-                const classe = classes.find(function(c) { return c.id === op.classe_id; });
-                const chipsOp = chips.filter(function(c) { return c.operador_id === op.id; });
-                const total = chipsOp.length;
-                const ativos = chipsOp.filter(function(c) { return c.status === 'ativo'; }).length;
-                const banidos = chipsOp.filter(function(c) { return c.status === 'banido'; }).length;
-                const eficiencia = total > 0 ? ((ativos / total) * 100).toFixed(1) : 0;
-                
-                data.push([
-                    op.nome,
-                    classe ? classe.nome : 'Sem Classe',
-                    total,
-                    ativos,
-                    banidos,
-                    eficiencia + '%'
-                ]);
-            });
-            
-            const ws = XLSX.utils.aoa_to_sheet(data);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, 'Relatório Eficiência');
-            XLSX.writeFile(wb, `relatorio_eficiencia_${new Date().toISOString().slice(0,19)}.xlsx`);
-            toast('Relatório de eficiência exportado!', 'ok');
-            registrarLog('Exportou relatório', 'Exportou relatório de eficiência dos operadores');
-        } catch(e) {
-            toast('Erro ao exportar relatório', 'err');
-        } finally {
-            esconderLoading();
-        }
-    };
-
-    window.baixarModelo = function() { 
-        const headers = ['OPERADOR', 'CHIP', 'SITUACAO', 'CLASSE', 'OBS']; 
-        const exemplos = [['Exemplo_operador', '(11) 99999-9999', 'Ativo', 'CRM', 'Observacao opcional']]; 
-        const csv = [headers.join(';')].concat(exemplos.map(function(row) { return row.map(function(c) { return '"' + c + '"'; }).join(';'); })).join('\n'); 
-        const blob = new Blob(["\uFEFF" + csv], { type: 'text/csv' }); 
-        const link = document.createElement('a'); 
-        link.href = URL.createObjectURL(blob); 
-        link.download = 'modelo_chips.csv'; 
-        link.click(); 
-        toast('Modelo baixado!', 'ok'); 
-    };
-
-    const dropzone = document.getElementById('dropzone'); 
-    const fileInput = document.getElementById('import-file'); 
-    if (dropzone && fileInput) { 
-        dropzone.addEventListener('click', function() { fileInput.click(); }); 
-        dropzone.addEventListener('dragover', function(e) { e.preventDefault(); dropzone.classList.add('drag-over'); }); 
-        dropzone.addEventListener('dragleave', function() { dropzone.classList.remove('drag-over'); }); 
-        dropzone.addEventListener('drop', function(e) { e.preventDefault(); dropzone.classList.remove('drag-over'); if (e.dataTransfer.files.length) { fileInput.files = e.dataTransfer.files; previewArquivo(e.dataTransfer.files[0]); } }); 
-        fileInput.addEventListener('change', function(e) { if (e.target.files.length) previewArquivo(e.target.files[0]); }); 
-    }
-
-    function previewArquivo(file) { 
-        const reader = new FileReader(); 
-        reader.onload = function(ev) { 
-            const preview = document.getElementById('import-preview'); 
-            const conteudo = ev.target.result; 
-            arquivoSeparador = conteudo.indexOf(';') !== -1 ? ';' : ','; 
-            const linhas = conteudo.split(/\r?\n/).filter(function(l) { return l.trim(); }); 
-            if (linhas.length < 2) { 
-                if (preview) {
-                    preview.innerHTML = '<span style="color:var(--red)">Arquivo vazio</span>'; 
-                    preview.style.display = 'block'; 
-                }
-                return; 
-            } 
-            const headers = linhas[0].split(arquivoSeparador).map(function(h) { return h.replace(/^"|"$/g, '').trim().toUpperCase(); }); 
-            const valid = headers.indexOf('OPERADOR') !== -1 && headers.indexOf('CHIP') !== -1 && headers.indexOf('SITUACAO') !== -1; 
-            if (!valid) { 
-                if (preview) {
-                    preview.innerHTML = '<span style="color:var(--red)">Colunas esperadas: OPERADOR; CHIP; SITUACAO; CLASSE; OBS (opcional)</span>'; 
-                    preview.style.display = 'block'; 
-                }
-                return; 
-            } 
-            const previewRows = linhas.slice(1, 6).map(function(l) { return l.split(arquivoSeparador).map(function(c) { return c.replace(/^"|"$/g, '').trim(); }); }); 
-            let html = '<table style="width:100%;border-collapse:collapse"><tr><th>OPERADOR</th><th>CHIP</th><th>SITUACAO</th><th>CLASSE</th><th>OBS</th></tr>'; 
-            previewRows.forEach(function(r) { if (r.length >= 3) html += '<tr>' + (r[0]||'') + '<td>' + (r[1]||'') + '<td>' + (r[2]||'') + '<td>' + (r[3]||'') + '<td>' + (r[4]||'') + '</td></tr>'; }); 
-            html += '</table><span style="color:var(--accent)">✔️ Pronto para importar</span></tr>'; 
-            if (preview) {
-                preview.innerHTML = html; 
-                preview.style.display = 'block'; 
-            }
-            arquivoLinhas = linhas; 
-        }; 
-        reader.readAsText(file, 'UTF-8'); 
-    }
-
-    function mostrarErrosImportacao() {
-        const content = document.getElementById('erros-importacao-content');
-        if (content) {
-            content.innerHTML = errosImportacao.map(function(err, idx) {
-                return '<div class="error-log-item"><div class="error-log-line">❌ Erro ' + (idx + 1) + ':</div><div>' + err + '</div></div>';
-            }).join('');
-            if (errosImportacao.length === 0) {
-                content.innerHTML = '<div class="empty-class">Nenhum erro registrado</div>';
-            }
-        }
-        document.getElementById('modal-erros-importacao').classList.add('open');
-    }
-
-    window.mostrarErrosImportacao = mostrarErrosImportacao;
-
-    window.processarImportacao = async function() { 
-        if (!arquivoLinhas) { toast('Nenhum arquivo carregado', 'err'); return; } 
-        
-        errosImportacao = [];
-        const errorButton = document.getElementById('import-error-button');
-        if (errorButton) errorButton.style.display = 'none';
-        if (timeoutErroBotao) clearTimeout(timeoutErroBotao);
-        
-        const headers = arquivoLinhas[0].split(arquivoSeparador).map(function(h) { return h.replace(/^"|"$/g, '').trim().toUpperCase(); }); 
-        const idxOp = headers.indexOf('OPERADOR'); 
-        const idxChip = headers.indexOf('CHIP'); 
-        const idxStatus = headers.indexOf('SITUACAO'); 
-        const idxClasse = headers.indexOf('CLASSE'); 
-        const idxObs = headers.indexOf('OBS');
-        let sucessos = 0, erros = 0, atualizados = 0; 
-        const chipsProcessados = new Map(); 
-        
-        for (let i = 1; i < arquivoLinhas.length; i++) { 
-            if (!arquivoLinhas[i].trim()) continue; 
-            const cols = arquivoLinhas[i].split(arquivoSeparador).map(function(c) { return c.replace(/^"|"$/g, '').trim(); }); 
-            const nomeOp = cols[idxOp] || ''; 
-            let numeroRaw = cols[idxChip] || ''; 
-            const situacao = (cols[idxStatus] || '').toLowerCase(); 
-            const nomeClasse = idxClasse !== -1 ? (cols[idxClasse] || '').trim() : ''; 
-            const obs = idxObs !== -1 ? (cols[idxObs] || '').trim() : '';
-            
-            const linhaErro = 'Linha ' + (i + 1) + ': ';
-            
-            numeroRaw = numeroRaw.toString().replace(/[^\d]/g, ''); 
-            if (numeroRaw.length === 12 && numeroRaw.indexOf('55') === 0) numeroRaw = numeroRaw.substring(2); 
-            else if (numeroRaw.length > 11) numeroRaw = numeroRaw.slice(-11); 
-            
-            if (numeroRaw.length < 10 || numeroRaw.length > 11) { 
-                erros++;
-                errosImportacao.push(linhaErro + 'Numero invalido: "' + (cols[idxChip] || '') + '"');
-                continue; 
-            } 
-            
-            const numero = formatarTelefone(numeroRaw); 
-            const statusMap = { 'ativo':'ativo', 'banido':'banido', 'atividade':'ativo', 'active':'ativo' }; 
-            const status = statusMap[situacao] || 'ativo'; 
-            
-            let classe_id = null; 
-            if (nomeClasse) { 
-                let existente = classes.find(function(c) { return c.nome.toLowerCase() === nomeClasse.toLowerCase(); }); 
-                if (existente) classe_id = existente.id; 
-                else { 
-                    classe_id = Date.now().toString() + Math.random(); 
-                    const novaClasse = { id: classe_id, nome: nomeClasse, icone: '📁', cor: '#00e5a0' };
-                    classes.push(novaClasse); 
-                    await salvarClasseNoSupabase(novaClasse);
-                } 
-            } 
-            
-            let operador_id = null; 
-            if (nomeOp) { 
-                let existenteOp = operadores.find(function(o) { return o.nome.toLowerCase() === nomeOp.toLowerCase(); }); 
-                if (existenteOp) operador_id = existenteOp.id; 
-                else { 
-                    operador_id = Date.now().toString() + Math.random(); 
-                    const novoOperador = { id: operador_id, nome: nomeOp, classe_id: classe_id };
-                    operadores.push(novoOperador); 
-                    await salvarOperadorNoSupabase(novoOperador);
-                } 
-            } 
-            
-            const chipExistente = chips.find(function(c) { return c.numero.replace(/\D/g, '') === numeroRaw; }); 
-            if (chipExistente) { 
-                if (chipExistente.status !== status || chipExistente.obs !== obs) { 
-                    const chipIndex = chips.findIndex(function(c) { return c.id === chipExistente.id; }); 
-                    if (chipIndex !== -1) {
-                        chips[chipIndex] = { id: chips[chipIndex].id, numero: chips[chipIndex].numero, operador_id: chips[chipIndex].operador_id, status: status, obs: obs, criado_em: chips[chipIndex].criado_em };
-                        await salvarChipNoSupabase(chips[chipIndex]);
-                    }
-                    atualizados++; 
-                } 
-            } else if (!chipsProcessados.has(numeroRaw)) { 
-                const novoChip = { id: Date.now().toString() + Math.random() + i, numero: numero, operador_id: operador_id, status: status, obs: obs, criado_em: new Date().toISOString() };
-                chips.push(novoChip); 
-                await salvarChipNoSupabase(novoChip);
-                chipsProcessados.set(numeroRaw, true); 
-                sucessos++; 
-            } 
-        } 
-        
-        await carregarDadosDoSupabase(); 
-        await registrarLog('Importação', `Importou ${sucessos} novos chips, ${atualizados} atualizados, ${erros} erros`);
-        const preview = document.getElementById('import-preview');
-        if (preview) {
-            preview.innerHTML = '✅ Importacao concluida!<br>📱 Novos chips: ' + sucessos + '<br>🔄 Status/obs atualizados: ' + atualizados + '<br>❌ Erros: ' + erros; 
-        }
-        
-        if (erros > 0 && errorButton) {
-            errorButton.style.display = 'block';
-            timeoutErroBotao = setTimeout(function() {
-                if (errorButton) errorButton.style.display = 'none';
-            }, 60000);
-        }
-        
-        toast(sucessos + ' novos chips, ' + atualizados + ' atualizados, ' + erros + ' erros', sucessos || atualizados ? 'ok' : 'err'); 
-        arquivoLinhas = null; 
-    };
+    const dropzone = document.getElementById('dropzone'), fileInput = document.getElementById('import-file'); if (dropzone && fileInput) { dropzone.addEventListener('click', () => fileInput.click()); dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('drag-over'); }); dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag-over')); dropzone.addEventListener('drop', e => { e.preventDefault(); dropzone.classList.remove('drag-over'); if (e.dataTransfer.files.length) { fileInput.files = e.dataTransfer.files; previewArquivo(e.dataTransfer.files[0]); } }); fileInput.addEventListener('change', e => { if (e.target.files.length) previewArquivo(e.target.files[0]); }); }
+    function previewArquivo(file) { const reader = new FileReader(); reader.onload = ev => { const preview = document.getElementById('import-preview'); const conteudo = ev.target.result; arquivoSeparador = conteudo.indexOf(';') !== -1 ? ';' : ','; const linhas = conteudo.split(/\r?\n/).filter(l => l.trim()); if (linhas.length < 2) { if (preview) { preview.innerHTML = '<span style="color:var(--red)">Arquivo vazio</span>'; preview.style.display = 'block'; } return; } const headers = linhas[0].split(arquivoSeparador).map(h => h.replace(/^"|"$/g, '').trim().toUpperCase()); const valid = headers.indexOf('OPERADOR') !== -1 && headers.indexOf('CHIP') !== -1 && headers.indexOf('SITUACAO') !== -1; if (!valid) { if (preview) { preview.innerHTML = '<span style="color:var(--red)">Colunas esperadas: OPERADOR; CHIP; SITUACAO; CLASSE; OBS</span>'; preview.style.display = 'block'; } return; } const previewRows = linhas.slice(1, 6).map(l => l.split(arquivoSeparador).map(c => c.replace(/^"|"$/g, '').trim())); let html = '<table><tr><th>OPERADOR</th><th>CHIP</th><th>SITUACAO</th><th>CLASSE</th><th>OBS</th></tr>'; previewRows.forEach(r => { if (r.length >= 3) html += `<tr><td>${r[0]||''}</td><td>${r[1]||''}</td><td>${r[2]||''}</td><td>${r[3]||''}</td><td>${r[4]||''}</td></tr>`; }); html += '<tr><td colspan="5"><span style="color:var(--accent)">✔️ Pronto para importar</span></td></tr></table>'; if (preview) { preview.innerHTML = html; preview.style.display = 'block'; } arquivoLinhas = linhas; }; reader.readAsText(file, 'UTF-8'); }
+    window.mostrarErrosImportacao = function() { const content = document.getElementById('erros-importacao-content'); if (content) { content.innerHTML = errosImportacao.map((err, idx) => `<div class="error-log-item"><div class="error-log-line">❌ Erro ${idx+1}:</div><div>${err}</div></div>`).join(''); if (!errosImportacao.length) content.innerHTML = '<div class="empty-class">Nenhum erro registrado</div>'; } document.getElementById('modal-erros-importacao').classList.add('open'); };
+    window.processarImportacao = async function() { if (!arquivoLinhas) { toast('Nenhum arquivo carregado', 'err'); return; } errosImportacao = []; const errorButton = document.getElementById('import-error-button'); if (errorButton) errorButton.style.display = 'none'; if (timeoutErroBotao) clearTimeout(timeoutErroBotao); const headers = arquivoLinhas[0].split(arquivoSeparador).map(h => h.replace(/^"|"$/g, '').trim().toUpperCase()); const idxOp = headers.indexOf('OPERADOR'); const idxChip = headers.indexOf('CHIP'); const idxStatus = headers.indexOf('SITUACAO'); const idxClasse = headers.indexOf('CLASSE'); const idxObs = headers.indexOf('OBS'); let sucessos = 0, erros = 0, atualizados = 0; const chipsProcessados = new Map(); for (let i = 1; i < arquivoLinhas.length; i++) { if (!arquivoLinhas[i].trim()) continue; const cols = arquivoLinhas[i].split(arquivoSeparador).map(c => c.replace(/^"|"$/g, '').trim()); const nomeOp = cols[idxOp] || ''; let numeroRaw = cols[idxChip] || ''; const situacao = (cols[idxStatus] || '').toLowerCase(); const nomeClasse = idxClasse !== -1 ? (cols[idxClasse] || '').trim() : ''; const obs = idxObs !== -1 ? (cols[idxObs] || '').trim() : ''; const linhaErro = 'Linha ' + (i+1) + ': '; numeroRaw = numeroRaw.toString().replace(/[^\d]/g, ''); if (numeroRaw.length === 12 && numeroRaw.indexOf('55') === 0) numeroRaw = numeroRaw.substring(2); else if (numeroRaw.length > 11) numeroRaw = numeroRaw.slice(-11); if (numeroRaw.length < 10 || numeroRaw.length > 11) { erros++; errosImportacao.push(linhaErro + 'Numero invalido: "' + (cols[idxChip] || '') + '"'); continue; } const numero = formatarTelefone(numeroRaw); const statusMap = { 'ativo':'ativo', 'banido':'banido', 'atividade':'ativo', 'active':'ativo' }; const status = statusMap[situacao] || 'ativo'; let classe_id = null; if (nomeClasse) { let existente = classes.find(c => c.nome.toLowerCase() === nomeClasse.toLowerCase()); if (existente) classe_id = existente.id; else { classe_id = Date.now().toString() + Math.random(); const novaClasse = { id: classe_id, nome: nomeClasse, icone: '📁', cor: '#0a58ca' }; classes.push(novaClasse); await salvarClasseNoSupabase(novaClasse); } } let operador_id = null; if (nomeOp) { let existenteOp = operadores.find(o => o.nome.toLowerCase() === nomeOp.toLowerCase()); if (existenteOp) operador_id = existenteOp.id; else { operador_id = Date.now().toString() + Math.random(); const novoOperador = { id: operador_id, nome: nomeOp, classe_id: classe_id }; operadores.push(novoOperador); await salvarOperadorNoSupabase(novoOperador); } } const chipExistente = chips.find(c => c.numero.replace(/\D/g, '') === numeroRaw); if (chipExistente) { if (chipExistente.status !== status || chipExistente.obs !== obs) { const chipIndex = chips.findIndex(c => c.id === chipExistente.id); if (chipIndex !== -1) { chips[chipIndex] = { ...chips[chipIndex], status, obs }; await salvarChipNoSupabase(chips[chipIndex]); } atualizados++; } } else if (!chipsProcessados.has(numeroRaw)) { const novoChip = { id: Date.now().toString() + Math.random() + i, numero, operador_id, status, obs, criado_em: new Date().toISOString() }; chips.push(novoChip); await salvarChipNoSupabase(novoChip); chipsProcessados.set(numeroRaw, true); sucessos++; } } await carregarDadosDoSupabase(); await registrarLog('Importação', 'Importação de chips', `Novos: ${sucessos}, Atualizados: ${atualizados}, Erros: ${erros}`); const preview = document.getElementById('import-preview'); if (preview) preview.innerHTML = `✅ Importacao concluida!<br>📱 Novos chips: ${sucessos}<br>🔄 Atualizados: ${atualizados}<br>❌ Erros: ${erros}`; if (erros > 0 && errorButton) { errorButton.style.display = 'block'; timeoutErroBotao = setTimeout(() => { if (errorButton) errorButton.style.display = 'none'; }, 60000); } toast(`${sucessos} novos, ${atualizados} atualizados, ${erros} erros`, sucessos || atualizados ? 'ok' : 'err'); arquivoLinhas = null; };
 
     let acaoConfirmada = null;
-    function abrirConfirmModal(titulo, mensagem, icone, acao) { 
-        document.getElementById('confirm-title').textContent = titulo; 
-        document.getElementById('confirm-message').innerHTML = mensagem; 
-        document.getElementById('confirm-icon').textContent = icone || '⚠️'; 
-        acaoConfirmada = acao; 
-        document.getElementById('confirm-modal').classList.add('open'); 
-    }
-    
-    function fecharConfirmModal() { 
-        document.getElementById('confirm-modal').classList.remove('open'); 
-        acaoConfirmada = null; 
-    }
-    
-    function executarAcaoConfirmada() { 
-        if (acaoConfirmada) acaoConfirmada(); 
-        fecharConfirmModal(); 
-    }
-    
-    function fecharModal(id) { 
-        const modal = document.getElementById(id); 
-        if (modal) modal.classList.remove('open'); 
-    }
-    
-    function toast(msg, tipo) { 
-        const el = document.getElementById('toast'); 
-        if (!el) return;
-        el.textContent = msg; 
-        el.className = 'show ' + (tipo || ''); 
-        setTimeout(function() { el.className = ''; }, 3000); 
-    }
-    
-    function toggleSidebar() { 
-        const sidebar = document.getElementById('sidebar');
-        if (sidebar) sidebar.classList.toggle('open'); 
-    }
-    
-    function toggleTheme() { 
-        const currentTheme = document.documentElement.getAttribute('data-theme'); 
-        const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-        document.documentElement.setAttribute('data-theme', newTheme); 
-        localStorage.setItem('receptivo_theme', newTheme);
-        
-        const themeText = document.getElementById('theme-text');
-        if (themeText) {
-            themeText.textContent = newTheme === 'light' ? 'Tema Claro' : 'Tema Escuro';
-        }
-    }
-
-    window.togglePasswordVisibility = function(inputId) {
-        const input = document.getElementById(inputId);
-        if (input.type === 'password') {
-            input.type = 'text';
-        } else {
-            input.type = 'password';
-        }
-    };
+    function abrirConfirmModal(titulo, mensagem, icone, acao) { document.getElementById('confirm-title').textContent = titulo; document.getElementById('confirm-message').innerHTML = mensagem; document.getElementById('confirm-icon').textContent = icone || '⚠️'; acaoConfirmada = acao; document.getElementById('confirm-modal').classList.add('open'); }
+    function fecharConfirmModal() { document.getElementById('confirm-modal').classList.remove('open'); acaoConfirmada = null; }
+    function executarAcaoConfirmada() { if (acaoConfirmada) acaoConfirmada(); fecharConfirmModal(); }
+    function fecharModal(id) { document.getElementById(id)?.classList.remove('open'); }
+    function toast(msg, tipo) { const el = document.getElementById('toast'); if (!el) return; el.textContent = msg; el.className = 'show ' + (tipo || ''); setTimeout(() => el.className = '', 3000); }
+    function toggleSidebar() { document.getElementById('sidebar')?.classList.toggle('open'); }
+    function toggleTheme() { const current = document.documentElement.getAttribute('data-theme'); const newTheme = current === 'light' ? 'dark' : 'light'; document.documentElement.setAttribute('data-theme', newTheme); localStorage.setItem('receptivo_theme', newTheme); const icon = document.getElementById('theme-icon'); const text = document.getElementById('theme-text'); if (icon && text) { if (newTheme === 'light') { icon.innerHTML = '☀️'; text.textContent = 'Tema Claro'; } else { icon.innerHTML = '🌙'; text.textContent = 'Tema Escuro'; } } }
 
     window.toggleSidebar = toggleSidebar;
     window.toggleTheme = toggleTheme;
@@ -2834,62 +1517,22 @@ input, select {
     window.logout = logout;
     window.carregarHistorico = carregarHistorico;
     window.buscarChipsDebounce = buscarChipsDebounce;
+    window.aplicarEdicaoEmMassa = async function() { const novoStatus = document.getElementById('bulk-status').value; const novoOperadorId = document.getElementById('bulk-operador').value; if (!novoStatus && !novoOperadorId) { toast('Selecione uma acao para aplicar', 'err'); return; } let alterados = 0; for (const id of chipsSelecionados) { const chipIndex = chips.findIndex(c => c.id === id); if (chipIndex !== -1) { if (novoStatus) chips[chipIndex].status = novoStatus; if (novoOperadorId) chips[chipIndex].operador_id = novoOperadorId; await salvarChipNoSupabase(chips[chipIndex]); alterados++; } } await registrarLog('Edição em massa', `Alterou ${alterados} chips`, `Status: ${novoStatus || 'mantido'}, Operador: ${novoOperadorId || 'mantido'}`); await carregarDadosDoSupabase(); chipsSelecionados.clear(); renderizarChips(); toast(alterados + ' chips atualizados', 'ok'); };
+    window.confirmarExclusaoEmMassa = function() { if (chipsSelecionados.size === 0) { toast('Nenhum chip selecionado', 'err'); return; } abrirConfirmModal('Excluir em Massa', 'Tem certeza que deseja excluir ' + chipsSelecionados.size + ' chip(s)?', '🗑️', async () => { let excluidos = 0; const excluidosLista = []; for (const id of chipsSelecionados) { const chip = chips.find(c => c.id === id); if (chip) excluidosLista.push(chip.numero); const index = chips.findIndex(c => c.id === id); if (index !== -1) { chips.splice(index, 1); await excluirChipDoSupabase(id); excluidos++; } } await registrarLog('Exclusão em massa', `Excluiu ${excluidos} chips`, excluidosLista.join('\n')); await carregarDadosDoSupabase(); chipsSelecionados.clear(); renderizarChips(); toast(excluidos + ' chips excluidos', 'ok'); }); };
 
-    const tabs = document.querySelectorAll('.login-tab');
-    for (let t = 0; t < tabs.length; t++) {
-        tabs[t].addEventListener('click', function() {
-            const targetTab = this.getAttribute('data-tab');
-            const allTabs = document.querySelectorAll('.login-tab');
-            for (let at = 0; at < allTabs.length; at++) {
-                allTabs[at].classList.remove('active');
-            }
-            this.classList.add('active');
-            document.getElementById('login-form').style.display = targetTab === 'login' ? 'block' : 'none';
-            document.getElementById('register-form').style.display = targetTab === 'register' ? 'block' : 'none';
-            document.getElementById('login-error').style.display = 'none';
-            document.getElementById('login-user').value = '';
-            document.getElementById('login-pass').value = '';
-            document.getElementById('register-user').value = '';
-            document.getElementById('register-pass').value = '';
-            document.getElementById('register-master-pass').value = '';
-        });
-    }
-
-    const navBtns = document.querySelectorAll('.nav-btn');
-    for (let nb = 0; nb < navBtns.length; nb++) {
-        navBtns[nb].addEventListener('click', function() {
-            const page = this.getAttribute('data-page');
-            navegarParaPagina(page);
-        });
-    }
-    
-    const modals = document.querySelectorAll('.modal-overlay');
-    for (let m = 0; m < modals.length; m++) {
-        modals[m].addEventListener('click', function(e) {
-            if (e.target === this) this.classList.remove('open');
-        });
-    }
-    
+    document.querySelectorAll('.login-tab').forEach(tab => { tab.addEventListener('click', function() { const target = this.getAttribute('data-tab'); document.querySelectorAll('.login-tab').forEach(t => t.classList.remove('active')); this.classList.add('active'); document.getElementById('login-form').style.display = target === 'login' ? 'block' : 'none'; document.getElementById('register-form').style.display = target === 'register' ? 'block' : 'none'; document.getElementById('login-error').style.display = 'none'; }); });
+    document.querySelectorAll('.nav-btn').forEach(btn => { btn.addEventListener('click', () => navegarParaPagina(btn.getAttribute('data-page'))); });
+    document.querySelectorAll('.modal-overlay').forEach(modal => { modal.addEventListener('click', e => { if (e.target === modal) modal.classList.remove('open'); }); });
     document.getElementById('login-btn').addEventListener('click', fazerLogin);
     document.getElementById('register-btn').addEventListener('click', registrarUsuario);
 
     const savedTheme = localStorage.getItem('receptivo_theme');
-    if (savedTheme === 'light') {
-        document.documentElement.setAttribute('data-theme', 'light');
-        const themeText = document.getElementById('theme-text');
-        if (themeText) themeText.textContent = 'Tema Claro';
-    } else {
-        document.documentElement.setAttribute('data-theme', 'dark');
-        const themeText = document.getElementById('theme-text');
-        if (themeText) themeText.textContent = 'Tema Escuro';
-    }
+    if (savedTheme === 'light') { document.documentElement.setAttribute('data-theme', 'light'); document.getElementById('theme-icon').innerHTML = '☀️'; document.getElementById('theme-text').textContent = 'Tema Claro'; }
+    else { document.documentElement.setAttribute('data-theme', 'dark'); document.getElementById('theme-icon').innerHTML = '🌙'; document.getElementById('theme-text').textContent = 'Tema Escuro'; }
 
     carregarClassesExpandidas();
-
-    initSupabase().then(function() {
-        verificarLogin();
-        initTooltips();
-    });
+    initSupabase().then(() => verificarLogin());
+    initTooltips();
 })();
 </script>
 </body>
